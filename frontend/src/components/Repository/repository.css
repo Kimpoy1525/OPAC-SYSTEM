@@ -1,0 +1,223 @@
+.repo-page{
+    min-height: 100vh;
+    background: rgba(238, 238, 238, 0.93);
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.repository-header{
+    text-align: center;
+    margin: 30px 0;
+    
+}
+
+.repository-header h1{
+    font-size: 44px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+    color: #058632;
+}
+
+.repository-header p{
+    font-size: 24px;
+    margin: 0;
+
+}
+
+.filter-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 40%;
+    gap: 15px;
+    margin-bottom: 40px;
+}
+
+.filter-select{
+    position: relative;
+    line-height: 0;
+    width: 47%;
+}
+
+.filter-container select {
+    padding: 10px 35px 10px 15px;
+    border-radius: 5px;
+    border-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    color: black;
+    font-weight: 600;
+    /*Para matago yung original na arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-color: WHITE;
+    width: 100%;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+    fill: #058632;
+    transform: translateY(-50%);
+}
+
+.apply-filter-btn{
+    background-color: #058632;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 97%;
+    transition: background-color 0.2s;
+}
+
+.apply-filter-btn:hover {
+    background-color: WHITE;
+    color: #058632;
+}
+
+.filter-results{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 70%;
+}
+
+.research-card {
+    background: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid black;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.research-card h3 {
+    margin: 0 0 10px 0;
+    color: black;
+    font-size: 24px;
+}
+
+.research-card .labels {
+    font-weight: bold;
+    margin-right: 5px;
+    color: black;
+}
+
+.research-card p {
+    margin: 10px 0;
+}
+
+.authors-name, .years-published {
+    color: black;
+}
+
+.abstract {
+    margin-top: 15px;
+    color: #000000;
+    line-height: 1.5;
+    font-size: 16px;
+    text-align: justify;
+    width: 90%;
+}
+
+.research-card-footer{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    padding-top: 15px;
+}
+
+.card-program{
+    font-weight: bold;
+    color: black;
+    pointer-events: none;
+}
+
+.research-card-footer .details-btn{
+    background-color: #058632;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    border: none;
+    border-radius: 18px;
+    padding: 8px 24px;
+    cursor: pointer;
+    pointer-events: auto;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+
+
+.details-btn:hover {
+    background-color: #EEEE;
+    color: #058632;
+}
+
+/* ---------- TABLET (≤1024px) ---------- */
+@media (max-width: 1024px) {
+  .filter-container {
+    width: 70%;
+  }
+
+  .research-card {
+    width: 100%;
+  }
+}
+
+/* ---------- MOBILE (≤768px) ---------- */
+@media (max-width: 668px) {
+  .repo-page {
+    padding: 15px;
+  }
+
+  .filter-container {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .apply-filter-btn {
+    width: 100%;
+  }
+
+  .research-card {
+    padding: 18px;
+  }
+}
+
+/* ---------- SMALL MOBILE (≤480px) ---------- */
+@media (max-width: 480px) {
+  .repository-header h1 {
+    font-size: 22px;
+  }
+
+  .repository-header p {
+    font-size: 14px;
+  }
+
+  .research-card h3 {
+    font-size: 18px;
+  }
+
+  .research-card p {
+    font-size: 14px;
+  }
+}
+

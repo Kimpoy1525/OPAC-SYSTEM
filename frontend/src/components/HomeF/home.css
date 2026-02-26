@@ -1,0 +1,170 @@
+
+/* Full Page Container */
+.home-container {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Montserrat", sans-serif;
+  background-color: #EEEEEE;
+  color: white;
+}
+
+/* Background Image */
+.home-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Red Gradient From Bottom to Top */
+.gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 180, 0, 0.8),
+    rgba(0, 180, 0, 0.5),
+    rgba(0, 180, 0, 0.1),
+    transparent
+  );
+}
+
+/* Content in the Center */
+.home-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 100%;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+
+}
+
+.home-content h1 {
+  font-size: 50px;
+  font-weight: 700;
+  margin-bottom: 5px;
+}
+
+.home-content h2 {
+  font-size: 40px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+
+.home-content p {
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
+/* Login Button */
+.login-btn {
+  padding: 12px 40px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  background-color: white;
+  color: #058632;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+
+}
+
+.login-btn:hover {
+  background-color: #058632;
+  color: white;
+}
+
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .header {
+    padding: 0.6rem 1rem;
+  }
+
+  .header-text h1 {
+    font-size: 1rem;
+  }
+
+  .header-text h2 {
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+  }
+  
+}
+/* Header.css */
+
+.header {
+  background: #058632;
+  color: #ffffff;
+  padding: 0.75rem 2rem;
+  font-family: "Montserrat", sans-serif;
+  height: 80px;           /* fixed container height */
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 999;
+
+}
+
+.header-inner {
+  display: flex;
+  align-items: left;
+  gap: 1rem;
+}
+
+/* Logo circle (placeholder) */
+.logo{
+  width: 475px;
+  height: 75px;
+}
+
+/* Text styles */
+.header-text h1 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  line-height: 1.1;
+  
+}
+
+.header-text h2 {
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  line-height: 1.1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .header {
+    padding: 0.6rem 1rem;
+  }
+
+  .header-text h1 {
+    font-size: 1rem;
+  }
+
+  .header-text h2 {
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+  }
+  
+}
+

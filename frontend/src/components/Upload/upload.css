@@ -1,0 +1,186 @@
+.upload-page{
+    min-height: 100vh;
+    background: rgba(238, 238, 238, 0.93);
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.upload-form{
+    background-color: white;
+    margin: 20px 0 50px 0;
+    padding: 35px;
+    width: 80%;
+    max-width: 650px;
+    color: black;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.form-header{
+    text-align: center;
+    margin: 30px 0;
+    font-size: 32px;
+    font-weight: bold;
+    pointer-events: none;
+}
+
+.form-input{
+    margin-bottom: 20px;
+}
+
+.form-input label{
+    display: block;
+    font-weight: bold;
+    margin-bottom: 3px;
+}
+
+.form-input input,
+.form-input textarea,
+.form-input select{
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background: #EEEE;
+    color: #333;
+    box-sizing: border-box;
+    font-size: 16px;
+    border-radius: 4px;
+    resize: none;
+}
+
+.form-input input::placeholder,
+.form-input textarea::placeholder{
+    color: black;
+}
+
+.form-input select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23000000%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13.2-5.4H18.6c-5%200-9.3%201.8-13.2%205.4A17.6%2017.6%200%200%200%200%2082.6c0%204.8%201.8%209.1%205.4%2013.2l128%20127.9c3.6%203.6%207.8%205.4%2013.2%205.4s9.6-1.8%2013.2-5.4l127.9-128c3.6-3.6%205.4-7.8%205.4-13.1%200-4.9-1.8-9.2-5.3-13.2z%22%2F%3E%3C%2Fsvg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+  padding-right: 30px;
+  color: black;
+}
+
+.file-upload{
+    display: flex;
+    align-items: center;
+    background-color: #EEEE;
+    border-radius: 4px;
+    padding: 5px 10px;
+}
+
+.file-btn{
+    background-color: #058632;
+    color: #ffffff;
+    padding: 10px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    font-weight: 100;
+    font-size: 14px;
+}
+
+.file-btn:hover{
+    background-color: white;
+    color: #058632;
+}
+
+.file-name{
+    color: black;
+    margin-left: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+.select-program{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    margin-bottom: 30px;
+    gap: 10px;
+}
+
+.program-btn{
+    background-color: #058632;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    flex-grow: 1;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.program-btn:hover:not(.selected){
+    background-color: white;
+    color: #058632;
+    font-weight: bold;
+}
+
+.program-btn.selected{
+    background-color: #e01515; 
+    color: #333;
+    box-shadow: 0 0 0 2px #fff inset; 
+}
+
+.submit-btn{
+    width: 100%;
+    background-color: #058632;
+    color: white;
+    padding: 18px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.submit-btn:hover {
+    background: #EEEE;
+    color: #058632;
+}
+
+@media (max-width: 580px) {
+  .upload-page {
+    padding: 10px;
+  }
+
+  .upload-form{
+    padding: 25px;
+  }
+
+  .form-header {
+    font-size: 1.4em;
+    margin-bottom: 20px;
+  }
+
+  .form-input input,
+  .form-input textarea,
+  .form-input select {
+    padding: 10px;
+    font-size: 0.95em;
+  }
+
+  .select-program {
+    flex-direction: column; 
+    gap: 8px;
+  }
+
+  .program-btn {
+    padding: 10px 0;
+  }
+
+  .submit-btn {
+    padding: 15px;
+    font-size: 1.2em;
+  }
+}

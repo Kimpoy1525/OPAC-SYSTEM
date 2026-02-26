@@ -1,0 +1,13 @@
+# Ignore backend-specific junk
+backend/venv/
+backend/__pycache__/
+backend/db.sqlite3
+*.pyc
+
+# Ignore frontend junk (just in case)
+frontend/node_modules/
+frontend/build/
+
+# General
+.DS_Store
+.env

@@ -1,0 +1,134 @@
+*{
+    margin: 0;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+}
+
+.header2{
+    padding: 15px 30px;
+    background: #058632;
+    color: #ffffff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo2 img{
+    height: auto;
+    width: 350px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: none;
+}
+
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+}
+
+.nav-links a{
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.nav-links a:hover{
+    text-decoration:underline;
+}
+
+.logout-btn {
+    padding: 10px 16px;
+    background: #ffffff;
+    color: #058632;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.logout-btn:hover {
+    background: #058632;
+    color: #ffffff;
+}
+
+.hamburger {
+    display: none;
+    cursor: pointer;
+    color: #ffffff;
+}
+.user-profile {
+    display: flex;
+    align-items: center;   
+    gap: 12px;       
+    border: 1px solid #008B43;
+    padding: 11px;
+    background-color: #F7FCF5;
+    border-radius: 50px;
+
+}
+
+.user-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #058632;
+    text-transform: uppercase;
+
+}
+
+.user-profile img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #008B43;
+
+}
+.user-area {
+    display: flex;
+    align-items: center;
+    gap: 30px; 
+}
+.profile-letter-avatar{
+    color: #EEEE;
+    font-weight: bold;
+    border: 2px solid #EEEE;
+    border-radius: 100%;
+    padding: 5px 10px;
+    background-color: #008B43;
+}
+
+
+@media (max-width: 980px) {
+    .nav-links{
+        position: absolute;
+        top: 80px;
+        right: -10px;
+        width: 100%;
+        background: #058632;
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 30px;
+        display: none;
+        z-index: 10;
+    }
+
+    .nav-links a,
+    .logout-btn {
+        margin: 10px 0;
+    }
+
+    .nav-links.show{
+        display: flex;
+    }
+
+    .hamburger{
+        display: block;
+    }
+}

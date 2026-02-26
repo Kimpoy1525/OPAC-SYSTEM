@@ -1,0 +1,71 @@
+.login-admin-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-admin {
+  background: #eeeeee;
+  width: 400px;
+  padding: 30px 25px;
+  border-radius: 10px;
+  position: relative;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-admin h2 {
+  margin-bottom: 20px;
+  color: #058632;
+  font-weight: bold;
+  font-size: 28px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: none;
+  background: none;
+  font-size: 35px;
+  cursor: pointer;
+}
+
+.input-admin {
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.input-admin input {
+  width: 95%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: #b7d8c0;
+  outline: none;
+  font-size: 14px;
+}
+
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #444;
+  size: 45px;
+}
+
+.error-text-admin {
+  color: red;
+  font-size: 13px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
