@@ -43,10 +43,11 @@ const Header = ({ setUser, user }) => {
     {user && (
       <div className="user-profile">
                             {/* --- CONDITIONAL AVATAR --- */}
-                            {user.picture ? (
+                            {user && user.picture ? (
                                 <img 
                                     src={user.picture} 
                                     alt="profile" 
+                                    referrerPolicy="no-referrer"
                                     className="profile-pic"
                                 />
                             ) : (

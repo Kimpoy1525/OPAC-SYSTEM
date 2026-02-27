@@ -51,7 +51,7 @@
 
 .form-input input::placeholder,
 .form-input textarea::placeholder{
-    color: black;
+    color: gray;
 }
 
 .form-input select {
@@ -87,7 +87,7 @@
 }
 
 .file-btn:hover{
-    background-color: white;
+    background-color: #EEEE;
     color: #058632;
 }
 
@@ -99,6 +99,26 @@
     white-space: nowrap;
     pointer-events: none;
 }
+
+.file-queue {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+}
+
+.remove-btn{
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
 
 .select-program{
     display: flex;
@@ -120,7 +140,7 @@
 }
 
 .program-btn:hover:not(.selected){
-    background-color: white;
+    background-color: #EEEE;
     color: #058632;
     font-weight: bold;
 }

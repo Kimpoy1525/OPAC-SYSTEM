@@ -8,7 +8,8 @@
 }
 
 .details-content{
-    max-width: 950px;
+    max-width: 850px;
+    width: 100%;
     margin: 40px auto;
     padding: 30px 40px;
     background-color: white;
@@ -24,8 +25,6 @@
     font-size: 32px;
 }
 
-
-
 .details-content p,
 .details-content strong { 
     font-size: 18px;
@@ -39,8 +38,6 @@
     margin: 40px 0 40px 0;
     color: #000000;
 }
-
-
 
 
 .file-section{
@@ -80,5 +77,22 @@
 .back-btn:hover {
    background-color: #EEEE;
    color: #058632;
+}
+
+.edit-details{
+    position: absolute;
+    top: 32%;
+    right: 22%;
+    border: none;
+    background-color: #058632;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.edit-details:hover{
+    background: #eeeeee;
+    color: black;
 }
 

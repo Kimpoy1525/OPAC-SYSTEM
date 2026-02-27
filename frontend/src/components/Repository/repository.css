@@ -42,7 +42,7 @@
     width: 47%;
 }
 
-.filter-container select {
+.filter-container select{
     padding: 10px 35px 10px 15px;
     border-radius: 5px;
     border-color: white;
@@ -56,6 +56,18 @@
     appearance: none;
     background-color: WHITE;
     width: 100%;
+}
+
+.filter-container input {
+    padding: 10px 35px 10px 15px;
+    border-radius: 5px;
+    border-color: white;
+    font-size: 16px;
+    cursor: pointer;
+    color: black;
+    font-weight: 600;
+    width: 80%;
+    
 }
 
 .dropdown-arrow {
@@ -96,6 +108,7 @@
 
 .research-card {
     background: #ffffff;
+    width: 100%;
     padding: 25px;
     border-radius: 8px;
     border: 1px solid black;
@@ -160,11 +173,14 @@
     transition: background-color 0.2s;
 }
 
-
-
 .details-btn:hover {
     background-color: #EEEE;
     color: #058632;
+}
+
+.detail-below{
+  display: flex;
+  gap: 50px;
 }
 
 /* ---------- TABLET (≤1024px) ---------- */
