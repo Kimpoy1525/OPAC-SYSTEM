@@ -109,7 +109,6 @@ const ResearchDetails = ({ setUser, user }) => {
         <main>
             <Header setUser={setUser} user={user} />
             <div className='details-page'>
-                <Searchbar/>
                 <div className='details-content'>
                     <h1>{researchItem.title}</h1>
                     
