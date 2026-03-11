@@ -27,10 +27,10 @@
 
 .details-content p,
 .details-content strong { 
-    font-size: 18px;
-    line-height: 1.6;
+    font-size: 19px;
+    line-height: 1.8;
     text-align: justify;
-    margin-bottom: 10px; 
+    margin-bottom: 30px; 
     color: black;
 }
 
@@ -95,4 +95,76 @@
     background: #eeeeee;
     color: black;
 }
+/* Modal Overlay - Darkens background */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    
+}
 
+/* Modal Container */
+.modal-container {
+    background: white;
+    padding: 30px 0 30px 100px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* Close button on the top right */
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    z-index: 1001;
+}
+
+/* Ensure the form inside looks like the upload page */
+.edit-form {
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.queue-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f4f4f4;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.queue-item.new {
+    border-left: 4px solid #28a745; /* Green for new */
+}
+
+.queue-item.existing {
+    border-left: 4px solid #dc3545; /* Red indicator for files that were there */
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: #ff4d4d;
+    font-weight: bold;
+    cursor: pointer;
+}

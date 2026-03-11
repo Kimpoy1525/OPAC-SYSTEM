@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import axios from 'axios';
 import Header from '../Header/header';
-import Searchbar from '../SearchBar/searchbar';
 import './upload.css';
 
 const Upload = ({ setUser, user }) => {
@@ -94,7 +93,6 @@ const Upload = ({ setUser, user }) => {
         <main>
             <Header setUser={setUser} user={user} />
             <div className='upload-page'>
-                <Searchbar />
 
                 <form className='upload-form' onSubmit={handleSubmit}>
                     <h2 className='form-header'>Upload Thesis / Capstone</h2>

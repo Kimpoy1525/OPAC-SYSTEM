@@ -1,22 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { FaChevronDown } from "react-icons/fa6";
+import { FaChevronDown, FaTrash } from "react-icons/fa6"; // Added FaTrash
 import axios from 'axios';
 import './repository.css'
 import Header from '../Header/header'
 import Searchbar from '../SearchBar/searchbar'
-import { Link } from 'react-router-dom';
-import Select from 'react-select'
+import { Link, useSearchParams } from 'react-router-dom';
 
 const Repository = ({ setUser, user }) => {
+  const [searchParams] = useSearchParams();
+  const initialSearch = searchParams.get('search') || '';
+  const initialCourse = searchParams.get('course') || '';
+
   const [researches, setResearches] = useState([]);
   const [loading, setLoading] = useState(true);
   
-  // State for Filters and Search
   const [selectedYear, setSelectedYear] = useState('');
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState(initialCourse);
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
 
-  // 1. Memoized fetch function to handle search and filters
   const fetchResearches = useCallback(async () => {
     setLoading(true);
     try {
@@ -24,7 +25,7 @@ const Repository = ({ setUser, user }) => {
         params: {
           year: selectedYear,
           course: selectedCourse,
-          search: searchQuery // Passes search to Django's icontains logic
+          search: searchQuery 
         }
       });
       setResearches(response.data);
@@ -35,14 +36,23 @@ const Repository = ({ setUser, user }) => {
     }
   }, [selectedYear, selectedCourse, searchQuery]);
 
-  // Initial fetch and fetch on search change
   useEffect(() => {
     fetchResearches();
   }, [fetchResearches]);
 
-  // Handle Apply Filters button
-  const handleApplyFilters = () => {
-    fetchResearches();
+  // --- DELETE HANDLER ---
+  const handleDelete = async (id, title) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+      try {
+        await axios.delete(`http://localhost:8000/home/detail/${id}/delete/`);
+        alert("Research deleted successfully.");
+        // Refresh the list after deletion
+        setResearches(prev => prev.filter(item => item.id !== id));
+      } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Failed to delete the item.");
+      }
+    }
   };
 
   return (
@@ -50,14 +60,11 @@ const Repository = ({ setUser, user }) => {
         <Header setUser={setUser} user={user} />
         
         <div className='repo-page'>
-          {/* 2. Pass search state to Searchbar */}
-          <Searchbar setSearchQuery={setSearchQuery} />
+          <Searchbar setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
 
           <header className='repository-header'>
             <h1>ONLINE PUBLIC ACCESS CATALOG</h1>
-            <p>Explore all stored theses and capstone 
-              projects from the College of Computer Studies
-            </p>
+            <p>Explore all stored theses and capstone projects from the College of Computer Studies</p>
           </header>
 
           <section className='filter-container'>
@@ -74,10 +81,7 @@ const Repository = ({ setUser, user }) => {
             </div>
 
             <div className='filter-select'>
-              <select 
-                value={selectedCourse} 
-                onChange={(e) => setSelectedCourse(e.target.value)}
-              >
+              <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
                 <option value=''>All Programs</option>
                 <option value='BSCS'>BSCS</option>
                 <option value='BSIT'>BSIT</option>
@@ -85,10 +89,6 @@ const Repository = ({ setUser, user }) => {
               </select>
               <FaChevronDown className="dropdown-arrow" />
             </div>
-
-            <button className='apply-filter-btn' onClick={handleApplyFilters}>
-              Apply Filters
-            </button>
           </section>
 
           <section className='filter-results'>
@@ -97,6 +97,17 @@ const Repository = ({ setUser, user }) => {
             ) : researches.length > 0 ? (
               researches.map((research) => (
                 <div key={research.id} className='research-card'>
+                  {/* --- DELETE BUTTON AT TOP RIGHT --- */}
+                  {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
+                    <button 
+                      className='card-delete-btn' 
+                      onClick={() => handleDelete(research.id, research.title)}
+                      title="Delete Research"
+                    >
+                      <FaTrash />
+                    </button>
+                  )}
+
                   <h3>{research.title}</h3>
                   <p className='authors-name'>
                     <span className='labels'>Author(s):</span> {research.authors}
@@ -105,7 +116,6 @@ const Repository = ({ setUser, user }) => {
                     <span className='labels'>Year:</span> {research.year}
                   </p>
                   
-                  {/* 3. Display Keyword Tags if they exist */}
                   {research.keywords && (
                     <p className='repo-keywords'>
                       <span className='labels'>Keywords:</span> {research.keywords}
@@ -119,14 +129,10 @@ const Repository = ({ setUser, user }) => {
                   <div className='research-card-footer'>
                     <div className='detail-below'>
                        <span className='card-program'>{research.course}</span>
-                    
-                        {/* 4. Display how many documents are attached */}
                       <span className='file-count'>
                         {research.files?.length || 0} Document(s)
                       </span>
                     </div>
-                   
-
                     <Link to={`/details/${research.id}`} className='details-btn'>View Details</Link>
                   </div>
                 </div>

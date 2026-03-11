@@ -2,10 +2,9 @@ import React from 'react'
 import { FaSearch } from 'react-icons/fa'
 import './searchbar.css'
 
-// 1. Accept setSearchQuery as a prop from Repository.js
-const Searchbar = ({ setSearchQuery }) => {
+// 1. Accept both the setter (setSearchQuery) AND the current value (searchQuery)
+const Searchbar = ({ setSearchQuery, searchQuery }) => {
     
-    // 2. Handle the input change
     const handleChange = (e) => {
         setSearchQuery(e.target.value);
     };
@@ -15,7 +14,8 @@ const Searchbar = ({ setSearchQuery }) => {
           <input 
             type='text' 
             placeholder='Search by title, author, or keyword....'
-            // 3. Connect the input to the state updater
+            // 2. Connect the value to the searchQuery state (Two-way binding)
+            value={searchQuery}
             onChange={handleChange}
           />
           <button className='search-btn' type="button">

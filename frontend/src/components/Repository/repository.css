@@ -182,6 +182,30 @@
   display: flex;
   gap: 50px;
 }
+.research-card {
+  position: relative; /* Essential for absolute positioning of the delete button */
+  /* your other existing styles */
+}
+
+.card-delete-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: #ff4d4d; /* Red color */
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease, color 0.2s ease;
+      pointer-events: auto;
+  
+}
+
+.card-delete-btn:hover {
+  color: #cc0000;
+  transform: scale(1.1);
+}
 
 /* ---------- TABLET (≤1024px) ---------- */
 @media (max-width: 1024px) {
