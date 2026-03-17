@@ -5,6 +5,7 @@ import './repository.css'
 import Header from '../Header/header'
 import Searchbar from '../SearchBar/searchbar'
 import { Link, useSearchParams } from 'react-router-dom';
+import '../Upload/upload.css'; 
 
 const Repository = ({ setUser, user }) => {
   const [searchParams] = useSearchParams();
@@ -17,6 +18,10 @@ const Repository = ({ setUser, user }) => {
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(initialCourse);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null); // Stores { id, title }
 
   const fetchResearches = useCallback(async () => {
     setLoading(true);
@@ -41,18 +46,24 @@ const Repository = ({ setUser, user }) => {
   }, [fetchResearches]);
 
   // --- DELETE HANDLER ---
-  const handleDelete = async (id, title) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
+  const openDeleteModal = (id, title) => {
+    setItemToDelete({ id, title });
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!itemToDelete) return;
+
       try {
-        await axios.delete(`http://localhost:8000/home/detail/${id}/delete/`);
-        alert("Research deleted successfully.");
-        // Refresh the list after deletion
-        setResearches(prev => prev.filter(item => item.id !== id));
+     await axios.delete(`http://localhost:8000/home/detail/${itemToDelete.id}/delete/`);
+       setResearches(prev => prev.filter(item => item.id !== itemToDelete.id));
+      setShowDeleteConfirm(false);
+      setShowDeleteSuccess(true);
+    
       } catch (err) {
         console.error("Delete failed:", err);
         alert("Failed to delete the item.");
       }
-    }
   };
 
   return (
@@ -101,7 +112,7 @@ const Repository = ({ setUser, user }) => {
                   {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
                     <button 
                       className='card-delete-btn' 
-                      onClick={() => handleDelete(research.id, research.title)}
+                      onClick={() => openDeleteModal(research.id, research.title)}
                       title="Delete Research"
                     >
                       <FaTrash />
@@ -142,6 +153,37 @@ const Repository = ({ setUser, user }) => {
             )}
           </section>
         </div>
+        {/* --- MODAL: CONFIRM DELETION --- */}
+        {showDeleteConfirm && (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <div className="success-icon" style={{ color: '#d9534f' }}><FaTrash /></div>
+                    <h3>Confirm Deletion</h3>
+                    <p>Are you sure you want to delete <strong>"{itemToDelete?.title}"</strong>? This action cannot be undone.</p>
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <button className="modal-close-btn" onClick={handleConfirmDelete} style={{ backgroundColor: '#d9534f' }}>
+                             Delete
+                        </button>
+                        <button className="modal-close-btn" onClick={() => setShowDeleteConfirm(false)} style={{ backgroundColor: '#6c757d' }}>
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+        {/* --- MODAL: DELETE SUCCESS --- */}
+        {showDeleteSuccess && (
+            <div className="modal-overlay">
+                <div className="modal-content">
+                    <div className="success-icon">✔</div>
+                    <h3>Record Deleted</h3>
+                    <p>The research record has been permanently removed.</p>
+                    <button className="modal-close-btn" onClick={() => setShowDeleteSuccess(false)}>
+                        Dismiss
+                    </button>
+                </div>
+            </div>
+        )}
     </main>
   )
 }

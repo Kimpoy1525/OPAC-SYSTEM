@@ -4,7 +4,6 @@ import { LuDownload } from "react-icons/lu";
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
 import Header from '../Header/header';
-import Searchbar from '../SearchBar/searchbar';
 import './researchdetails.css';
 import '../Upload/upload.css';
 
@@ -14,7 +13,7 @@ const ResearchDetails = ({ setUser, user }) => {
 
     const [researchItem, setResearchItem] = useState(null);
     const [loading, setLoading] = useState(true);
-
+    const [showSuccess, setShowSuccess] = useState(false);
     // --- FILE STATES ---
     const [existingFiles, setExistingFiles] = useState([]); 
     const [newFiles, setNewFiles] = useState([]);           
@@ -93,13 +92,20 @@ const ResearchDetails = ({ setUser, user }) => {
             await axios.put(`http://localhost:8000/home/detail/${id}/update/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("Research updated successfully!");
+           
             setIsEditModalOpen(false);
-            window.location.reload(); 
+            setShowSuccess(true);
+            
         } catch (err) {
             console.error(err);
             alert("Update failed.");
+            
         }
+    };
+
+    const handleCloseSuccess = () => {
+        setShowSuccess(false);
+        window.location.reload();
     };
 
     if (loading) return <div className='loading-spinner'>Loading...</div>;
@@ -239,6 +245,19 @@ const ResearchDetails = ({ setUser, user }) => {
                     </div>
                 </div>
             )}
+            {showSuccess && (
+                <div className="modal-overlay"><div className="modal-content">
+                    <div className="success-icon">✔</div>
+                    <h3>Changes Saved!</h3>
+                    <p>The research details have been updated successfully.</p>
+                    <button className="modal-close-btn" onClick={handleCloseSuccess}>
+                            Done
+                        </button>
+                        </div>
+                </div>
+            )}
+
+
         </main>
     );
 }

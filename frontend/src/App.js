@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useState } from 'react'
 import Upload from './components/Upload/upload'
 import HomeF from './components/HomeF/home';
@@ -7,6 +7,8 @@ import Repository from './components/Repository/repository';
 import ResearchDetails from './components/ResearchDetails/researchdetails';
 import Admin from './components/AdminF/Admin';
 import './App.css';
+import Footer from './components/Footer/footer';
+
 
 // The Gatekeeper Component
 const ProtectedRoute = ({ isAllowed, children, redirectTo = "/" }) => {
@@ -32,10 +34,12 @@ function App() {
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
 
   return (
-    <Routes>
-      {/* 1. Public Route - Student Google Login */}
-      <Route path='/' element={
-        !isAuthenticated ? <HomeF setUser={setUser} /> : <Navigate to="/homepage" />
+   
+      <div className='app-container'>
+        <Routes>
+          {/* 1. Public Route - Student Google Login */}
+        <Route path='/' element={
+          !isAuthenticated ? <HomeF setUser={setUser} /> : <Navigate to="/homepage" />
       } />
 
       {/* 2. Admin Login Portal */}
@@ -71,8 +75,18 @@ function App() {
       } />
 
       {/* 5. Fallback: Redirect any unknown routes */}
+
       <Route path="*" element={<Navigate to={isAuthenticated ? "/homepage" : "/"} replace />} />
+      
     </Routes>
+      <Footer/>
+      </div>
+  
+   
+    
+    
+
+
   );
 }
 

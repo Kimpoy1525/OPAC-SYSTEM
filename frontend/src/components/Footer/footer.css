@@ -1,0 +1,82 @@
+.footer {
+    background-color: #1a472a; /* Matching your green theme */
+    color: white;
+    padding: 40px 0 20px 0;
+    margin-top: auto; /* Pushes footer to bottom if using flexbox on main */
+    width: 100%;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 30px;
+    padding: 0 20px;
+}
+
+.footer-section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+    color: #fff;
+}
+
+.footer-section h4 {
+    margin-bottom: 15px;
+    border-bottom: 2px solid #058632;
+    display: inline-block;
+    padding-bottom: 5px;
+}
+
+.footer-section p {
+    font-size: 0.9rem;
+    color: #ccc;
+    max-width: 250px;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 8px;
+}
+
+.footer-section ul li a {
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s;
+}
+
+.footer-section ul li a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    font-size: 1.5rem;
+}
+
+.social-icons a {
+    color: white;
+    transition: transform 0.3s, color 0.3s;
+}
+
+.social-icons a:hover {
+    color: #058632;
+    transform: translateY(-3px);
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    color: #aaa;
+}

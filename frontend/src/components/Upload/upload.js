@@ -13,7 +13,7 @@ const Upload = ({ setUser, user }) => {
     const [course, setCourse] = useState(''); 
     const [files, setFiles] = useState([]); 
     const [fileLabel, setFileLabel] = useState('No files chosen');
-
+    const [showSuccess, setShowSuccess] = useState(false);
     // 1. Updated: Append files one-by-one or in groups
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
@@ -78,7 +78,9 @@ const Upload = ({ setUser, user }) => {
             await axios.post('http://localhost:8000/home/upload/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert("Thesis uploaded successfully!");
+
+            setShowSuccess(true);
+           
             
             setTitle(''); setAuthors(''); setYear(''); setAbstract('');
             setKeywords(''); setPanelists(''); setCourse('');
@@ -161,6 +163,17 @@ const Upload = ({ setUser, user }) => {
                     <button type='submit' className='submit-btn'>SUBMIT</button>
                 </form>
             </div>
+            {showSuccess && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="success-icon">✔</div>
+                        <h3>Upload Successful!</h3>
+                        <p>Your research information has been added to the catalog.</p>
+                        <button className="modal-close-btn" onClick={() => setShowSuccess(false)}>Great!</button>
+                        </div></div>
+            )}
+
+
         </main>
     );
 }
