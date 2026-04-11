@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_cx!mok9ka+60h^=lkn^042e!fiep(=ntou!fsn6)q%y6qz!za'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_cx!mok9ka+60h^=lkn^042e!fiep(=ntou!fsn6)q%y6qz!za')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app']
 
 
 # Application definition
@@ -99,14 +99,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'OPAC',      # The name of the database you created in Postgres
-        'USER': 'postgres',           # Your Postgres username (usually 'postgres')
-        'PASSWORD': '12345',  # The password you set during Postgres installation
-        'HOST': 'localhost',          # Use 'localhost' or '127.0.0.1'
-        'PORT': '5432',               # The default Postgres port
-    }
+    'default': dj_database_url.config(
+        # This tells Django: Use the DATABASE_URL from Railway's variables.
+        # If that's missing (like on your laptop), use the local Postgres address.
+        default=os.environ.get('DATABASE_URL', 'postgresql://postgres:12345@localhost:5432/OPAC')
+    )
 }
 
 
@@ -155,3 +152,21 @@ CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
 AUTH_USER_MODEL = 'accounts.User'
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+# Static files configuration
+STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files (This connects to your /app/media volume)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# Railway networking fixes
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Add your Railway URL to trusted origins for CSRF
+RAILWAY_URL = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if RAILWAY_URL:
+    CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_URL}", "http://localhost:3000"]
