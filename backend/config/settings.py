@@ -167,6 +167,8 @@ USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Add your Railway URL to trusted origins for CSRF
-RAILWAY_URL = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-if RAILWAY_URL:
-    CSRF_TRUSTED_ORIGINS = [f"https://{RAILWAY_URL}", "http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://ccstechvault.up.railway.app", 
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+]
