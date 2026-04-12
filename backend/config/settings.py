@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_cx!mok9ka+60h^=lkn^0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.railway.app']
+ALLOWED_HOSTS = ['ccstechvault-backend.up.railway.app', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -61,6 +61,7 @@ MIDDLEWARE = [
 
 # Allow your frontend
 CORS_ALLOWED_ORIGINS = [
+    "https://ccstechvault.up.railway.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
@@ -147,7 +148,10 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://ccstechvault.up.railway.app",
+    "http://localhost:3000"
+]
 
 AUTH_USER_MODEL = 'accounts.User'
 
