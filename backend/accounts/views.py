@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from .models import AccessLog  # --- IMPORT THE ACCESS LOG ---
+from .models import AccessLog 
 
 # Get our Custom User model
 User = get_user_model()
@@ -12,11 +12,11 @@ User = get_user_model()
 GOOGLE_CLIENT_ID = "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com"
 ALLOWED_DOMAIN = "@student.fatima.edu.ph"
 
-# Helper function to get IP address
+# Optimized for Railway/Cloud Proxies
 def get_client_ip(request):
     x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
     if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0]
+        ip = x_forwarded_for.split(',')[0].strip()
     else:
         ip = request.META.get('REMOTE_ADDR')
     return ip
@@ -55,7 +55,7 @@ def google_login(request):
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
-                "role": User.Role.USER ,
+                "role": User.Role.USER,
                 "picture": picture,
             }
         )
@@ -78,7 +78,7 @@ def google_login(request):
                 "email": user.email,
                 "first_name": user.first_name,
                 "role": user.role,
-                "picture": picture,
+                "picture": user.picture,
             }
         })
 
@@ -100,6 +100,7 @@ def manual_admin_login(request):
         user = authenticate(username=username, password=password)
 
         if user is not None:
+            # Check for Admin or Superadmin role
             if user.role in [User.Role.ADMIN, User.Role.SUPERADMIN]:
                 login(request, user)
 
