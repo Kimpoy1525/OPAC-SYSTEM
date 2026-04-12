@@ -1,10 +1,10 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.utils import timezone
 
 class User(AbstractUser):
     """
-    Django needs this to handle sessions and the Admin panel.
-    We will add your 3 roles here.
+    Custom User model with 3 distinct roles.
     """
     class Role(models.TextChoices):
         SUPERADMIN = "SUPERADMIN", "Superadmin"
@@ -25,3 +25,29 @@ class InstituteAccount(models.Model):
 
     def __str__(self):
         return self.email
+
+# --- ACTIVITY LOGGING MODELS ---
+
+class AccessLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    login_time = models.DateTimeField(default=timezone.now)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = "Access Logs"
+        ordering = ['-login_time']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.login_time}"
+
+class DownloadLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    file_name = models.CharField(max_length=255)
+    downloaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Download Logs"
+        ordering = ['-downloaded_at']
+
+    def __str__(self):
+        return f"{self.user.username} downloaded {self.file_name}"
