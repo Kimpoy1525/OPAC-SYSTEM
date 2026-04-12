@@ -170,7 +170,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Add your Railway URL to trusted origins for CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "https://ccstechvault.up.railway.app", 
+    "https://ccstechvault-backend.up.railway.app", 
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
