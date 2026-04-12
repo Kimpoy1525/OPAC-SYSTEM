@@ -51,3 +51,15 @@ class DownloadLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} downloaded {self.file_name}"
+    
+class UploadLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255) # The title of the research paper
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Upload Logs"
+        ordering = ['-uploaded_at']
+
+    def __str__(self):
+        return f"{self.user.username} uploaded '{self.title}'"
