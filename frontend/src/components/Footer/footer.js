@@ -33,8 +33,8 @@ const Footer = () => {
                     <h4>Connect</h4>
                     <div className="social-icons">
                         <a href="https://fatima.edu.ph" target="_blank" rel="noreferrer"><FaGlobe /></a>
-                        <a href="#"><FaFacebook /></a>
-                        <a href="#"><FaGithub /></a>
+                        <a href="https://www.facebook.com/our.lady.of.fatima.university/"><FaFacebook /></a>
+                        <a href="https://github.com/"><FaGithub /></a>
                     </div>
                 </div>
             </div>
