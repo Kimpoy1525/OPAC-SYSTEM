@@ -3,14 +3,14 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
 from django.db.models import Q
-from django.conf import settings # Added for media path access
-from django.http import FileResponse, Http404 # Added for serving files
-from django.shortcuts import get_object_or_404 # Added for clean error handling
+from django.conf import settings 
+from django.http import FileResponse, Http404 
+from django.shortcuts import get_object_or_404 
 from .models import Document, ResearchFile
 from .serializers import DocumentSerializer
-from accounts.models import DownloadLog # Link to your logging system
+from accounts.models import DownloadLog, UploadLog # Added UploadLog here
 import json
-import os # Added for file path manipulation
+import os 
 
 # 1. Handles the initial upload of a paper
 class DocumentUploadView(APIView):
@@ -20,6 +20,13 @@ class DocumentUploadView(APIView):
         serializer = DocumentSerializer(data=request.data)
         if serializer.is_valid():
             document = serializer.save()
+            
+            # --- NEW: LOG THE UPLOAD EVENT ---
+            if request.user.is_authenticated:
+                UploadLog.objects.create(
+                    user=request.user,
+                    title=document.title
+                )
             
             # Extract the list of documents from the 'files' key
             files_data = request.FILES.getlist('files')
@@ -38,7 +45,6 @@ class DocumentListView(generics.ListAPIView):
 
     def get_queryset(self):
         queryset = Document.objects.all().order_by('-uploaded_at')
-        
         year = self.request.query_params.get('year')
         course = self.request.query_params.get('course')
         search_query = self.request.query_params.get('search')
@@ -47,14 +53,12 @@ class DocumentListView(generics.ListAPIView):
             queryset = queryset.filter(year=year)
         if course:
             queryset = queryset.filter(course=course)
-
         if search_query:
             queryset = queryset.filter(
                 Q(title__icontains=search_query) | 
                 Q(authors__icontains=search_query) |
                 Q(keywords__icontains=search_query)
             )
-            
         return queryset
 
 # 3. Handles viewing the details of a single paper
@@ -63,7 +67,7 @@ class DocumentDetailView(generics.RetrieveAPIView):
     serializer_class = DocumentSerializer
     lookup_field = 'id'
 
-# 4. Handles the Edit Popup (Updating text, deleting files, adding new files)
+# 4. Handles the Edit Popup
 class DocumentUpdateView(generics.UpdateAPIView):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
@@ -72,12 +76,10 @@ class DocumentUpdateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         
         if serializer.is_valid():
             document = serializer.save()
-
             delete_ids_raw = request.data.get('delete_files')
             if delete_ids_raw:
                 try:
@@ -91,7 +93,6 @@ class DocumentUpdateView(generics.UpdateAPIView):
                 ResearchFile.objects.create(document=document, file=file_data)
 
             return Response(DocumentSerializer(document).data, status=status.HTTP_200_OK)
-        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 5. Handles deleting the entire research document
@@ -101,13 +102,10 @@ class DocumentDeleteView(generics.DestroyAPIView):
     lookup_field = 'id'
 
 # --- THE DOWNLOAD LOGIC ---
-# 6. Handles logging and serving the file from the Railway Volume
 class FileDownloadView(APIView):
     def get(self, request, file_id):
-        # Find the specific file entry
         research_file = get_object_or_404(ResearchFile, id=file_id)
         
-        # Check if the user is logged in (React must send the token/session)
         if request.user.is_authenticated:
             DownloadLog.objects.create(
                 user=request.user,
@@ -115,8 +113,14 @@ class FileDownloadView(APIView):
             )
 
         # Serve the file directly from the persistent Volume
+        # We check the absolute path first, then a joined path as a backup
         file_path = research_file.file.path
+        
+        if not os.path.exists(file_path):
+             # Backup: Try joining BASE_DIR/media/ + file name
+             file_path = os.path.join(settings.MEDIA_ROOT, research_file.file.name)
+
         if os.path.exists(file_path):
             return FileResponse(open(file_path, 'rb'), as_attachment=True)
         else:
-            raise Http404("File not found on the server volume.")
+            raise Http404(f"File not found at: {file_path}")
