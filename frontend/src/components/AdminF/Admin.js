@@ -19,7 +19,7 @@ export default function Admin({ setUser }) {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/accounts/admin-login/", {
+      const response = await fetch("https://ccstechvault-backend.up.railway.app/api/accounts/admin-login/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
