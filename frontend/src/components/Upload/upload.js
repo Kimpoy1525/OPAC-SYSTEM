@@ -75,7 +75,7 @@ const Upload = ({ setUser, user }) => {
         });
 
         try {
-            await axios.post('http://localhost:8000/home/upload/', formData, {
+            await axios.post('https://ccstechvault.up.railway.app/home/upload/', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
 

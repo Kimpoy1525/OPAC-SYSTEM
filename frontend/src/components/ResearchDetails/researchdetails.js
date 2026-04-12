@@ -32,7 +32,7 @@ const ResearchDetails = ({ setUser, user }) => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/home/detail/${id}/`);
+                const response = await axios.get(`https://ccstechvault.up.railway.app/home/detail/${id}/`);
                 const data = response.data;
                 setResearchItem(data);
                 
@@ -89,7 +89,7 @@ const ResearchDetails = ({ setUser, user }) => {
         });
 
         try {
-            await axios.put(`http://localhost:8000/home/detail/${id}/update/`, formData, {
+            await axios.put(`https://ccstechvault.up.railway.app/home/detail/${id}/update/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
            

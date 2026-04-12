@@ -26,7 +26,7 @@ const Repository = ({ setUser, user }) => {
   const fetchResearches = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:8000/home/all/', {
+      const response = await axios.get('https://ccstechvault.up.railway.app/home/all/', {
         params: {
           year: selectedYear,
           course: selectedCourse,
@@ -55,7 +55,7 @@ const Repository = ({ setUser, user }) => {
     if (!itemToDelete) return;
 
       try {
-     await axios.delete(`http://localhost:8000/home/detail/${itemToDelete.id}/delete/`);
+     await axios.delete(`https://ccstechvault.up.railway.app/home/detail/${itemToDelete.id}/delete/`);
        setResearches(prev => prev.filter(item => item.id !== itemToDelete.id));
       setShowDeleteConfirm(false);
       setShowDeleteSuccess(true);
