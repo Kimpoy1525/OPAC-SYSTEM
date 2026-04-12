@@ -14,6 +14,7 @@ const ResearchDetails = ({ setUser, user }) => {
     const [researchItem, setResearchItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showSuccess, setShowSuccess] = useState(false);
+    
     // --- FILE STATES ---
     const [existingFiles, setExistingFiles] = useState([]); 
     const [newFiles, setNewFiles] = useState([]);           
@@ -36,7 +37,6 @@ const ResearchDetails = ({ setUser, user }) => {
                 const data = response.data;
                 setResearchItem(data);
                 
-                // Prefill text states
                 setTitle(data.title);
                 setAuthors(data.authors);
                 setYear(data.year);
@@ -44,8 +44,6 @@ const ResearchDetails = ({ setUser, user }) => {
                 setKeywords(data.keywords || '');
                 setPanelists(data.panelists || '');
                 setCourse(data.course || '');
-                
-                // Prefill file state
                 setExistingFiles(data.files || []);
                 
                 setLoading(false);
@@ -57,7 +55,6 @@ const ResearchDetails = ({ setUser, user }) => {
         fetchDetail();
     }, [id]);
 
-    // --- HANDLERS ---
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
         setNewFiles((prev) => [...prev, ...selectedFiles]);
@@ -99,7 +96,6 @@ const ResearchDetails = ({ setUser, user }) => {
         } catch (err) {
             console.error(err);
             alert("Update failed.");
-            
         }
     };
 
@@ -118,7 +114,6 @@ const ResearchDetails = ({ setUser, user }) => {
                 <div className='details-content'>
                     <h1>{researchItem.title}</h1>
                     
-                    {/* Only show Edit if Admin */}
                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
                         <button className='edit-details' onClick={() => setIsEditModalOpen(true)}>Edit</button>
                     )}
@@ -136,8 +131,14 @@ const ResearchDetails = ({ setUser, user }) => {
                                     <span className='file-name'>
                                         {fileObj.file.split('/').pop()}
                                     </span>
+                                    
+                                    {/* UPDATED: Points to the Django Download View instead of the raw media URL */}
                                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') ? (
-                                        <a href={fileObj.file} download target="_blank" rel="noreferrer" className='download-icon'>
+                                        <a 
+                                            href={`https://ccstechvault-backend.up.railway.app/home/download/${fileObj.id}/`} 
+                                            className='download-icon'
+                                            title="Download File"
+                                        >
                                             <LuDownload />
                                         </a>
                                     ) : (
@@ -155,9 +156,8 @@ const ResearchDetails = ({ setUser, user }) => {
                     <button className='back-btn' onClick={() => navigate(-1)}>Back</button>
                 </div>
             </div>
-            
 
-            {/* --- POPUP MODAL --- */}
+            {/* --- EDIT MODAL --- */}
             {isEditModalOpen && (
                 <div className="modal-overlay">
                     <div className="modal-container">
@@ -173,31 +173,30 @@ const ResearchDetails = ({ setUser, user }) => {
 
                             <div className='form-input'>
                                 <label>Author(s)</label>
-                             <input type='text' value={authors} onChange={(e) => setAuthors(e.target.value)} required />
-                                </div>
-
-                            <div className='form-input'>
-                            <label>Year</label>
-                            <input type='number' value={year} onChange={(e) => setYear(e.target.value)} required />
+                                <input type='text' value={authors} onChange={(e) => setAuthors(e.target.value)} required />
                             </div>
 
                             <div className='form-input'>
-                            <label>Keywords</label>
-                            <input type='text' value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+                                <label>Year</label>
+                                <input type='number' value={year} onChange={(e) => setYear(e.target.value)} required />
                             </div>
 
                             <div className='form-input'>
-                            <label>Abstract</label>
-                            <textarea rows={5} value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
+                                <label>Keywords</label>
+                                <input type='text' value={keywords} onChange={(e) => setKeywords(e.target.value)} />
                             </div>
 
                             <div className='form-input'>
-                            <label>Panelists</label>
-                            <input type='text' value={panelists} onChange={(e) => setPanelists(e.target.value)} required />
+                                <label>Abstract</label>
+                                <textarea rows={5} value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
                             </div>
-                        
 
-                            {/* --- FILE MANAGEMENT SECTION --- */}
+                            <div className='form-input'>
+                                <label>Panelists</label>
+                                <input type='text' value={panelists} onChange={(e) => setPanelists(e.target.value)} required />
+                            </div>
+
+                            {/* --- FILE MANAGEMENT --- */}
                             <div className='form-input'>
                                 <label>Existing Files (Click ✕ to delete)</label>
                                 <div className="file-queue">
@@ -245,19 +244,18 @@ const ResearchDetails = ({ setUser, user }) => {
                     </div>
                 </div>
             )}
+
+            {/* --- SUCCESS POPUP --- */}
             {showSuccess && (
-                <div className="modal-overlay"><div className="modal-content">
-                    <div className="success-icon">✔</div>
-                    <h3>Changes Saved!</h3>
-                    <p>The research details have been updated successfully.</p>
-                    <button className="modal-close-btn" onClick={handleCloseSuccess}>
-                            Done
-                        </button>
-                        </div>
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="success-icon">✔</div>
+                        <h3>Changes Saved!</h3>
+                        <p>The research details have been updated successfully.</p>
+                        <button className="modal-close-btn" onClick={handleCloseSuccess}>Done</button>
+                    </div>
                 </div>
             )}
-
-
         </main>
     );
 }
