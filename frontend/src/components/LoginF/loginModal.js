@@ -9,7 +9,6 @@ export default function LoginModal({ close, setUser }) {
 
   const handleGoogleLogin = async (response) => {
     try {
-      // Use localhost to match your React origin (prevents CORS issues)
       const res = await fetch("https://ccstechvault-backend.up.railway.app/api/auth/google/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

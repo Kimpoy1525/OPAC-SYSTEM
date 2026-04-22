@@ -8,6 +8,7 @@
 }
 
 .details-content{
+    position: relative;
     max-width: 850px;
     width: 100%;
     margin: 40px auto;
@@ -82,7 +83,7 @@
 .edit-details{
     position: absolute;
     top: 32%;
-    right: 22%;
+    right: 32%;
     border: none;
     background-color: #058632;
     color: white;
