@@ -34,7 +34,7 @@ class DownloadLogAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request): return False
     
-from .models import UploadLog, EditLog # Add to your existing imports
+from .models import UploadLog, EditLog, DeleteLog # Add to your existing imports
 
 @admin.register(UploadLog)
 class UploadLogAdmin(admin.ModelAdmin):
@@ -49,5 +49,13 @@ class EditLogAdmin(admin.ModelAdmin):
     list_display = ('user', 'title', 'edited_at')
     list_filter = ('edited_at', 'user')
     readonly_fields = ('user', 'title', 'edited_at')
+
+    def has_add_permission(self, request): return False
+
+@admin.register(DeleteLog)
+class DeleteLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'title', 'deleted_at')
+    list_filter = ('deleted_at', 'user')
+    readonly_fields = ('user', 'title', 'deleted_at')
 
     def has_add_permission(self, request): return False

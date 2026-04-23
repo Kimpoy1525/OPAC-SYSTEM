@@ -8,7 +8,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404 
 from .models import Document, ResearchFile
 from .serializers import DocumentSerializer
-from accounts.models import DownloadLog, UploadLog, EditLog # Added UploadLog and EditLog here
+from accounts.models import DownloadLog, UploadLog, EditLog, DeleteLog # Added all log models here
 import json
 import os 
 
@@ -108,6 +108,19 @@ class DocumentDeleteView(generics.DestroyAPIView):
     queryset = Document.objects.all()
     serializer_class = DocumentSerializer
     lookup_field = 'id'
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        
+        # --- NEW: LOG THE DELETE EVENT (before deleting so we still have the title) ---
+        if request.user.is_authenticated:
+            DeleteLog.objects.create(
+                user=request.user,
+                title=instance.title
+            )
+        
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 # --- THE DOWNLOAD LOGIC ---
 class FileDownloadView(APIView):

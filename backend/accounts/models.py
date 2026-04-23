@@ -75,3 +75,15 @@ class EditLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} edited '{self.title}'"
+
+class DeleteLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255) # The title of the research paper that was deleted
+    deleted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Delete Logs"
+        ordering = ['-deleted_at']
+
+    def __str__(self):
+        return f"{self.user.username} deleted '{self.title}'"
