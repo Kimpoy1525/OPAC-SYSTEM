@@ -24,6 +24,7 @@ export default function Admin({ setUser }) {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Required for Django session cookies to work
         body: JSON.stringify({
           username: username, // Matches the 'username' key in Django view
           password: password,
