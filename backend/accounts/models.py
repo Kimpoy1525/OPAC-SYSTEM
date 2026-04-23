@@ -63,3 +63,15 @@ class UploadLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} uploaded '{self.title}'"
+
+class EditLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=255) # The title of the research paper that was edited
+    edited_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name_plural = "Edit Logs"
+        ordering = ['-edited_at']
+
+    def __str__(self):
+        return f"{self.user.username} edited '{self.title}'"

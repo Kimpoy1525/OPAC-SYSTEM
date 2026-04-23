@@ -8,7 +8,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404 
 from .models import Document, ResearchFile
 from .serializers import DocumentSerializer
-from accounts.models import DownloadLog, UploadLog # Added UploadLog here
+from accounts.models import DownloadLog, UploadLog, EditLog # Added UploadLog and EditLog here
 import json
 import os 
 
@@ -80,6 +80,14 @@ class DocumentUpdateView(generics.UpdateAPIView):
         
         if serializer.is_valid():
             document = serializer.save()
+            
+            # --- NEW: LOG THE EDIT EVENT ---
+            if request.user.is_authenticated:
+                EditLog.objects.create(
+                    user=request.user,
+                    title=document.title
+                )
+            
             delete_ids_raw = request.data.get('delete_files')
             if delete_ids_raw:
                 try:
