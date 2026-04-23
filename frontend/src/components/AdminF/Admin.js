@@ -19,7 +19,7 @@ export default function Admin({ setUser }) {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://ccstechvault-backend.up.railway.app/api/accounts/admin-login/", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/admin-login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -26,7 +26,7 @@ const Repository = ({ setUser, user }) => {
   const fetchResearches = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://ccstechvault-backend.up.railway.app/home/all/', {
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/home/all/`, {
         params: {
           year: selectedYear,
           course: selectedCourse,
@@ -55,7 +55,7 @@ const Repository = ({ setUser, user }) => {
     if (!itemToDelete) return;
 
       try {
-     await axios.delete(`https://ccstechvault-backend.up.railway.app/home/detail/${itemToDelete.id}/delete/`);
+     await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${itemToDelete.id}/delete/`);
        setResearches(prev => prev.filter(item => item.id !== itemToDelete.id));
       setShowDeleteConfirm(false);
       setShowDeleteSuccess(true);
@@ -80,15 +80,22 @@ const Repository = ({ setUser, user }) => {
 
           <section className='filter-container'>
             <div className='filter-select'>
-              <input 
-                type='number' 
-                placeholder='Year (e.g. 2024)'
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
-                min="2019"
-                max={new Date().getFullYear()}
-                className="year-filter-input"
-              />
+               <input 
+                 type='number' 
+                 placeholder='Year (e.g. 2024)'
+                 value={selectedYear}
+                 onChange={(e) => setSelectedYear(e.target.value)}
+                 min="2019"
+                 max={new Date().getFullYear()}
+                 maxLength={4}
+                 onInput={(e) => {
+                   const value = e.target.value;
+                   if (value.length > 4) {
+                     e.target.value = value.slice(0, 4);
+                   }
+                 }}
+                 className="year-filter-input"
+               />
             </div>
 
             <div className='filter-select'>

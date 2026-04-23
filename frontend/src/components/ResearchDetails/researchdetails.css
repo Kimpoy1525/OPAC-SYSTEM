@@ -82,14 +82,15 @@
 
 .edit-details{
     position: absolute;
-    top: 32%;
-    right: 32%;
+    top: 20px;
+    right: 20px;
     border: none;
     background-color: #058632;
     color: white;
     padding: 10px 20px;
     border-radius: 20px;
     cursor: pointer;
+    z-index: 10;
 }
 
 .edit-details:hover{

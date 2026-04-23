@@ -33,7 +33,7 @@ const ResearchDetails = ({ setUser, user }) => {
     useEffect(() => {
         const fetchDetail = async () => {
             try {
-                const response = await axios.get(`https://ccstechvault-backend.up.railway.app/home/detail/${id}/`);
+                const response = await axios.get(`${process.env.REACT_APP_API_URL}/home/detail/${id}/`);
                 const data = response.data;
                 setResearchItem(data);
                 
@@ -86,7 +86,7 @@ const ResearchDetails = ({ setUser, user }) => {
         });
 
         try {
-            await axios.put(`https://ccstechvault-backend.up.railway.app/home/detail/${id}/update/`, formData, {
+            await axios.put(`${process.env.REACT_APP_API_URL}/home/detail/${id}/update/`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
            
@@ -121,6 +121,7 @@ const ResearchDetails = ({ setUser, user }) => {
                     <p><strong>Author(s):</strong> {researchItem.authors}</p>
                     <p><strong>Year:</strong> {researchItem.year}</p>
                     <p className='details-abstract'><strong>Abstract:</strong> {researchItem.abstract}</p>
+                    <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>
                     <p><strong>Keywords:</strong> {researchItem.keywords || "No keywords specified"}</p>
 
                     <div className='file-section'>
@@ -135,7 +136,7 @@ const ResearchDetails = ({ setUser, user }) => {
                                     {/* UPDATED: Points to the Django Download View instead of the raw media URL */}
                                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') ? (
                                         <a 
-                                            href={`https://ccstechvault-backend.up.railway.app/home/download/${fileObj.id}/`} 
+                                            href={`${process.env.REACT_APP_API_URL}/home/download/${fileObj.id}/`} 
                                             className='download-icon'
                                             title="Download File"
                                         >
