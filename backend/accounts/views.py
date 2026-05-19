@@ -10,7 +10,8 @@ from .models import AccessLog
 User = get_user_model()
 
 GOOGLE_CLIENT_ID = "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com"
-ALLOWED_DOMAIN = "@student.fatima.edu.ph"
+ALLOWED_STUDENT_DOMAIN = "@student.fatima.edu.ph"
+ALLOWED_TEACHER_DOMAIN = "@fatima.edu.ph"
 
 # Optimized for Railway/Cloud Proxies
 def get_client_ip(request):
@@ -46,7 +47,13 @@ def google_login(request):
         if not email_verified:
             return JsonResponse({"error": "Email not verified"}, status=403)
 
-        if not email.lower().endswith(ALLOWED_DOMAIN):
+        # Determine role based on email domain
+        email_lower = email.lower()
+        if email_lower.endswith(ALLOWED_STUDENT_DOMAIN):
+            assigned_role = User.Role.USER
+        elif email_lower.endswith(ALLOWED_TEACHER_DOMAIN) and not email_lower.endswith(ALLOWED_STUDENT_DOMAIN):
+            assigned_role = User.Role.TEACHER
+        else:
             return JsonResponse({"error": "Use your institute Google account"}, status=403)
 
         user, created = User.objects.get_or_create(
@@ -55,7 +62,7 @@ def google_login(request):
                 "email": email,
                 "first_name": first_name,
                 "last_name": last_name,
-                "role": User.Role.USER,
+                "role": assigned_role,
                 "picture": picture,
             }
         )

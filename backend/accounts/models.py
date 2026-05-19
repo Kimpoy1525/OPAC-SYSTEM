@@ -9,6 +9,7 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         SUPERADMIN = "SUPERADMIN", "Superadmin"
         ADMIN = "ADMIN", "Admin"
+        TEACHER = "TEACHER", "Teacher"
         USER = "USER", "User"
 
     role = models.CharField(

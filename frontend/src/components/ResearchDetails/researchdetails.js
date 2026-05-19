@@ -134,7 +134,7 @@ const ResearchDetails = ({ setUser, user }) => {
                                     </span>
                                     
                                     {/* UPDATED: Points to the Django Download View instead of the raw media URL */}
-                                    {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') ? (
+                                    {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN' || user.role === 'TEACHER') ? (
                                         <a 
                                             href={`${process.env.REACT_APP_API_URL}/home/download/${fileObj.id}/`} 
                                             className='download-icon'

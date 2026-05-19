@@ -156,6 +156,18 @@ SECURE_REFERRER_POLICY = "no-referrer-when-downgrade"
 
 AUTH_USER_MODEL = 'accounts.User'
 
+# Django REST Framework configuration
+# We use a custom session auth that exempts CSRF because our React SPA
+# sends session cookies but cannot easily send CSRF tokens with every request.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'accounts.authentication.CsrfExemptSessionAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 
