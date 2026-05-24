@@ -26,7 +26,7 @@ export default function HomeF({ setUser }) {
             <div className="home-content">
                 <h1>OUR LADY OF FATIMA UNIVERSITY</h1>
                 <h2>COLLEGE OF COMPUTER STUDIES</h2>
-                <p>ONLINE PUBLIC ACCESS CATALOG</p>
+                <p>CCSTECHVAULT</p>
 
                 <button 
                     className="login-btn"

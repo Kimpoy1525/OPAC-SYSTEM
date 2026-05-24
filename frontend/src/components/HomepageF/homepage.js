@@ -40,7 +40,7 @@ export default function Homepage({ setUser, user }) {
 
       <div className='homepage-banner'>
           <img className="olfuhome" src={OLFU} alt="OLFU Campus" />
-          <h1 className="homepage-title">ONLINE PUBLIC ACCESS CATALOG</h1>
+          <h1 className="homepage-title">CCSTECHVAULT</h1>
            <div className="gradient-overlay1"></div>
       </div>
       

@@ -74,7 +74,7 @@ const Repository = ({ setUser, user }) => {
           <Searchbar setSearchQuery={setSearchQuery} searchQuery={searchQuery} />
 
           <header className='repository-header'>
-            <h1>ONLINE PUBLIC ACCESS CATALOG</h1>
+            <h1>CCSTECHVAULT</h1>
             <p>Explore all stored theses and capstone projects from the College of Computer Studies</p>
           </header>
 
