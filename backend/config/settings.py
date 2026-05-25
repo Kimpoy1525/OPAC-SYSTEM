@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 import os
+from dotenv import load_dotenv
 import dj_database_url
 from pathlib import Path
+
+# Load environment variables from .env file (if it exists)
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_cx!mok9ka+60h^=lkn^042e!fiep(=ntou!fsn6)q%y6qz!za')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['ccstechvault-backend.up.railway.app', 'localhost', '127.0.0.1']
 
@@ -100,10 +104,12 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Database
+# Uses DATABASE_URL environment variable (provided by Railway when deployed,
+# or set it manually in your terminal when running locally).
+# Example: postgresql://user:password@host:5432/database
 DATABASES = {
     'default': dj_database_url.config(
-        # This tells Django: Use the DATABASE_URL from Railway's variables.
-        # If that's missing (like on your laptop), use the local Postgres address.
         default=os.environ.get('DATABASE_URL', 'postgresql://postgres:12345@localhost:5432/OPAC')
     )
 }
@@ -181,8 +187,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Railway networking fixes
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-# Add your Railway URL to trusted origins for CSRF
+# Railway networking fixes (only in production/on Railway)
+USE_X_FORWARDED_HOST = not DEBUG
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

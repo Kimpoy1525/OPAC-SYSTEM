@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { FaChevronDown, FaTrash } from "react-icons/fa6"; // Added FaTrash
+import { FaChevronDown, FaTrash } from "react-icons/fa6";
 import axios from 'axios';
 import './repository.css'
 import Header from '../Header/header'
 import Searchbar from '../SearchBar/searchbar'
 import { Link, useSearchParams } from 'react-router-dom';
+import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import '../Upload/upload.css'; 
 
 const Repository = ({ setUser, user }) => {
@@ -14,14 +15,15 @@ const Repository = ({ setUser, user }) => {
 
   const [researches, setResearches] = useState([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(initialCourse);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
-  const [itemToDelete, setItemToDelete] = useState(null); // Stores { id, title }
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchResearches = useCallback(async () => {
     setLoading(true);
@@ -45,7 +47,6 @@ const Repository = ({ setUser, user }) => {
     fetchResearches();
   }, [fetchResearches]);
 
-  // --- DELETE HANDLER ---
   const openDeleteModal = (id, title) => {
     setItemToDelete({ id, title });
     setShowDeleteConfirm(true);
@@ -54,16 +55,19 @@ const Repository = ({ setUser, user }) => {
   const handleConfirmDelete = async () => {
     if (!itemToDelete) return;
 
-      try {
-     await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${itemToDelete.id}/delete/`);
-       setResearches(prev => prev.filter(item => item.id !== itemToDelete.id));
+    setDeleting(true);
+
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${itemToDelete.id}/delete/`);
+      setResearches(prev => prev.filter(item => item.id !== itemToDelete.id));
+      setDeleting(false);
       setShowDeleteConfirm(false);
       setShowDeleteSuccess(true);
-    
-      } catch (err) {
-        console.error("Delete failed:", err);
-        alert("Failed to delete the item.");
-      }
+    } catch (err) {
+      setDeleting(false);
+      console.error("Delete failed:", err);
+      alert("Failed to delete the item.");
+    }
   };
 
   return (
@@ -115,7 +119,6 @@ const Repository = ({ setUser, user }) => {
             ) : researches.length > 0 ? (
               researches.map((research) => (
                 <div key={research.id} className='research-card'>
-                  {/* --- DELETE BUTTON AT TOP RIGHT --- */}
                   {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
                     <button 
                       className='card-delete-btn' 
@@ -160,8 +163,14 @@ const Repository = ({ setUser, user }) => {
             )}
           </section>
         </div>
-        {/* --- MODAL: CONFIRM DELETION --- */}
-        {showDeleteConfirm && (
+
+        {/* Loading overlay for search */}
+        {loading && <LoadingOverlay message="Loading research papers..." />}
+
+        {/* Loading overlay for delete */}
+        {deleting && <LoadingOverlay message="Deleting record..." />}
+
+        {showDeleteConfirm && !deleting && (
             <div className="modal-overlay">
                 <div className="modal-content">
                     <div className="success-icon" style={{ color: '#d9534f' }}><FaTrash /></div>
@@ -178,7 +187,7 @@ const Repository = ({ setUser, user }) => {
                 </div>
             </div>
         )}
-        {/* --- MODAL: DELETE SUCCESS --- */}
+
         {showDeleteSuccess && (
             <div className="modal-overlay">
                 <div className="modal-content">

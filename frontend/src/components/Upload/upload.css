@@ -267,3 +267,218 @@
     from { transform: scale(0.8); opacity: 0; }
     to { transform: scale(1); opacity: 1; }
 }
+
+/* Warning icon */
+.warning-icon {
+    font-size: 50px;
+    margin-bottom: 10px;
+}
+
+/* Duplicate list in confirmation modal */
+.duplicate-list {
+    text-align: left;
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.duplicate-item {
+    padding: 4px 0;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.duplicate-item:last-child {
+    border-bottom: none;
+}
+
+/* Modal action buttons */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.modal-cancel-btn {
+    background-color: #ccc;
+    color: #333;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.modal-cancel-btn:hover {
+    background-color: #aaa;
+}
+
+.modal-confirm-btn {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+}
+
+.modal-confirm-btn:hover {
+    background-color: #b71c1c;
+}
+
+.modal-actions-three {
+    flex-wrap: wrap;
+}
+
+.modal-confirm-btn-new {
+    background-color: #2e7d32;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+    font-size: 14px;
+}
+
+.modal-confirm-btn-new:hover {
+    background-color: #1b5e20;
+}
+
+.csv-skipped-count {
+    color: #f57c00;
+    font-weight: bold;
+}
+
+/* --- CSV UPLOAD SECTION --- */
+.csv-divider {
+    display: flex;
+    align-items: center;
+    width: 80%;
+    max-width: 650px;
+    margin: 10px 0;
+}
+
+.csv-divider::before,
+.csv-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 2px solid #ccc;
+}
+
+.csv-divider span {
+    padding: 0 15px;
+    color: #666;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.csv-upload-section {
+    background-color: white;
+    margin: 10px 0 50px 0;
+    padding: 35px;
+    width: 80%;
+    max-width: 650px;
+    color: black;
+    border-radius: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.csv-info {
+    text-align: center;
+    color: #555;
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.csv-upload-btn {
+    margin-top: 10px;
+}
+
+.csv-upload-btn:disabled {
+    background-color: #999;
+    cursor: not-allowed;
+}
+
+.csv-upload-btn:disabled:hover {
+    background-color: #999;
+    color: white;
+}
+
+.csv-results {
+    margin-top: 20px;
+    padding: 15px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+}
+
+.csv-error-message {
+    color: #d32f2f;
+    padding: 10px;
+    background: #ffebee;
+    border-radius: 4px;
+}
+
+.csv-summary {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.csv-success-count {
+    color: #2e7d32;
+    font-weight: bold;
+}
+
+.csv-error-count {
+    color: #d32f2f;
+    font-weight: bold;
+}
+
+.csv-result-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border-top: 1px solid #eee;
+    padding-top: 10px;
+}
+
+.csv-result-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 13px;
+}
+
+.csv-result-row.success {
+    color: #2e7d32;
+}
+
+.csv-result-row.error {
+    color: #d32f2f;
+}
+
+.csv-result-status {
+    flex-shrink: 0;
+}
+
+.csv-result-text {
+    word-break: break-word;
+}
+
+.csv-result-error {
+    color: #c62828;
+    font-style: italic;
+}

@@ -5,6 +5,7 @@ from .views import (
     DocumentListView, 
     DocumentDetailView, 
     DocumentUpdateView,
+    DocumentCSVUploadView,
     FileDownloadView  
 )
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('detail/<int:id>/update/', DocumentUpdateView.as_view(), name='document-update'),
     path('detail/<int:id>/delete/', DocumentDeleteView.as_view(), name='document-delete'),
     path('download/<int:file_id>/', FileDownloadView.as_view(), name='file-download'),
+    path('upload-csv/', DocumentCSVUploadView.as_view(), name='document-csv-upload'),
 ]

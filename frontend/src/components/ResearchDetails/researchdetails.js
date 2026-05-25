@@ -4,6 +4,7 @@ import { LuDownload } from "react-icons/lu";
 import { FaLock } from "react-icons/fa";
 import axios from 'axios';
 import Header from '../Header/header';
+import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './researchdetails.css';
 import '../Upload/upload.css';
 
@@ -14,6 +15,7 @@ const ResearchDetails = ({ setUser, user }) => {
     const [researchItem, setResearchItem] = useState(null);
     const [loading, setLoading] = useState(true);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [saving, setSaving] = useState(false);
     
     // --- FILE STATES ---
     const [existingFiles, setExistingFiles] = useState([]); 
@@ -71,6 +73,8 @@ const ResearchDetails = ({ setUser, user }) => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        setSaving(true);
+
         const formData = new FormData();
         formData.append('title', title);
         formData.append('authors', authors);
@@ -90,10 +94,12 @@ const ResearchDetails = ({ setUser, user }) => {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
            
+            setSaving(false);
             setIsEditModalOpen(false);
             setShowSuccess(true);
             
         } catch (err) {
+            setSaving(false);
             console.error(err);
             alert("Update failed.");
         }
@@ -104,7 +110,7 @@ const ResearchDetails = ({ setUser, user }) => {
         window.location.reload();
     };
 
-    if (loading) return <div className='loading-spinner'>Loading...</div>;
+    if (loading) return <LoadingOverlay message="Loading research details..." />;
     if (!researchItem) return <div>Not found.</div>;
 
     return (
@@ -133,7 +139,6 @@ const ResearchDetails = ({ setUser, user }) => {
                                         {fileObj.file.split('/').pop()}
                                     </span>
                                     
-                                    {/* UPDATED: Points to the Django Download View instead of the raw media URL */}
                                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN' || user.role === 'TEACHER') ? (
                                         <a 
                                             href={`${process.env.REACT_APP_API_URL}/home/download/${fileObj.id}/`} 
@@ -158,8 +163,11 @@ const ResearchDetails = ({ setUser, user }) => {
                 </div>
             </div>
 
+            {/* Loading overlay for save */}
+            {saving && <LoadingOverlay message="Saving changes..." />}
+
             {/* --- EDIT MODAL --- */}
-            {isEditModalOpen && (
+            {isEditModalOpen && !saving && (
                 <div className="modal-overlay">
                     <div className="modal-container">
                         <button className="close-modal" onClick={() => setIsEditModalOpen(false)}>✕</button>
@@ -197,7 +205,6 @@ const ResearchDetails = ({ setUser, user }) => {
                                 <input type='text' value={panelists} onChange={(e) => setPanelists(e.target.value)} required />
                             </div>
 
-                            {/* --- FILE MANAGEMENT --- */}
                             <div className='form-input'>
                                 <label>Existing Files (Click ✕ to delete)</label>
                                 <div className="file-queue">
