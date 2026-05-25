@@ -141,7 +141,17 @@ class DocumentCSVUploadView(APIView):
             return Response({"error": "File must be a CSV"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            decoded = csv_file.read().decode('utf-8-sig')
+            raw = csv_file.read()
+            # Try multiple encodings to handle files saved from Excel (Windows-1252), etc.
+            decoded = None
+            for enc in ['utf-8-sig', 'utf-8', 'cp1252', 'latin-1', 'utf-16']:
+                try:
+                    decoded = raw.decode(enc)
+                    break
+                except (UnicodeDecodeError, UnicodeError):
+                    continue
+            if decoded is None:
+                return Response({"error": "Could not decode CSV file. Try saving it as UTF-8 in Excel (File → Save As → CSV UTF-8)."}, status=status.HTTP_400_BAD_REQUEST)
             reader = csv.DictReader(io.StringIO(decoded))
 
             if not reader.fieldnames:
