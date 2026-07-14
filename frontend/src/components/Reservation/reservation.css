@@ -18,7 +18,7 @@
   background: #fff;
   border: 1px solid #c8c8c8;
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(19, 54, 31, 0.08);
   overflow: hidden;
 }
 
@@ -112,9 +112,10 @@
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
+  transition: background .2s ease, transform .2s ease;
 }
 
-.reservation-form button:hover { background: #047429; }
+.reservation-form button:hover { background: #047429; transform: translateY(-1px); }
 .reservation-form button:disabled { background: #8aa994; cursor: not-allowed; }
 
 .reservation-message {

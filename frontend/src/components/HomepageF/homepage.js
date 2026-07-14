@@ -21,19 +21,6 @@ export default function Homepage({ setUser, user }) {
     }
   };
 
-  // Function to handle Enter key press
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSearch(e);
-    }
-  };
-
-  // Function to handle category clicks (Program buttons)
-  const handleCategoryClick = (course) => {
-    // Navigates to repository with the course as a URL parameter
-    navigate(`/repository?course=${course}`);
-  };
-
   return (
     <div className="homepage-container">
       <Header setUser={setUser} user={user} />
@@ -45,19 +32,19 @@ export default function Homepage({ setUser, user }) {
       </div>
       
       {/* Search container - Wrapped in a form-like div for better UX */}
-      <div className="search-container">
+      <form className="search-container" onSubmit={handleSearch} role="search">
         <input
           type="text"
           placeholder="Search by title, author or keyword"
           className="search-input"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onKeyDown={handleKeyDown}
+          aria-label="Search the research repository"
         />
-        <button className="search-icon" onClick={handleSearch}>
+        <button className="search-icon" type="submit" aria-label="Search">
           <FaSearch />
         </button>
-      </div>
+      </form>
     </div>
   );
 }

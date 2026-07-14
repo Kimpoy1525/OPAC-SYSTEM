@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./loginModal.css";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +7,7 @@ export default function LoginModal({ close, setUser }) {
   const navigate = useNavigate();
   const [error, setError] = useState("");
 
-  const handleGoogleLogin = async (response) => {
+  const handleGoogleLogin = useCallback(async (response) => {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google/`, {
         method: "POST",
@@ -39,7 +39,7 @@ export default function LoginModal({ close, setUser }) {
       console.error("Fetch error:", err);
       setError("Cannot connect to server.");
     }
-  };
+  }, [close, navigate, setUser]);
 
   // Keep manual login if you need it for testing, but update it to use setUser
   const handleLogin = (e) => {
@@ -61,7 +61,7 @@ export default function LoginModal({ close, setUser }) {
       document.getElementById("googleLoginBtn"),
       { theme: "outline", size: "large", width: 250 }
     );
-  }, []);
+  }, [handleGoogleLogin]);
 
   return (
     <div className="modal-overlay">

@@ -1,7 +1,7 @@
 .details-page{
     min-height: 100vh;
     background: rgba(238, 238, 238, 0.93);
-    padding: 20px 30px;
+    padding: 34px clamp(18px, 5vw, 64px) 70px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -11,25 +11,26 @@
     position: relative;
     max-width: 850px;
     width: 100%;
-    margin: 40px auto;
-    padding: 30px 40px;
+    margin: 24px auto;
+    padding: clamp(28px, 5vw, 52px);
     background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border: 2px solid black;
+    border-radius: 14px;
+    box-shadow: 0 8px 26px rgba(19, 54, 31, 0.09);
+    border: 1px solid #d9dedb;
 }
 
 .details-content h1{
     color: black;
     text-align: center;
     margin: 20px 0 40px 0;
-    font-size: 32px;
+    font-size: clamp(24px, 4vw, 32px);
+    line-height: 1.35;
 }
 
 .details-content p,
 .details-content strong { 
-    font-size: 19px;
-    line-height: 1.8;
+    font-size: 15px;
+    line-height: 1.75;
     text-align: justify;
     margin-bottom: 30px; 
     color: black;
@@ -69,15 +70,14 @@
     font-weight: bold;
     font-size: 14px;
     border: none;
-    border-radius: 18px;
+    border-radius: 8px;
     padding: 12px 24px;
     cursor: pointer;
     width: 100%;
 }
 
 .back-btn:hover {
-   background-color: #EEEE;
-   color: #058632;
+   background-color: #046f2a;
 }
 
 .edit-details{
@@ -88,7 +88,7 @@
     background-color: #058632;
     color: white;
     padding: 10px 20px;
-    border-radius: 20px;
+    border-radius: 8px;
     cursor: pointer;
     z-index: 10;
 }

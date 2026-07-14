@@ -1,105 +1,12 @@
-html {
-  background-color: #EEEEEE;
-}
-
-.homepage-container {
-  text-align: center;
-  background: #EEEEEE;
-  min-height: 100vh;
-  font-family: "Montserrat", sans-serif;
-  
-}
-
-.homepage-banner {
-  position: relative;
-  width: 100%;
-  height: 450px; 
-  overflow: hidden;
-}
-
-.homepage-title {
-  position: absolute;
-  top: 60%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2; 
-  font-size: 52px;
-  color: #ffff;; 
-  font-weight: 700;
-  text-transform: uppercase;
-  margin: 0;
-  text-shadow: 0 5px 5px rgba(0, 79, 38, 0.8);
-  width: 90%;
-}
-
-
-.search-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 60px; 
-  margin-bottom: 100px;
-}
-
-.search-input {
-  width: 500px;
-  padding: 20px 20px;
-  font-size: 1rem;
-  border-radius: 12px 0 0 12px;
-  border: 1px solid #058632;
-  outline: none;
-  background: rgba(0, 139, 67, 0.25);
-  color: black;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.search-input::placeholder {
-  color: black; 
-}
-
-.search-icon {
-  padding: 18px 20px 17.5px 20px;
-  background: rgba(0, 139, 67, 0.25);
-  border: 1px solid #058632;
-  border-left: none;
-  border-radius: 0 12px 12px 0;
-  cursor: pointer;
-  color: #058632;
-  font-size: 1.2rem;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.search-icon:hover {
-  background: white;
-}
-
-/* Updated image CSS for proper layering */
-.olfuhome {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%; /* Fill the wrapper */
-  object-fit: cover;
-  object-position: center;
-  display: block;
-  z-index: 1; /* Lowest layer */
-  opacity: 90%;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
-.gradient-overlay1 {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 100%;
- 
-  background: linear-gradient(
-    to top,
-    #EEEEEE 0%,         /* Matches your HTML background perfectly */
-    rgba(238, 238, 238, 0.1) 20%, 
-    rgba(238, 238, 238, 0.1) 40%,
-    transparent 100%
-  );
-  z-index: 2; /* Sits between the image and the text */
-
-}
+.homepage-container { min-height: 100vh; text-align: center; background: #eeeeee; }
+.homepage-banner { position: relative; width: 100%; height: clamp(330px, 50vw, 500px); overflow: hidden; }
+.olfuhome { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; z-index: 1; }
+.gradient-overlay1 { position: absolute; inset: 0; z-index: 2; background: linear-gradient(to top, #eeeeee 0%, rgba(238,238,238,.2) 32%, rgba(0,54,20,.08) 100%); }
+.homepage-title { position: absolute; top: 58%; left: 50%; z-index: 3; width: 92%; margin: 0; transform: translate(-50%,-50%); color: #fff; font-size: clamp(34px, 5vw, 58px); font-weight: 800; letter-spacing: .025em; text-shadow: 0 4px 18px rgba(0,55,21,.72); }
+.search-container { position: relative; z-index: 4; width: min(680px, calc(100% - 32px)); margin: -20px auto 100px; display: flex; justify-content: center; filter: drop-shadow(0 10px 22px rgba(19,54,31,.14)); }
+.search-input { width: 100%; min-height: 58px; padding: 0 20px; background: #fff; color: #18201b; border: 1px solid #d9dedb; border-right: 0; border-radius: 12px 0 0 12px; font-size: 14px; }
+.search-input::placeholder { color: #737c76; }
+.search-input:focus { border-color: #058632; }
+.search-icon { width: 62px; flex: none; display: grid; place-items: center; background: #058632; color: #fff; border: 1px solid #058632; border-radius: 0 12px 12px 0; cursor: pointer; font-size: 18px; transition: background .2s; }
+.search-icon:hover { background: #046f2a; }
+@media (max-width: 600px) { .homepage-banner { height: 350px; } .search-container { margin-top: -16px; } .search-input { min-height: 52px; } .search-icon { width: 54px; } }

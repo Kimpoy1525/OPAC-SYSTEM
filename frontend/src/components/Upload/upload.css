@@ -13,8 +13,9 @@
     width: 80%;
     max-width: 650px;
     color: black;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    border: 1px solid #d9dedb;
+    box-shadow: 0 8px 26px rgba(19, 54, 31, 0.09);
 }
 
 .form-header{
@@ -40,7 +41,7 @@
 .form-input select{
     width: 100%;
     padding: 12px;
-    border: none;
+    border: 1px solid #d9dedb;
     background: #EEEE;
     color: #333;
     box-sizing: border-box;
@@ -48,6 +49,7 @@
     border-radius: 4px;
     resize: none;
 }
+.form-input input:focus, .form-input textarea:focus, .form-input select:focus { border-color: #058632; box-shadow: 0 0 0 3px rgba(5,134,50,.1); }
 
 .form-input input::placeholder,
 .form-input textarea::placeholder{
@@ -165,8 +167,7 @@
 }
 
 .submit-btn:hover {
-    background: #EEEE;
-    color: #058632;
+    background: #046f2a;
 }
 
 @media (max-width: 580px) {
@@ -389,8 +390,9 @@
     width: 80%;
     max-width: 650px;
     color: black;
-    border-radius: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+    border-radius: 14px;
+    border: 1px solid #d9dedb;
+    box-shadow: 0 8px 26px rgba(19, 54, 31, 0.09);
 }
 
 .csv-info {
