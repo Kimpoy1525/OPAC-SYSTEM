@@ -9,7 +9,7 @@ class DocumentAdmin(admin.ModelAdmin):
 
     @admin.display(boolean=True, description='Video')
     def has_video(self, obj):
-        return bool(obj.video)
+        return bool(obj.video_demo_url)
 
 @admin.register(ResearchFile)
 class ResearchFileAdmin(admin.ModelAdmin):

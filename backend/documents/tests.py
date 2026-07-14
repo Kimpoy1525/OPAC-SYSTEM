@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from .models import Document
+from .serializers import DocumentSerializer
 
 
 class DocumentSearchTests(TestCase):
@@ -30,3 +31,11 @@ class DocumentSearchTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.json()), 1)
+
+    def test_video_demo_link_accepts_youtube_and_rejects_other_hosts(self):
+        valid = DocumentSerializer(instance=self.document, data={"video_demo_url": "https://youtu.be/abc123"}, partial=True)
+        invalid = DocumentSerializer(instance=self.document, data={"video_demo_url": "https://example.com/video"}, partial=True)
+
+        self.assertTrue(valid.is_valid(), valid.errors)
+        self.assertFalse(invalid.is_valid())
+        self.assertIn("video_demo_url", invalid.errors)

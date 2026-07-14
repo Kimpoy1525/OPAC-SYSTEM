@@ -8,6 +8,21 @@ import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './researchdetails.css';
 import '../Upload/upload.css';
 
+const getYouTubeEmbedUrl = (url) => {
+    if (!url) return '';
+    try {
+        const parsed = new URL(url);
+        let videoId = '';
+        if (parsed.hostname === 'youtu.be') videoId = parsed.pathname.slice(1).split('/')[0];
+        else if (parsed.pathname.startsWith('/shorts/')) videoId = parsed.pathname.split('/')[2];
+        else if (parsed.pathname.startsWith('/embed/')) videoId = parsed.pathname.split('/')[2];
+        else videoId = parsed.searchParams.get('v') || '';
+        return videoId ? `https://www.youtube-nocookie.com/embed/${encodeURIComponent(videoId)}` : '';
+    } catch {
+        return '';
+    }
+};
+
 const ResearchDetails = ({ setUser, user }) => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -21,8 +36,7 @@ const ResearchDetails = ({ setUser, user }) => {
     const [existingFiles, setExistingFiles] = useState([]); 
     const [newFiles, setNewFiles] = useState([]);           
     const [filesToDelete, setFilesToDelete] = useState([]); 
-    const [newVideo, setNewVideo] = useState(null);
-    const [removeVideo, setRemoveVideo] = useState(false);
+    const [videoDemoUrl, setVideoDemoUrl] = useState('');
 
     // --- FORM STATES ---
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -49,6 +63,7 @@ const ResearchDetails = ({ setUser, user }) => {
                 setPanelists(data.panelists || '');
                 setCourse(data.course || '');
                 setExistingFiles(data.files || []);
+                setVideoDemoUrl(data.video_demo_url || '');
                 
                 setLoading(false);
             } catch (err) {
@@ -86,8 +101,7 @@ const ResearchDetails = ({ setUser, user }) => {
         formData.append('panelists', panelists);
         formData.append('course', course);
         formData.append('delete_files', JSON.stringify(filesToDelete));
-        formData.append('remove_video', removeVideo ? 'true' : 'false');
-        if (newVideo) formData.append('video', newVideo);
+        formData.append('video_demo_url', videoDemoUrl.trim());
 
         newFiles.forEach((file) => {
             formData.append('new_files', file);
@@ -134,13 +148,13 @@ const ResearchDetails = ({ setUser, user }) => {
                     <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>
                     <p><strong>Keywords:</strong> {researchItem.keywords || "No keywords specified"}</p>
 
-                    {researchItem.video && (
+                    {researchItem.video_demo_url && getYouTubeEmbedUrl(researchItem.video_demo_url) && (
                         <section className='video-section'>
-                            <strong>Thesis Video</strong>
-                            <video controls preload='metadata'>
-                                <source src={researchItem.video} />
-                                Your browser does not support embedded video.
-                            </video>
+                            <strong>Thesis Video Demo Link</strong>
+                            <div className='video-frame'>
+                                <iframe src={getYouTubeEmbedUrl(researchItem.video_demo_url)} title={`${researchItem.title} video demonstration`} allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowFullScreen />
+                            </div>
+                            <a className='youtube-link' href={researchItem.video_demo_url} target='_blank' rel='noreferrer'>Watch on YouTube</a>
                         </section>
                     )}
 
@@ -248,16 +262,9 @@ const ResearchDetails = ({ setUser, user }) => {
                             </div>
 
                             <div className='form-input'>
-                                <label>Thesis Video <span className='optional-label'>Optional</span></label>
-                                {researchItem.video && !removeVideo && !newVideo && (
-                                    <div className='existing-video-row'><span>{researchItem.video.split('/').pop()}</span><button type='button' className='remove-btn' onClick={() => setRemoveVideo(true)}>Remove</button></div>
-                                )}
-                                <p className='field-help'>{newVideo ? `Selected: ${newVideo.name}` : removeVideo ? 'Existing video will be removed.' : 'MP4, WebM, or MOV; maximum 100 MB.'}</p>
-                                <div className='file-upload'>
-                                    <input type='file' id='editVideoUpload' accept='video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov' hidden onChange={(event) => { setNewVideo(event.target.files[0] || null); setRemoveVideo(false); }} />
-                                    <label htmlFor='editVideoUpload' className='file-btn'>{researchItem.video ? 'Replace Video' : 'Choose Video'}</label>
-                                    {newVideo && <button type='button' className='remove-btn' onClick={() => setNewVideo(null)}>Cancel</button>}
-                                </div>
+                                <label htmlFor='editVideoDemoUrl'>Thesis Video Demo Link <span className='optional-label'>Optional</span></label>
+                                <p className='field-help'>Paste an Unlisted YouTube or youtu.be link. Clear the field to remove the current video.</p>
+                                <input id='editVideoDemoUrl' type='url' placeholder='https://www.youtube.com/watch?v=...' value={videoDemoUrl} onChange={(event) => setVideoDemoUrl(event.target.value)} />
                             </div>
 
                             <div className='select-program'>

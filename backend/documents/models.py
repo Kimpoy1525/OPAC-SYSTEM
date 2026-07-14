@@ -41,12 +41,11 @@ class Document(models.Model):
     
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    video = models.FileField(
-        upload_to='research_videos/',
-        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'webm', 'mov'])],
+    video_demo_url = models.URLField(
+        max_length=500,
         blank=True,
         null=True,
-        help_text="Optional thesis presentation or demonstration video (MP4, WebM, MOV).",
+        help_text="Optional unlisted YouTube link for the thesis video demonstration.",
     )
 
     def __str__(self):

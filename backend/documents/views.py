@@ -16,9 +16,6 @@ import csv
 import io
 from datetime import date
 
-MAX_VIDEO_SIZE = 100 * 1024 * 1024
-
-
 class IsCatalogAdmin(BasePermission):
     message = "Admin access is required."
 
@@ -30,24 +27,12 @@ class IsCatalogAdmin(BasePermission):
         )
 
 
-def video_size_error(request):
-    video = request.FILES.get('video')
-    if video and video.size > MAX_VIDEO_SIZE:
-        return Response(
-            {"video": ["Video must be 100 MB or smaller."]},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-    return None
-
 # 1. Handles the initial upload of a paper
 class DocumentUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsCatalogAdmin]
 
     def post(self, request, *args, **kwargs):
-        size_error = video_size_error(request)
-        if size_error:
-            return size_error
         serializer = DocumentSerializer(data=request.data)
         if serializer.is_valid():
             document = serializer.save()
@@ -111,18 +96,10 @@ class DocumentUpdateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        size_error = video_size_error(request)
-        if size_error:
-            return size_error
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         
         if serializer.is_valid():
             document = serializer.save()
-            if request.data.get('remove_video', '').lower() == 'true' and not request.FILES.get('video'):
-                if document.video:
-                    document.video.delete(save=False)
-                document.video = None
-                document.save(update_fields=['video'])
             
             # --- NEW: LOG THE EDIT EVENT ---
             if request.user.is_authenticated:

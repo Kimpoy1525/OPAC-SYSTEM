@@ -125,8 +125,10 @@
 }
 .video-section { margin: 30px 0; padding: 18px; border: 1px solid #d9dedb; border-radius: 10px; background: #f7faf8; }
 .video-section > strong { display: block; margin-bottom: 12px; }
-.video-section video { display: block; width: 100%; max-height: 480px; border-radius: 8px; background: #111; }
-.existing-video-row { padding: 10px 12px; display: flex; justify-content: space-between; gap: 12px; border-radius: 7px; background: #f2f4f2; font-size: 12px; overflow-wrap: anywhere; }
+.video-frame { position: relative; width: 100%; padding-top: 56.25%; overflow: hidden; border-radius: 8px; background: #111; }
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.youtube-link { display: inline-block; margin-top: 10px; color: #058632; font-size: 12px; font-weight: 700; text-decoration: none; }
+.youtube-link:hover { text-decoration: underline; }
 
 @media (max-width: 600px) {
     .details-page { padding: 18px 12px 45px; }
