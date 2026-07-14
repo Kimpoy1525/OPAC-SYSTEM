@@ -1,0 +1,192 @@
+.reservation-page {
+  min-height: 100vh;
+  background: #eeeeee;
+  color: #151515;
+}
+
+.reservation-layout {
+  width: min(1100px, calc(100% - 48px));
+  margin: 34px auto 70px;
+  display: grid;
+  grid-template-columns: minmax(0, 2.35fr) minmax(280px, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.reservation-card,
+.review-card {
+  background: #fff;
+  border: 1px solid #c8c8c8;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.reservation-card-header {
+  min-height: 58px;
+  padding: 13px 18px 12px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  background: #058b32;
+  color: #fff;
+}
+
+.reservation-card-header h1 {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.reservation-card-header p {
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.attempt-badge {
+  flex: none;
+  padding: 11px 13px;
+  border-radius: 10px;
+  background: #fff;
+  color: #171717;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.reservation-form {
+  padding: 30px 32px 38px;
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-form label {
+  margin: 0 2px 7px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reservation-form input,
+.reservation-form textarea,
+.reservation-form select {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 18px;
+  padding: 13px 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: #ededed;
+  color: #242424;
+  font: inherit;
+  font-size: 12px;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+.reservation-field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.reservation-field-row > div { display: flex; flex-direction: column; }
+.reservation-form select { appearance: auto; cursor: pointer; }
+
+.reservation-form textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.reservation-form input:focus,
+.reservation-form textarea:focus,
+.reservation-form select:focus {
+  border-color: #058b32;
+  box-shadow: 0 0 0 3px rgba(5, 139, 50, .12);
+}
+
+.reservation-form button {
+  min-height: 38px;
+  margin-top: 3px;
+  border: 0;
+  border-radius: 7px;
+  background: #058b32;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.reservation-form button:hover { background: #047429; }
+.reservation-form button:disabled { background: #8aa994; cursor: not-allowed; }
+
+.reservation-message {
+  margin-top: 12px;
+  color: #08732d;
+  text-align: center;
+  font-size: 12px;
+}
+
+.review-card {
+  padding: 18px 16px 22px;
+}
+
+.review-card h2 {
+  margin: 0 2px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.review-card h2 svg { font-size: 21px; }
+
+.review-item {
+  min-height: 54px;
+  margin-bottom: 17px;
+  padding: 9px 9px 9px 12px;
+  border-radius: 8px;
+  background: #ededed;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.review-item:last-child { margin-bottom: 0; }
+.review-item div { min-width: 0; }
+.review-item strong { color: #058b32; font-size: 10px; }
+.review-item p { margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 10px; }
+
+.status {
+  flex: none;
+  padding: 3px 7px;
+  border-radius: 3px;
+  font-size: 7px;
+}
+
+.status-pending { background: #f4dda4; color: #725600; }
+.status-approved { background: #9fd5af; color: #075a24; }
+.status-rejected { background: #d99b9b; color: #6f1111; }
+
+.review-empty {
+  padding: 34px 12px;
+  border-radius: 8px;
+  background: #ededed;
+  text-align: center;
+  color: #555;
+}
+
+.review-empty p { font-size: 12px; font-weight: 600; }
+.review-empty span { display: block; margin-top: 6px; font-size: 10px; }
+
+@media (max-width: 850px) {
+  .reservation-layout { grid-template-columns: 1fr; }
+  .review-card { grid-row: 1; }
+}
+
+@media (max-width: 560px) {
+  .reservation-layout { width: min(100% - 24px, 1100px); margin-top: 18px; }
+  .reservation-card-header { padding-left: 18px; }
+  .reservation-form { padding: 24px 18px 30px; }
+  .attempt-badge { padding: 9px; font-size: 10px; }
+  .reservation-field-row { grid-template-columns: 1fr; gap: 0; }
+}

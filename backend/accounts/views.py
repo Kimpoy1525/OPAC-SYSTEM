@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from django.contrib.auth import login, authenticate, get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests
-from .models import AccessLog 
+from django.utils import timezone
+from .models import AccessLog, TitleReservation
 
 # Get our Custom User model
 User = get_user_model()
@@ -128,3 +129,112 @@ def manual_admin_login(request):
 
     except Exception as e:
         return JsonResponse({"error": "Server error"}, status=500)
+
+
+def _reservation_json(reservation):
+    student_name = reservation.student.get_full_name() or reservation.student.username
+    return {
+        "id": reservation.id,
+        "student_id": reservation.student_id,
+        "student_name": student_name,
+        "student_email": reservation.student.email,
+        "title": reservation.title,
+        "overview": reservation.overview,
+        "group_members": reservation.group_members,
+        "course": reservation.course,
+        "course_label": reservation.get_course_display(),
+        "section": reservation.section,
+        "status": reservation.status,
+        "status_label": reservation.get_status_display(),
+        "created_at": reservation.created_at.isoformat(),
+        "reviewed_at": reservation.reviewed_at.isoformat() if reservation.reviewed_at else None,
+    }
+
+
+@csrf_exempt
+def student_reservations(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+
+    if request.method == "GET":
+        reservations = request.user.title_reservations.select_related("student")
+        return JsonResponse({"reservations": [_reservation_json(item) for item in reservations]})
+
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    if request.user.role != User.Role.USER:
+        return JsonResponse({"error": "Only student accounts can submit proposals"}, status=403)
+
+    if request.user.title_reservations.count() >= 3:
+        return JsonResponse({"error": "All three title reservation attempts have been used"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    title = str(data.get("title", "")).strip()
+    overview = str(data.get("overview", "")).strip()
+    group_members = str(data.get("group_members", "")).strip()
+    course = str(data.get("course", "")).strip().upper()
+    section = str(data.get("section", "")).strip()
+    if not all([title, overview, group_members, course, section]):
+        return JsonResponse({"error": "All proposal fields are required"}, status=400)
+    if course not in TitleReservation.Course.values:
+        return JsonResponse({"error": "Select a valid course"}, status=400)
+
+    reservation = TitleReservation.objects.create(
+        student=request.user,
+        title=title,
+        overview=overview,
+        group_members=group_members,
+        course=course,
+        section=section,
+    )
+    return JsonResponse({"reservation": _reservation_json(reservation)}, status=201)
+
+
+@csrf_exempt
+def approval_queue(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role != User.Role.SUPERADMIN:
+        return JsonResponse({"error": "Superadmin access required"}, status=403)
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    reservations = TitleReservation.objects.select_related("student").filter(
+        status=TitleReservation.Status.PENDING
+    )
+    return JsonResponse({"reservations": [_reservation_json(item) for item in reservations]})
+
+
+@csrf_exempt
+def review_reservation(request, reservation_id):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role != User.Role.SUPERADMIN:
+        return JsonResponse({"error": "Superadmin access required"}, status=403)
+    if request.method != "PATCH":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        status = str(data.get("status", "")).upper()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    if status not in [TitleReservation.Status.APPROVED, TitleReservation.Status.REJECTED]:
+        return JsonResponse({"error": "Status must be APPROVED or REJECTED"}, status=400)
+
+    try:
+        reservation = TitleReservation.objects.select_related("student").get(pk=reservation_id)
+    except TitleReservation.DoesNotExist:
+        return JsonResponse({"error": "Reservation not found"}, status=404)
+
+    reservation.status = status
+    reservation.reviewed_by = request.user
+    reservation.reviewed_at = timezone.now()
+    reservation.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+    return JsonResponse({"reservation": _reservation_json(reservation)})

@@ -6,6 +6,8 @@ import Homepage from './components/HomepageF/homepage';
 import Repository from './components/Repository/repository';
 import ResearchDetails from './components/ResearchDetails/researchdetails';
 import Admin from './components/AdminF/Admin';
+import Reservation from './components/Reservation/reservation';
+import AdminApproval from './components/AdminApproval/adminApproval';
 import './App.css';
 import Footer from './components/Footer/footer';
 
@@ -57,6 +59,18 @@ function App() {
       <Route path='/repository' element={
         <ProtectedRoute isAllowed={isAuthenticated}>
           <Repository setUser={setUser} user={user} />
+        </ProtectedRoute>
+      } />
+
+      <Route path='/reservation' element={
+        <ProtectedRoute isAllowed={isAuthenticated}>
+          <Reservation setUser={setUser} user={user} />
+        </ProtectedRoute>
+      } />
+
+      <Route path='/admin-approval' element={
+        <ProtectedRoute isAllowed={isAuthenticated && user?.role === "SUPERADMIN"} redirectTo="/homepage">
+          <AdminApproval setUser={setUser} user={user} />
         </ProtectedRoute>
       } />
 

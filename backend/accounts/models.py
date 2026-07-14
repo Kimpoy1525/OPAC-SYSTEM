@@ -27,6 +27,49 @@ class InstituteAccount(models.Model):
     def __str__(self):
         return self.email
 
+
+class TitleReservation(models.Model):
+    class Course(models.TextChoices):
+        BSCS = "BSCS", "BS Computer Science"
+        BSIT = "BSIT", "BS Information Technology"
+        BSEMC = "BSEMC", "BS Entertainment and Multimedia Computing"
+
+    class Status(models.TextChoices):
+        PENDING = "PENDING", "Pending Review"
+        APPROVED = "APPROVED", "Approved"
+        REJECTED = "REJECTED", "Rejected"
+
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="title_reservations",
+    )
+    title = models.CharField(max_length=255)
+    overview = models.TextField()
+    group_members = models.TextField()
+    course = models.CharField(max_length=10, choices=Course.choices)
+    section = models.CharField(max_length=50)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+    )
+    reviewed_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="reviewed_title_reservations",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.student.username}: {self.title}"
+
 # --- ACTIVITY LOGGING MODELS ---
 
 class AccessLog(models.Model):

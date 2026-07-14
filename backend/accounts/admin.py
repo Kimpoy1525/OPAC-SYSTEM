@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, AccessLog, DownloadLog
+from .models import User, AccessLog, DownloadLog, TitleReservation
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
@@ -59,3 +59,11 @@ class DeleteLogAdmin(admin.ModelAdmin):
     readonly_fields = ('user', 'title', 'deleted_at')
 
     def has_add_permission(self, request): return False
+
+
+@admin.register(TitleReservation)
+class TitleReservationAdmin(admin.ModelAdmin):
+    list_display = ('title', 'student', 'course', 'section', 'status', 'created_at', 'reviewed_by')
+    list_filter = ('status', 'course', 'section', 'created_at')
+    search_fields = ('title', 'student__username', 'student__email', 'group_members')
+    readonly_fields = ('student', 'title', 'overview', 'group_members', 'course', 'section', 'created_at')

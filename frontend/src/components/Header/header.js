@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi';
 import Logout from "../Logout/logout";
 import logo from "../Images/Logo Olfu.png"
@@ -9,10 +9,8 @@ import './header.css'
 const Header = ({ setUser, user }) => {
     const [open, setOpen] = useState(false);
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
-    const navigate = useNavigate();
-
     // 2. Updated Admin Check: Use the is_staff flag from your Django user object
-    const isAdmin = user?.role === "Admin" || user?.role === "ADMIN";
+    const isAdmin = user?.role === "Admin" || user?.role === "ADMIN" || user?.role === "SUPERADMIN";
 
     return (
         <header className='header2'>
@@ -28,6 +26,7 @@ const Header = ({ setUser, user }) => {
     )}
 
     <Link to='/repository'>Repository</Link>
+    <Link to={user?.role === "SUPERADMIN" ? '/admin-approval' : '/reservation'}>Reservation</Link>
 
 <div className="user-area">
     {user && (
