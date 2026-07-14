@@ -49,6 +49,8 @@
     border-radius: 4px;
     resize: none;
 }
+.optional-label { margin-left: 5px; padding: 3px 7px; border-radius: 10px; background: #eef4f0; color: #058632; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+.field-help { margin: 0 0 8px; color: #667069; font-size: 11px; line-height: 1.45; }
 .form-input input:focus, .form-input textarea:focus, .form-input select:focus { border-color: #058632; box-shadow: 0 0 0 3px rgba(5,134,50,.1); }
 
 .form-input input::placeholder,

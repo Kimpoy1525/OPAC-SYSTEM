@@ -278,8 +278,8 @@ def student_reservations(request):
 def approval_queue(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
-    if request.user.role != User.Role.SUPERADMIN:
-        return JsonResponse({"error": "Superadmin access required"}, status=403)
+    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Admin access required"}, status=403)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
@@ -293,8 +293,8 @@ def approval_queue(request):
 def review_reservation(request, reservation_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
-    if request.user.role != User.Role.SUPERADMIN:
-        return JsonResponse({"error": "Superadmin access required"}, status=403)
+    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Admin access required"}, status=403)
     if request.method != "PATCH":
         return JsonResponse({"error": "Invalid method"}, status=405)
 

@@ -42,7 +42,7 @@ class TitleReservationWorkflowTests(TestCase):
             self.assertEqual(self.submit(number).status_code, 201)
         self.assertEqual(self.submit(4).status_code, 400)
 
-    def test_only_superadmin_can_access_queue_and_review(self):
+    def test_admin_and_superadmin_can_access_and_review_queue(self):
         reservation = TitleReservation.objects.create(
             student=self.student,
             title="Proposal",
@@ -53,9 +53,6 @@ class TitleReservationWorkflowTests(TestCase):
         )
 
         self.client.force_login(self.admin)
-        self.assertEqual(self.client.get(reverse("approval_queue")).status_code, 403)
-
-        self.client.force_login(self.superadmin)
         self.assertEqual(self.client.get(reverse("approval_queue")).status_code, 200)
         response = self.client.patch(
             reverse("review_reservation", args=[reservation.id]),
@@ -65,7 +62,10 @@ class TitleReservationWorkflowTests(TestCase):
         self.assertEqual(response.status_code, 200)
         reservation.refresh_from_db()
         self.assertEqual(reservation.status, TitleReservation.Status.APPROVED)
-        self.assertEqual(reservation.reviewed_by, self.superadmin)
+        self.assertEqual(reservation.reviewed_by, self.admin)
+
+        self.client.force_login(self.superadmin)
+        self.assertEqual(self.client.get(reverse("approval_queue")).status_code, 200)
 
 
 class AuthenticationSecurityTests(TestCase):

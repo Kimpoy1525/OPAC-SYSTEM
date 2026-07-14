@@ -41,6 +41,14 @@ class Document(models.Model):
     
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
+    video = models.FileField(
+        upload_to='research_videos/',
+        validators=[FileExtensionValidator(allowed_extensions=['mp4', 'webm', 'mov'])],
+        blank=True,
+        null=True,
+        help_text="Optional thesis presentation or demonstration video (MP4, WebM, MOV).",
+    )
+
     def __str__(self):
         return self.title
 

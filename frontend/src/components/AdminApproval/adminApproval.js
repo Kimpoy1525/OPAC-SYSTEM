@@ -10,6 +10,7 @@ const AdminApproval = ({ setUser, user }) => {
   const [loading, setLoading] = useState(true);
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState('');
+  const [courseFilter, setCourseFilter] = useState('');
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/approval-queue/`, { withCredentials: true })
@@ -23,6 +24,14 @@ const AdminApproval = ({ setUser, user }) => {
   }, []);
 
   const selected = proposals.find((proposal) => proposal.id === selectedId) || null;
+  const filteredProposals = courseFilter ? proposals.filter((proposal) => proposal.course === courseFilter) : proposals;
+  const courseCounts = ['BSCS', 'BSIT', 'BSEMC'].reduce((counts, course) => ({ ...counts, [course]: proposals.filter((proposal) => proposal.course === course).length }), {});
+
+  const changeCourseFilter = (course) => {
+    setCourseFilter(course);
+    const filtered = course ? proposals.filter((proposal) => proposal.course === course) : proposals;
+    setSelectedId(filtered[0]?.id || null);
+  };
 
   const review = async (status) => {
     if (!selected || reviewing) return;
@@ -36,7 +45,8 @@ const AdminApproval = ({ setUser, user }) => {
       );
       const remaining = proposals.filter((proposal) => proposal.id !== selected.id);
       setProposals(remaining);
-      setSelectedId(remaining[0]?.id || null);
+      const remainingFiltered = courseFilter ? remaining.filter((proposal) => proposal.course === courseFilter) : remaining;
+      setSelectedId(remainingFiltered[0]?.id || null);
     } catch (requestError) {
       setError(requestError.response?.data?.error || 'Unable to update this proposal.');
     } finally {
@@ -47,6 +57,13 @@ const AdminApproval = ({ setUser, user }) => {
   return (
     <main className="approval-page">
       <Header setUser={setUser} user={user} />
+      <section className="dashboard-summary">
+        <div><p>Proposal Management</p><h1>Title Reservation Dashboard</h1><span>Review and manage student title submissions.</span></div>
+        <div className="dashboard-metrics">
+          <article><strong>{proposals.length}</strong><span>Pending</span></article>
+          {['BSCS', 'BSIT', 'BSEMC'].map((course) => <article key={course}><strong>{courseCounts[course]}</strong><span>{course}</span></article>)}
+        </div>
+      </section>
       <div className="approval-layout">
         <section className="proposal-card">
           {selected ? (
@@ -90,17 +107,23 @@ const AdminApproval = ({ setUser, user }) => {
 
         <aside className="approval-queue">
           <h2><FiList aria-hidden="true" /> My Approval Queue</h2>
-          {proposals.map((proposal) => (
+          <label className="queue-filter">Filter by course
+            <select value={courseFilter} onChange={(event) => changeCourseFilter(event.target.value)}>
+              <option value="">All courses</option><option value="BSCS">BSCS</option><option value="BSIT">BSIT</option><option value="BSEMC">BSEMC</option>
+            </select>
+          </label>
+          {filteredProposals.map((proposal) => (
             <button
               key={proposal.id}
               className={`queue-item ${proposal.id === selectedId ? 'selected' : ''}`}
               onClick={() => setSelectedId(proposal.id)}
             >
               <strong>Pending Review</strong>
-              <span>Student # {String(proposal.student_id).padStart(7, '0')}</span>
+              <span>{proposal.course} · Student # {String(proposal.student_id).padStart(7, '0')}</span>
+              <small>{proposal.title}</small>
             </button>
           ))}
-          {!loading && !proposals.length && <p className="queue-empty">No pending reviews</p>}
+          {!loading && !filteredProposals.length && <p className="queue-empty">No pending reviews for this course</p>}
         </aside>
       </div>
     </main>

@@ -22,6 +22,7 @@ class DocumentSerializer(serializers.ModelSerializer):
             'panelists', 
             'course', 
             'uploaded_at', 
+            'video',
             'files'
         ]
         
@@ -30,4 +31,5 @@ class DocumentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'keywords': {'required': False, 'allow_blank': True, 'allow_null': True},
             'panelists': {'required': False, 'allow_blank': True},
+            'video': {'required': False, 'allow_null': True},
         }

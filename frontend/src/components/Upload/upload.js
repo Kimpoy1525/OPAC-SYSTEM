@@ -14,6 +14,7 @@ const Upload = ({ setUser, user }) => {
     const [course, setCourse] = useState(''); 
     const [files, setFiles] = useState([]); 
     const [fileLabel, setFileLabel] = useState('No files chosen');
+    const [video, setVideo] = useState(null);
     const [showSuccess, setShowSuccess] = useState(false);
     const [uploading, setUploading] = useState(false);
 
@@ -80,6 +81,7 @@ const Upload = ({ setUser, user }) => {
         formData.append('keywords', keywords); 
         formData.append('panelists', panelists);
         formData.append('course', course);
+        if (video) formData.append('video', video);
 
         files.forEach((file) => {
             formData.append('files', file);
@@ -96,6 +98,7 @@ const Upload = ({ setUser, user }) => {
             setTitle(''); setAuthors(''); setYear(''); setAbstract('');
             setKeywords(''); setPanelists(''); setCourse('');
             setFiles([]); setFileLabel('No files chosen');
+            setVideo(null);
         } catch (err) {
             setUploading(false);
             console.error(err.response?.data);
@@ -275,6 +278,17 @@ const Upload = ({ setUser, user }) => {
                                 ))}
                             </div>
                         )}
+                    </div>
+
+                    <div className='form-input'>
+                        <label>Thesis Video <span className='optional-label'>Optional</span></label>
+                        <p className='field-help'>Add one presentation or demonstration video. MP4, WebM, or MOV; maximum 100 MB.</p>
+                        <div className='file-upload'>
+                            <input type='file' id='videoUpload' accept='video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov' onChange={(event) => setVideo(event.target.files[0] || null)} hidden />
+                            <label htmlFor='videoUpload' className='file-btn'>Choose Video</label>
+                            <span className='file-name' style={{ color: video ? 'black' : 'gray' }}>{video?.name || 'No video chosen'}</span>
+                            {video && <button type='button' className='remove-btn' onClick={() => setVideo(null)}>Remove</button>}
+                        </div>
                     </div>
 
                     <div className='select-program'>

@@ -70,7 +70,7 @@ function App() {
       } />
 
       <Route path='/admin-approval' element={
-        <ProtectedRoute isAllowed={isAuthenticated && user?.role === "SUPERADMIN"} redirectTo="/homepage">
+        <ProtectedRoute isAllowed={isAuthenticated && isAdmin} redirectTo="/homepage">
           <AdminApproval setUser={setUser} user={user} />
         </ProtectedRoute>
       } />

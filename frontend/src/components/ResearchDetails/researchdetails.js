@@ -21,6 +21,8 @@ const ResearchDetails = ({ setUser, user }) => {
     const [existingFiles, setExistingFiles] = useState([]); 
     const [newFiles, setNewFiles] = useState([]);           
     const [filesToDelete, setFilesToDelete] = useState([]); 
+    const [newVideo, setNewVideo] = useState(null);
+    const [removeVideo, setRemoveVideo] = useState(false);
 
     // --- FORM STATES ---
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -84,6 +86,8 @@ const ResearchDetails = ({ setUser, user }) => {
         formData.append('panelists', panelists);
         formData.append('course', course);
         formData.append('delete_files', JSON.stringify(filesToDelete));
+        formData.append('remove_video', removeVideo ? 'true' : 'false');
+        if (newVideo) formData.append('video', newVideo);
 
         newFiles.forEach((file) => {
             formData.append('new_files', file);
@@ -129,6 +133,16 @@ const ResearchDetails = ({ setUser, user }) => {
                     <p className='details-abstract'><strong>Abstract:</strong> {researchItem.abstract}</p>
                     <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>
                     <p><strong>Keywords:</strong> {researchItem.keywords || "No keywords specified"}</p>
+
+                    {researchItem.video && (
+                        <section className='video-section'>
+                            <strong>Thesis Video</strong>
+                            <video controls preload='metadata'>
+                                <source src={researchItem.video} />
+                                Your browser does not support embedded video.
+                            </video>
+                        </section>
+                    )}
 
                     <div className='file-section'>
                         <strong>Files:</strong>
@@ -230,6 +244,19 @@ const ResearchDetails = ({ setUser, user }) => {
                                             <button type="button" className="remove-btn" onClick={() => removeNewFile(index)}>✕</button>
                                         </div>
                                     ))}
+                                </div>
+                            </div>
+
+                            <div className='form-input'>
+                                <label>Thesis Video <span className='optional-label'>Optional</span></label>
+                                {researchItem.video && !removeVideo && !newVideo && (
+                                    <div className='existing-video-row'><span>{researchItem.video.split('/').pop()}</span><button type='button' className='remove-btn' onClick={() => setRemoveVideo(true)}>Remove</button></div>
+                                )}
+                                <p className='field-help'>{newVideo ? `Selected: ${newVideo.name}` : removeVideo ? 'Existing video will be removed.' : 'MP4, WebM, or MOV; maximum 100 MB.'}</p>
+                                <div className='file-upload'>
+                                    <input type='file' id='editVideoUpload' accept='video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov' hidden onChange={(event) => { setNewVideo(event.target.files[0] || null); setRemoveVideo(false); }} />
+                                    <label htmlFor='editVideoUpload' className='file-btn'>{researchItem.video ? 'Replace Video' : 'Choose Video'}</label>
+                                    {newVideo && <button type='button' className='remove-btn' onClick={() => setNewVideo(null)}>Cancel</button>}
                                 </div>
                             </div>
 

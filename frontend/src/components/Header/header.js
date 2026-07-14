@@ -12,7 +12,6 @@ const Header = ({ setUser, user }) => {
     // 2. Updated Admin Check: Use the is_staff flag from your Django user object
     const isAdmin = user?.role === "Admin" || user?.role === "ADMIN" || user?.role === "SUPERADMIN";
     const isStudent = user?.role === "USER";
-    const isSuperAdmin = user?.role === "SUPERADMIN";
 
     return (
         <header className='header2'>
@@ -29,7 +28,7 @@ const Header = ({ setUser, user }) => {
 
     <Link to='/repository'>Repository</Link>
     {isStudent && <Link to='/reservation'>Reservation</Link>}
-    {isSuperAdmin && <Link to='/admin-approval'>Approvals</Link>}
+    {isAdmin && <Link to='/admin-approval'>Proposals</Link>}
 
 <div className="user-area">
     {user && (
