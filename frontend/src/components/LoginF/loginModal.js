@@ -1,85 +1,113 @@
-import React, { useState, useEffect, useCallback } from "react";
-import "./loginModal.css";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { FiLock, FiShield, FiX } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
+import "./loginModal.css";
 
-// Note: Removed the local "users" import if you are moving fully to Django/Google
 export default function LoginModal({ close, setUser }) {
   const navigate = useNavigate();
+  const dialogRef = useRef(null);
   const [error, setError] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
 
   const handleGoogleLogin = useCallback(async (response) => {
+    if (!response?.credential) {
+      setError("Google did not return a valid sign-in credential.");
+      return;
+    }
+
+    setIsSigningIn(true);
+    setError("");
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google/`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ token: response.credential }),
-        credentials: "include", // Required for Django session cookies to work
+        credentials: "include",
       });
+      const data = await res.json().catch(() => ({}));
 
-      const data = await res.json();
-
-      if (res.ok) {
-        // 1. Save the full user object to localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
-        
-        // 2. Update the App.js state IMMEDIATELY
-        setUser(data.user);
-        
-        setError("");
-        close();
-        
-        // 3. Small delay ensures state is recognized before the route guard checks it
-        setTimeout(() => {
-          navigate("/homepage");
-        }, 100);
-      } else {
-        setError(data.error || "Login failed");
+      if (!res.ok) {
+        setError(data.error || "Sign-in could not be completed.");
+        return;
       }
-    } catch (err) {
-      console.error("Fetch error:", err);
-      setError("Cannot connect to server.");
+
+      localStorage.setItem("user", JSON.stringify(data.user));
+      setUser(data.user);
+      close();
+      navigate("/homepage", { replace: true });
+    } catch {
+      setError("The secure login service is unavailable. Please try again.");
+    } finally {
+      setIsSigningIn(false);
     }
   }, [close, navigate, setUser]);
 
-  // Keep manual login if you need it for testing, but update it to use setUser
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // This is still using your hardcoded list. 
-    // For your thesis, you'll eventually want this to call a Django API too.
-    setError("Please use Google Login for the repository.");
-  };
-
   useEffect(() => {
-    if (!window.google) return;
+    const onKeyDown = (event) => event.key === "Escape" && close();
+    document.addEventListener("keydown", onKeyDown);
+    dialogRef.current?.focus();
 
-    window.google.accounts.id.initialize({
-      client_id: "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com",
-      callback: handleGoogleLogin,
-    });
+    let attempts = 0;
+    const initializeGoogle = () => {
+      attempts += 1;
+      if (!window.google?.accounts?.id) {
+        if (attempts >= 20) {
+          setError("Google Sign-In could not load. Check your connection and try again.");
+          return true;
+        }
+        return false;
+      }
 
-    window.google.accounts.id.renderButton(
-      document.getElementById("googleLoginBtn"),
-      { theme: "outline", size: "large", width: 250 }
-    );
-  }, [handleGoogleLogin]);
+      window.google.accounts.id.initialize({
+        client_id: "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com",
+        callback: handleGoogleLogin,
+        cancel_on_tap_outside: true,
+      });
+      const container = document.getElementById("googleLoginBtn");
+      if (container) {
+        container.replaceChildren();
+        window.google.accounts.id.renderButton(container, {
+          theme: "outline",
+          size: "large",
+          shape: "rectangular",
+          text: "continue_with",
+          width: Math.min(320, window.innerWidth - 72),
+        });
+        setGoogleReady(true);
+      }
+      return true;
+    };
+
+    if (!initializeGoogle()) {
+      const timer = window.setInterval(() => initializeGoogle() && window.clearInterval(timer), 250);
+      return () => {
+        window.clearInterval(timer);
+        document.removeEventListener("keydown", onKeyDown);
+      };
+    }
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [close, handleGoogleLogin]);
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
-        <button className="close-btn" onClick={close}>×</button>
-        <h2 className="modal-title">Login</h2>
-        <div id="googleLoginBtn" style={{ marginBottom: "16px"}}></div>
+    <div className="login-overlay" onMouseDown={(event) => event.target === event.currentTarget && close()}>
+      <section className="login-dialog" role="dialog" aria-modal="true" aria-labelledby="login-title" ref={dialogRef} tabIndex="-1">
+        <button className="login-close" type="button" onClick={close} aria-label="Close login dialog"><FiX /></button>
+        <div className="login-security-icon" aria-hidden="true"><FiShield /></div>
+        <p className="login-eyebrow">Secure institutional access</p>
+        <h2 id="login-title">Sign in to CCSTECHVAULT</h2>
+        <p className="login-description">Use your official OLFU Google account to access the research repository.</p>
 
-        
-        <form onSubmit={handleLogin}>
-          
-          <p className="login-hint">
-            Use your <strong>@student.fatima.edu.ph</strong> account
-          </p>
-          {error && <p className="error-text">{error}</p>}
-       
-        </form>
-      </div>
+        <div className="google-button-wrap">
+          {!googleReady && !error && <span className="login-loading">Loading secure sign-in…</span>}
+          <div id="googleLoginBtn" aria-hidden={isSigningIn}></div>
+          {isSigningIn && <div className="login-busy" role="status">Verifying your account…</div>}
+        </div>
+
+        {error && <p className="login-error" role="alert">{error}</p>}
+        <div className="login-trust-note"><FiLock aria-hidden="true" /><span>Only authorized <strong>@student.fatima.edu.ph</strong> and institutional accounts are accepted.</span></div>
+        <p className="login-privacy">Authentication is handled securely by Google. CCSTECHVAULT never receives your Google password.</p>
+      </section>
     </div>
   );
 }

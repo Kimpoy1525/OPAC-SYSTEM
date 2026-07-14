@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-_cx!mok9ka+60h^=lkn^042e!fiep(=ntou!fsn6)q%y6qz!za')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = ['ccstechvault-backend.up.railway.app', 'localhost', '127.0.0.1']
 
@@ -154,6 +154,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 CSRF_TRUSTED_ORIGINS = [
     "https://ccstechvault-backend.up.railway.app", 
+    "https://ccstechvault.up.railway.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000"
 ]
@@ -174,9 +175,6 @@ REST_FRAMEWORK = {
     ],
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
-
-
 # Static files configuration
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -191,3 +189,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 USE_X_FORWARDED_HOST = not DEBUG
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None'
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    X_FRAME_OPTIONS = 'DENY'
+
+SESSION_COOKIE_AGE = 60 * 60 * 8
+SESSION_SAVE_EVERY_REQUEST = True

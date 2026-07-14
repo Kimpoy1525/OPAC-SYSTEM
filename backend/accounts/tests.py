@@ -2,6 +2,7 @@ import json
 
 from django.test import TestCase
 from django.urls import reverse
+from django.core.cache import cache
 
 from .models import TitleReservation, User
 
@@ -65,5 +66,48 @@ class TitleReservationWorkflowTests(TestCase):
         reservation.refresh_from_db()
         self.assertEqual(reservation.status, TitleReservation.Status.APPROVED)
         self.assertEqual(reservation.reviewed_by, self.superadmin)
+
+
+class AuthenticationSecurityTests(TestCase):
+    def setUp(self):
+        cache.clear()
+        self.admin = User.objects.create_user(
+            username="secure-admin",
+            password="StrongTestPassword!123",
+            role=User.Role.ADMIN,
+        )
+
+    def test_logout_terminates_authenticated_session(self):
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("secure_logout"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("_auth_user_id", self.client.session)
+        self.assertEqual(response["Cache-Control"], "no-store")
+
+    def test_admin_login_rejects_untrusted_browser_origin(self):
+        response = self.client.post(
+            reverse("admin_login"),
+            data=json.dumps({"username": "secure-admin", "password": "StrongTestPassword!123"}),
+            content_type="application/json",
+            HTTP_ORIGIN="https://malicious.example",
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_admin_login_is_rate_limited_after_five_failures(self):
+        for _ in range(5):
+            response = self.client.post(
+                reverse("admin_login"),
+                data=json.dumps({"username": "secure-admin", "password": "incorrect"}),
+                content_type="application/json",
+            )
+            self.assertEqual(response.status_code, 401)
+
+        response = self.client.post(
+            reverse("admin_login"),
+            data=json.dumps({"username": "secure-admin", "password": "incorrect"}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 429)
+        self.assertEqual(response["Retry-After"], "900")
 
 # Create your tests here.

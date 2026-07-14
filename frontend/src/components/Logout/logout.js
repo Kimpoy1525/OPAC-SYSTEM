@@ -9,7 +9,15 @@ const Logout = ({ isOpen, onClose, setUser }) => {
 
     if (!isOpen) return null;
 
-    const handleConfirmLogout = () => {
+    const handleConfirmLogout = async () => {
+        try {
+            await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/logout/`, {
+                method: "POST",
+                credentials: "include",
+            });
+        } catch {
+            // Continue clearing local state even if the server is unreachable.
+        }
         // 1. Clear the storage so it doesn't auto-login on refresh
         localStorage.removeItem("user");
 
@@ -26,7 +34,7 @@ const Logout = ({ isOpen, onClose, setUser }) => {
     return (
         <main className='logout-page' onClick={onClose}>
             <div className='logout-modal' onClick={(e) => e.stopPropagation()}>
-                <FiX size={24} className='close-icon' onClick={onClose} />
+                <button className='logout-close' type='button' onClick={onClose} aria-label='Close logout dialog'><FiX size={20} /></button>
                 
                 <h2>Logout</h2>
                 <p>Are you sure you want to logout?</p>

@@ -1,50 +1,19 @@
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.modal-box {
-  background: #EEEE;
-  padding: 40px;
-  width: 360px;
-  border-radius: 12px;
-  position: relative;
-  color: #058632;
-  font-family: "Montserrat", sans-serif;
-}
-
-.close-btn {
-  position: absolute;
-  top: 10px;
-  right: 12px;
-  background: none;
-  border: none;
-  font-size: 22px;
-  cursor: pointer;
-  color: black;
-}
-
-.modal-title {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.6rem;
-  font-weight: 700;
-}
-
-.error-text {
-  color: red;
-  font-size: 0.85rem;
-  margin-top: -5px;
-  margin-bottom: 10px;
-  text-align: center;
-}
-#googleLoginBtn {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
+.login-overlay { position: fixed; inset: 0; z-index: 9999; padding: 20px; display: grid; place-items: center; background: rgba(5, 32, 15, .72); backdrop-filter: blur(7px); animation: loginFade .18s ease-out; }
+.login-dialog { position: relative; width: min(440px, 100%); padding: 36px 38px 30px; overflow: hidden; background: #fff; color: #18201b; border: 1px solid rgba(255,255,255,.8); border-radius: 18px; box-shadow: 0 24px 70px rgba(0,30,11,.3); text-align: center; }
+.login-dialog::before { content: ''; position: absolute; inset: 0 0 auto; height: 5px; background: #058632; }
+.login-close { position: absolute; top: 16px; right: 16px; width: 34px; height: 34px; display: grid; place-items: center; border: 0; border-radius: 50%; background: #f0f3f1; color: #3d4841; font-size: 19px; cursor: pointer; transition: background .2s, color .2s; }
+.login-close:hover { background: #e4ebe6; color: #058632; }
+.login-security-icon { width: 54px; height: 54px; margin: 1px auto 14px; display: grid; place-items: center; border-radius: 15px; background: rgba(5,134,50,.1); color: #058632; font-size: 27px; }
+.login-eyebrow { margin: 0 0 7px; color: #058632; font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.login-dialog h2 { margin: 0; color: #18201b; font-size: clamp(22px, 4vw, 27px); line-height: 1.25; }
+.login-description { max-width: 340px; margin: 11px auto 23px; color: #667069; font-size: 13px; line-height: 1.55; }
+.google-button-wrap { position: relative; min-height: 44px; display: grid; place-items: center; }
+#googleLoginBtn { display: flex; justify-content: center; width: 100%; }
+.login-loading, .login-busy { color: #667069; font-size: 12px; }
+.login-busy { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255,255,255,.92); }
+.login-error { margin: 14px 0 0; padding: 10px 12px; border: 1px solid #efc1bd; border-radius: 8px; background: #fff3f2; color: #a9231b; font-size: 11px; line-height: 1.45; }
+.login-trust-note { margin-top: 24px; padding: 12px; display: flex; align-items: flex-start; gap: 9px; border-radius: 9px; background: #f2f7f3; color: #465149; text-align: left; font-size: 10px; line-height: 1.5; }
+.login-trust-note svg { flex: none; margin-top: 2px; color: #058632; }
+.login-privacy { margin: 15px auto 0; max-width: 330px; color: #858c87; font-size: 9px; line-height: 1.45; }
+@keyframes loginFade { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 480px) { .login-dialog { padding: 32px 20px 25px; border-radius: 14px; } }

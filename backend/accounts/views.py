@@ -1,7 +1,9 @@
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from django.contrib.auth import login, authenticate, get_user_model
+from django.contrib.auth import login, logout, authenticate, get_user_model
+from django.conf import settings
+from django.core.cache import cache
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.utils import timezone
@@ -13,6 +15,8 @@ User = get_user_model()
 GOOGLE_CLIENT_ID = "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com"
 ALLOWED_STUDENT_DOMAIN = "@student.fatima.edu.ph"
 ALLOWED_TEACHER_DOMAIN = "@fatima.edu.ph"
+LOGIN_ATTEMPT_LIMIT = 5
+LOGIN_LOCKOUT_SECONDS = 15 * 60
 
 # Optimized for Railway/Cloud Proxies
 def get_client_ip(request):
@@ -23,15 +27,55 @@ def get_client_ip(request):
         ip = request.META.get('REMOTE_ADDR')
     return ip
 
+
+def _login_rate_key(request, login_type):
+    return f"login-attempts:{login_type}:{get_client_ip(request)}"
+
+
+def _is_rate_limited(request, login_type):
+    return cache.get(_login_rate_key(request, login_type), 0) >= LOGIN_ATTEMPT_LIMIT
+
+
+def _record_failed_login(request, login_type):
+    key = _login_rate_key(request, login_type)
+    attempts = cache.get(key, 0) + 1
+    cache.set(key, attempts, LOGIN_LOCKOUT_SECONDS)
+
+
+def _clear_failed_logins(request, login_type):
+    cache.delete(_login_rate_key(request, login_type))
+
+
+def _origin_is_allowed(request):
+    origin = request.headers.get("Origin")
+    return not origin or origin in settings.CORS_ALLOWED_ORIGINS
+
+
+def _rate_limit_response():
+    response = JsonResponse(
+        {"error": "Too many login attempts. Please try again in 15 minutes."},
+        status=429,
+    )
+    response["Retry-After"] = str(LOGIN_LOCKOUT_SECONDS)
+    return response
+
 # --- GOOGLE LOGIN (For Students/Viewers) ---
 @csrf_exempt
 def google_login(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "google"):
+        return _rate_limit_response()
+
     try:
         data = json.loads(request.body)
-        token = data.get("token")
+        token = str(data.get("token", ""))
+        if not token or len(token) > 10000:
+            _record_failed_login(request, "google")
+            return JsonResponse({"error": "Invalid sign-in request"}, status=400)
         
         idinfo = id_token.verify_oauth2_token(
             token,
@@ -46,6 +90,7 @@ def google_login(request):
         picture = idinfo.get("picture", "")
 
         if not email_verified:
+            _record_failed_login(request, "google")
             return JsonResponse({"error": "Email not verified"}, status=403)
 
         # Determine role based on email domain
@@ -55,6 +100,7 @@ def google_login(request):
         elif email_lower.endswith(ALLOWED_TEACHER_DOMAIN) and not email_lower.endswith(ALLOWED_STUDENT_DOMAIN):
             assigned_role = User.Role.TEACHER
         else:
+            _record_failed_login(request, "google")
             return JsonResponse({"error": "Use your institute Google account"}, status=403)
 
         user, created = User.objects.get_or_create(
@@ -75,6 +121,8 @@ def google_login(request):
             user.save()
 
         login(request, user)
+        request.session.cycle_key()
+        _clear_failed_logins(request, "google")
 
         # --- LOG THE ACCESS ---
         AccessLog.objects.create(user=user, ip_address=get_client_ip(request))
@@ -90,8 +138,12 @@ def google_login(request):
             }
         })
 
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=401)
+    except (json.JSONDecodeError, ValueError):
+        _record_failed_login(request, "google")
+        return JsonResponse({"error": "Google sign-in could not be verified"}, status=401)
+    except Exception:
+        _record_failed_login(request, "google")
+        return JsonResponse({"error": "Sign-in is temporarily unavailable"}, status=503)
 
 
 # --- MANUAL LOGIN (For Admins) ---
@@ -100,10 +152,18 @@ def manual_admin_login(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "admin"):
+        return _rate_limit_response()
+
     try:
         data = json.loads(request.body)
-        username = data.get("username")
-        password = data.get("password")
+        username = str(data.get("username", "")).strip()
+        password = str(data.get("password", ""))
+        if not username or not password or len(username) > 150 or len(password) > 256:
+            _record_failed_login(request, "admin")
+            return JsonResponse({"error": "Invalid username or password"}, status=401)
 
         user = authenticate(username=username, password=password)
 
@@ -111,6 +171,8 @@ def manual_admin_login(request):
             # Check for Admin or Superadmin role
             if user.role in [User.Role.ADMIN, User.Role.SUPERADMIN]:
                 login(request, user)
+                request.session.cycle_key()
+                _clear_failed_logins(request, "admin")
 
                 # --- LOG THE ACCESS ---
                 AccessLog.objects.create(user=user, ip_address=get_client_ip(request))
@@ -123,12 +185,29 @@ def manual_admin_login(request):
                         "role": user.role
                     }
                 })
-            return JsonResponse({"error": "Access denied: User is not an admin"}, status=403)
+            _record_failed_login(request, "admin")
+            return JsonResponse({"error": "Invalid username or password"}, status=401)
         
+        _record_failed_login(request, "admin")
         return JsonResponse({"error": "Invalid username or password"}, status=401)
 
-    except Exception as e:
+    except (json.JSONDecodeError, TypeError):
+        _record_failed_login(request, "admin")
+        return JsonResponse({"error": "Invalid username or password"}, status=401)
+    except Exception:
         return JsonResponse({"error": "Server error"}, status=500)
+
+
+@csrf_exempt
+def secure_logout(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    logout(request)
+    response = JsonResponse({"message": "Logout successful"})
+    response["Cache-Control"] = "no-store"
+    return response
 
 
 def _reservation_json(reservation):
