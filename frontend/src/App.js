@@ -34,6 +34,7 @@ function App() {
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
+  const isStudent = user?.role === "USER";
 
   return (
    
@@ -63,7 +64,7 @@ function App() {
       } />
 
       <Route path='/reservation' element={
-        <ProtectedRoute isAllowed={isAuthenticated}>
+        <ProtectedRoute isAllowed={isAuthenticated && isStudent} redirectTo="/homepage">
           <Reservation setUser={setUser} user={user} />
         </ProtectedRoute>
       } />

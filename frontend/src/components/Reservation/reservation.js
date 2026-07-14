@@ -15,7 +15,7 @@ const Reservation = ({ setUser, user }) => {
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/`, { withCredentials: true })
-      .then(({ data }) => setReservations(data.reservations))
+      .then(({ data }) => setReservations(Array.isArray(data?.reservations) ? data.reservations : []))
       .catch(() => setMessage('Unable to load your reservations. Please try again.'))
       .finally(() => setLoading(false));
   }, []);

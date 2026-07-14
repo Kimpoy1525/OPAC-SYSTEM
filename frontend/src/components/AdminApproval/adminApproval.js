@@ -14,8 +14,9 @@ const AdminApproval = ({ setUser, user }) => {
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/approval-queue/`, { withCredentials: true })
       .then(({ data }) => {
-        setProposals(data.reservations);
-        setSelectedId(data.reservations[0]?.id || null);
+        const queue = Array.isArray(data?.reservations) ? data.reservations : [];
+        setProposals(queue);
+        setSelectedId(queue[0]?.id || null);
       })
       .catch((requestError) => setError(requestError.response?.data?.error || 'Unable to load the approval queue.'))
       .finally(() => setLoading(false));
