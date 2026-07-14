@@ -10,17 +10,19 @@ const Header = ({ setUser, user }) => {
     const [open, setOpen] = useState(false);
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
     // 2. Updated Admin Check: Use the is_staff flag from your Django user object
-    const isAdmin = user?.role === "Admin" || user?.role === "ADMIN" || user?.role === "SUPERADMIN";
-    const isStudent = user?.role === "USER";
+    const normalizedRole = user?.role?.toUpperCase();
+    const isAdmin = normalizedRole === "ADMIN" || normalizedRole === "SUPERADMIN";
+    const isStudent = normalizedRole === "USER";
+    const homePath = isAdmin ? '/admin-approval' : '/homepage';
 
     return (
         <header className='header2'>
-            <Link to='/homepage' className='logo2'>
+            <Link to={homePath} className='logo2'>
                 <img src={logo} alt='logo'/>
             </Link>
 
       <nav className={`nav-links ${open ? "show" : ""}`}>
-    <Link to='/homepage'>Home</Link>
+    <Link to={homePath}>{isAdmin ? 'Admin Dashboard' : 'Home'}</Link>
 
     {isAdmin && (
       <Link to='/upload'>Upload</Link>
@@ -28,7 +30,6 @@ const Header = ({ setUser, user }) => {
 
     <Link to='/repository'>Repository</Link>
     {isStudent && <Link to='/reservation'>Reservation</Link>}
-    {isAdmin && <Link to='/admin-approval'>Proposals</Link>}
 
 <div className="user-area">
     {user && (

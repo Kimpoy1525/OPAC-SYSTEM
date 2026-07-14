@@ -33,8 +33,10 @@ function App() {
   });
 
   const isAuthenticated = !!user;
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
-  const isStudent = user?.role === "USER";
+  const normalizedRole = user?.role?.toUpperCase();
+  const isAdmin = normalizedRole === "ADMIN" || normalizedRole === "SUPERADMIN";
+  const isStudent = normalizedRole === "USER";
+  const authenticatedHome = isAdmin ? "/admin-approval" : "/homepage";
 
   return (
    
@@ -42,7 +44,7 @@ function App() {
         <Routes>
           {/* 1. Public Route - Student Google Login */}
         <Route path='/' element={
-          !isAuthenticated ? <HomeF setUser={setUser} /> : <Navigate to="/homepage" />
+          !isAuthenticated ? <HomeF setUser={setUser} /> : <Navigate to={authenticatedHome} />
       } />
 
       {/* 2. Admin Login Portal */}
@@ -91,7 +93,7 @@ function App() {
 
       {/* 5. Fallback: Redirect any unknown routes */}
 
-      <Route path="*" element={<Navigate to={isAuthenticated ? "/homepage" : "/"} replace />} />
+      <Route path="*" element={<Navigate to={isAuthenticated ? authenticatedHome : "/"} replace />} />
       
     </Routes>
       <Footer/>

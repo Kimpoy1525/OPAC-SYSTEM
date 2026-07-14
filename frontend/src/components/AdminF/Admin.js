@@ -41,7 +41,7 @@ export default function Admin({ setUser }) {
         
         // Redirect based on role
         if (data.user.role === "SUPERADMIN" || data.user.role === "ADMIN") {
-          navigate("/homepage");
+          navigate("/admin-approval", { replace: true });
         } else {
           setError("Access denied: Not an administrator.");
         }

@@ -42,6 +42,7 @@ class Document(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
     video_demo_url = models.URLField(
+        "Thesis Video Demo Link",
         max_length=500,
         blank=True,
         null=True,
