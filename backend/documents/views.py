@@ -51,6 +51,8 @@ class DocumentListView(generics.ListAPIView):
         year = self.request.query_params.get('year')
         course = self.request.query_params.get('course')
         search_query = self.request.query_params.get('search')
+        if search_query:
+            search_query = search_query.strip()
 
         if year:
             queryset = queryset.filter(year=year)
@@ -60,7 +62,8 @@ class DocumentListView(generics.ListAPIView):
             queryset = queryset.filter(
                 Q(title__icontains=search_query) | 
                 Q(authors__icontains=search_query) |
-                Q(keywords__icontains=search_query)
+                Q(keywords__icontains=search_query) |
+                Q(abstract__icontains=search_query)
             )
         return queryset
 

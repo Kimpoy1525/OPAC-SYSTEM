@@ -27,6 +27,7 @@
 .research-card .labels { margin-right: 4px; color: #3d4841; font-weight: 700; }
 .research-card p { margin: 7px 0; overflow-wrap: anywhere; color: #566159; font-size: 12px; line-height: 1.55; }
 .abstract { max-width: 850px; margin-top: 15px !important; color: #39423c !important; line-height: 1.7 !important; }
+.search-highlight { padding: 1px 2px; border-radius: 3px; background: #f7dc82; color: #18201b; font-weight: 700; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
 .research-card-footer { margin-top: 18px; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid #edf0ee; }
 .detail-below { display: flex; gap: 20px; align-items: center; color: #667069; font-size: 11px; }
 .card-program { padding: 5px 10px; border-radius: 14px; background: rgba(5,134,50,.1); color: #058632; font-weight: 700; }

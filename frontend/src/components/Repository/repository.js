@@ -8,6 +8,21 @@ import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './repository.css';
 import '../Upload/upload.css';
 
+const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const HighlightText = ({ text, query }) => {
+  const value = String(text ?? '');
+  const search = query.trim();
+  if (!search) return value;
+
+  const matcher = new RegExp(`(${escapeRegExp(search)})`, 'gi');
+  return value.split(matcher).map((part, index) =>
+    part.toLocaleLowerCase() === search.toLocaleLowerCase()
+      ? <mark className='search-highlight' key={`${part}-${index}`}>{part}</mark>
+      : <React.Fragment key={`${part}-${index}`}>{part}</React.Fragment>
+  );
+};
+
 const Repository = ({ setUser, user }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialSearch = searchParams.get('search') || '';
@@ -86,6 +101,8 @@ const Repository = ({ setUser, user }) => {
     }
   };
 
+  const activeSearch = appliedFilters.search;
+
   return (
     <main>
       <Header setUser={setUser} user={user} />
@@ -128,11 +145,11 @@ const Repository = ({ setUser, user }) => {
               {researches.map((research) => (
                 <article key={research.id} className='research-card'>
                   {(user?.role === 'ADMIN' || user?.role === 'SUPERADMIN') && <button className='card-delete-btn' onClick={() => { setItemToDelete({ id: research.id, title: research.title }); setShowDeleteConfirm(true); }} title='Delete research' aria-label={`Delete ${research.title}`}><FaTrash /></button>}
-                  <h2>{research.title}</h2>
-                  <p><span className='labels'>Author(s):</span> {research.authors}</p>
+                  <h2><HighlightText text={research.title} query={activeSearch} /></h2>
+                  <p><span className='labels'>Author(s):</span> <HighlightText text={research.authors} query={activeSearch} /></p>
                   <p><span className='labels'>Year:</span> {research.year}</p>
-                  {research.keywords && <p><span className='labels'>Keywords:</span> {research.keywords}</p>}
-                  <p className='abstract'>{(research.abstract || 'No abstract available.').substring(0, 250)}{research.abstract?.length > 250 ? '…' : ''}</p>
+                  {research.keywords && <p><span className='labels'>Keywords:</span> <HighlightText text={research.keywords} query={activeSearch} /></p>}
+                  <p className='abstract'><HighlightText text={(research.abstract || 'No abstract available.').substring(0, 250)} query={activeSearch} />{research.abstract?.length > 250 ? '…' : ''}</p>
                   <div className='research-card-footer'><div className='detail-below'><span className='card-program'>{research.course}</span><span>{research.files?.length || 0} Document(s)</span></div><Link to={`/details/${research.id}`} className='details-btn'>View details</Link></div>
                 </article>
               ))}
