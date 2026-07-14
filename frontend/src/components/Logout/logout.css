@@ -61,9 +61,11 @@
 
 @media (max-width: 480px) {
   .logout-modal {
+    width: calc(100% - 24px);
     padding: 20px;
     max-width: 320px;
   }
+  .logout-button-group { grid-template-columns: 1fr; }
 
   .logout-modal h2 {
     font-size: 22px;

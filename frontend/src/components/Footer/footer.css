@@ -80,3 +80,10 @@
     font-size: 0.8rem;
     color: #aaa;
 }
+
+@media (max-width: 640px) {
+    .footer { padding-top: 30px; }
+    .footer-content { justify-content: flex-start; padding: 0 22px; }
+    .footer-section { width: 100%; }
+    .footer-bottom { padding-inline: 20px; line-height: 1.5; }
+}

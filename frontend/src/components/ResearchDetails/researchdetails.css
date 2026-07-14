@@ -115,13 +115,23 @@
 /* Modal Container */
 .modal-container {
     background: white;
-    padding: 30px 0 30px 100px;
+    padding: 34px;
     border-radius: 12px;
     width: 100%;
     max-width: 600px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
+}
+
+@media (max-width: 600px) {
+    .details-page { padding: 18px 12px 45px; }
+    .details-content { padding: 58px 18px 24px; margin: 12px auto; }
+    .details-content h1 { margin: 8px 0 26px; text-align: left; }
+    .details-content p, .details-content strong { font-size: 13px; text-align: left; overflow-wrap: anywhere; }
+    .edit-details { top: 14px; right: 14px; padding: 8px 13px; }
+    .file-download { gap: 12px; align-items: flex-start; overflow-wrap: anywhere; }
+    .modal-container { width: calc(100% - 24px); max-height: 92vh; padding: 48px 18px 22px; }
 }
 
 /* Close button on the top right */

@@ -1,26 +1,44 @@
-.repo-page { min-height: 100vh; padding: 34px clamp(18px, 5vw, 72px) 80px; display: flex; flex-direction: column; align-items: center; background: #eeeeee; }
-.repository-header { max-width: 760px; margin: 16px 0 30px; text-align: center; }
-.repository-header h1 { margin: 0 0 9px; color: #058632; font-size: clamp(30px, 4vw, 44px); letter-spacing: -.025em; }
-.repository-header p { margin: 0; color: #667069; font-size: clamp(14px, 2vw, 17px); line-height: 1.6; }
-.filter-container { width: min(560px, 100%); margin-bottom: 36px; padding: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #fff; border: 1px solid #d9dedb; border-radius: 12px; box-shadow: 0 2px 8px rgba(19,54,31,.06); }
-.filter-select { position: relative; width: 100%; line-height: 0; }
-.filter-container select, .filter-container input { width: 100%; height: 44px; padding: 0 38px 0 13px; border: 1px solid #d9dedb; border-radius: 8px; background: #fff; color: #18201b; font-size: 13px; font-weight: 600; }
+.repo-page { min-height: 100vh; padding: 38px clamp(16px,5vw,72px) 80px; display: flex; flex-direction: column; align-items: center; background: #eeeeee; }
+.repository-header { max-width: 760px; margin: 4px 0 28px; text-align: center; }
+.repository-eyebrow { margin-bottom: 5px !important; color: #058632 !important; font-size: 10px !important; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.repository-header h1 { margin: 0 0 8px; color: #058632; font-size: clamp(30px,4vw,44px); letter-spacing: -.025em; }
+.repository-header > p:last-child { margin: 0; color: #667069; font-size: clamp(13px,2vw,16px); line-height: 1.6; }
+.filter-container { width: min(760px,100%); margin: 16px 0 34px; padding: 15px; display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; background: #fff; border: 1px solid #d9dedb; border-radius: 12px; box-shadow: 0 2px 8px rgba(19,54,31,.06); }
+.filter-select { position: relative; min-width: 0; }
+.filter-select label { display: block; margin: 0 0 7px 2px; color: #566159; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.filter-container select, .filter-container input { width: 100%; height: 42px; padding: 0 36px 0 12px; border: 1px solid #d9dedb; border-radius: 8px; background: #fff; color: #18201b; font-size: 12px; font-weight: 600; }
 .filter-container select { appearance: none; cursor: pointer; }
-.filter-container input { padding-right: 13px; }
+.filter-container input { padding-right: 12px; }
 .filter-container select:focus, .filter-container input:focus { border-color: #058632; }
-.dropdown-arrow { position: absolute; top: 50%; right: 13px; width: 14px; height: 14px; pointer-events: none; fill: #058632; transform: translateY(-50%); }
-.filter-results { width: min(920px, 100%); display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
-.research-card { position: relative; width: 100%; padding: 25px 28px; background: #fff; border: 1px solid #d9dedb; border-left: 4px solid #058632; border-radius: 12px; box-shadow: 0 3px 12px rgba(19,54,31,.07); transition: transform .2s, box-shadow .2s; }
+.dropdown-arrow { position: absolute; right: 12px; bottom: 14px; width: 13px; height: 13px; pointer-events: none; fill: #058632; }
+.filter-actions { display: flex; gap: 8px; }
+.apply-filter-btn, .clear-filter-btn { height: 42px; padding: 0 14px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700; white-space: nowrap; }
+.apply-filter-btn { border: 1px solid #058632; background: #058632; color: #fff; }
+.clear-filter-btn { border: 1px solid #d9dedb; background: #fff; color: #566159; }
+.apply-filter-btn:hover:not(:disabled) { background: #046f2a; }
+.clear-filter-btn:hover:not(:disabled) { border-color: #058632; color: #058632; }
+.filter-actions button:disabled { opacity: .6; cursor: wait; }
+.filter-error { grid-column: 1/-1; margin: 0; color: #a9231b; font-size: 11px; }
+.filter-results { width: min(960px,100%); display: flex; flex-direction: column; gap: 18px; }
+.results-count { margin: 0 2px -5px; color: #667069; font-size: 11px; font-weight: 600; }
+.research-card { position: relative; width: 100%; padding: 25px 28px; background: #fff; border: 1px solid #d9dedb; border-left: 4px solid #058632; border-radius: 12px; box-shadow: 0 3px 12px rgba(19,54,31,.07); transition: transform .2s,box-shadow .2s; }
 .research-card:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(19,54,31,.11); }
-.research-card h3 { margin: 0 40px 14px 0; color: #18201b; font-size: clamp(18px, 2.2vw, 22px); line-height: 1.35; }
+.research-card h2 { margin: 0 40px 14px 0; color: #18201b; font-size: clamp(17px,2.2vw,21px); line-height: 1.4; }
 .research-card .labels { margin-right: 4px; color: #3d4841; font-weight: 700; }
-.research-card p { margin: 7px 0; color: #566159; font-size: 13px; }
-.abstract { max-width: 820px; margin-top: 16px !important; color: #39423c !important; line-height: 1.7; text-align: left; }
-.research-card-footer { margin-top: 18px; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #edf0ee; }
-.detail-below { display: flex; gap: 24px; align-items: center; color: #667069; font-size: 12px; }
+.research-card p { margin: 7px 0; overflow-wrap: anywhere; color: #566159; font-size: 12px; line-height: 1.55; }
+.abstract { max-width: 850px; margin-top: 15px !important; color: #39423c !important; line-height: 1.7 !important; }
+.research-card-footer { margin-top: 18px; padding-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid #edf0ee; }
+.detail-below { display: flex; gap: 20px; align-items: center; color: #667069; font-size: 11px; }
 .card-program { padding: 5px 10px; border-radius: 14px; background: rgba(5,134,50,.1); color: #058632; font-weight: 700; }
-.research-card-footer .details-btn { padding: 9px 18px; background: #058632; color: #fff; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 700; transition: background .2s, transform .2s; }
-.research-card-footer .details-btn:hover { background: #046f2a; transform: translateY(-1px); }
-.card-delete-btn { position: absolute; top: 18px; right: 18px; padding: 7px; background: transparent; border: 0; color: #b3261e; font-size: 16px; cursor: pointer; }
-.card-delete-btn:hover { transform: scale(1.08); }
-@media (max-width: 600px) { .repo-page { padding-top: 22px; } .filter-container { grid-template-columns: 1fr; } .research-card { padding: 21px 18px; } .research-card-footer { align-items: flex-start; gap: 16px; } .detail-below { flex-direction: column; align-items: flex-start; gap: 7px; } }
+.research-card-footer .details-btn { padding: 9px 18px; flex: none; background: #058632; color: #fff; border-radius: 8px; text-decoration: none; font-size: 11px; font-weight: 700; }
+.research-card-footer .details-btn:hover { background: #046f2a; }
+.card-delete-btn { position: absolute; top: 17px; right: 17px; padding: 7px; background: transparent; border: 0; color: #b3261e; font-size: 16px; cursor: pointer; }
+.repository-state { min-height: 210px; padding: 32px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 7px; background: #fff; border: 1px dashed #cbd2cd; border-radius: 12px; color: #667069; text-align: center; }
+.repository-state strong { color: #253129; font-size: 15px; }
+.repository-state p { margin: 0; font-size: 12px; line-height: 1.5; }
+.repository-state button { margin-top: 9px; padding: 9px 15px; border: 0; border-radius: 7px; background: #058632; color: #fff; cursor: pointer; font-size: 11px; font-weight: 700; }
+.repository-spinner { width: 26px; height: 26px; margin-bottom: 6px; border: 3px solid #dce6df; border-top-color: #058632; border-radius: 50%; animation: repoSpin .7s linear infinite; }
+.repository-error { border-color: #efc1bd; background: #fffafa; }
+@keyframes repoSpin { to { transform: rotate(360deg); } }
+@media (max-width: 760px) { .repo-page { padding-top: 26px; } .filter-container { grid-template-columns: 1fr 1fr; } .filter-actions { grid-column: 1/-1; } .filter-actions button { flex: 1; } }
+@media (max-width: 520px) { .repo-page { padding-inline: 12px; padding-bottom: 55px; } .repository-header { margin-bottom: 20px; } .filter-container { grid-template-columns: 1fr; padding: 12px; } .filter-actions { grid-column: auto; } .research-card { padding: 20px 16px; border-left-width: 3px; } .research-card h2 { margin-right: 30px; } .research-card-footer { align-items: stretch; flex-direction: column; } .detail-below { justify-content: space-between; } .research-card-footer .details-btn { width: 100%; text-align: center; } .repository-state { min-height: 180px; padding: 24px 16px; } }

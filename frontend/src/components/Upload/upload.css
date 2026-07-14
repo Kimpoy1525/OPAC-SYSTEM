@@ -176,7 +176,8 @@
   }
 
   .upload-form{
-    padding: 25px;
+    width: 100%;
+    padding: 22px 16px;
   }
 
   .form-header {
@@ -204,6 +205,11 @@
     padding: 15px;
     font-size: 1.2em;
   }
+  .csv-divider, .csv-upload-section { width: 100%; }
+  .csv-upload-section { padding: 22px 16px; }
+  .file-upload { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .file-name { width: 100%; margin-left: 0; }
+  .modal-content { width: calc(100% - 24px); padding: 24px 16px; }
 }
 
 /* Modal Overlay */
