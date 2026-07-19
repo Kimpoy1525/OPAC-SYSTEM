@@ -110,7 +110,7 @@ const Repository = ({ setUser, user }) => {
         <header className='repository-header'>
           <p className='repository-eyebrow'>OLFU CCS Research Repository</p>
           <h1>CCSTECHVAULT</h1>
-          <p>Explore theses and capstone projects from the College of Computer Studies.</p>
+          <p>Explore thesis and capstone projects from the College of Computer Studies.</p>
         </header>
 
         <Searchbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} onSearch={applyFilters} loading={loading} />

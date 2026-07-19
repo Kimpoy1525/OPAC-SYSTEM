@@ -219,7 +219,28 @@
 }
 
 .cancel-edit-btn:hover { background: #f2f5f3; }
-.edit-form .queue-item span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.edit-form .queue-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+}
+
+.edit-form .queue-item span {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.edit-form .queue-item .remove-btn {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+}
 .video-section { margin: 30px 0; padding: 18px; border: 1px solid #d9dedb; border-radius: 10px; background: #f7faf8; }
 .video-section > strong { display: block; margin-bottom: 12px; }
 .video-frame { position: relative; width: 100%; padding-top: 56.25%; overflow: hidden; border-radius: 8px; background: #111; }
@@ -243,7 +264,7 @@
     .edit-modal-actions { bottom: -22px; flex-wrap: wrap; margin: 4px -18px -22px; padding: 14px 18px; }
     .edit-modal-actions button { flex: 1; }
     .edit-error-message { flex: 0 0 100%; }
-    .edit-modal-container > .close-modal { top: 12px; right: 18px; }
+    .edit-modal-container > .close-modal { top: 0; right: 0; }
 }
 
 /* Close button on the top right */
@@ -269,19 +290,27 @@
 }
 
 .edit-modal-container > .close-modal {
-    right: 34px;
-    top: 22px;
+    right: -46px;
+    top: 30px;
     display: grid;
     place-items: center;
     width: 36px;
     height: 36px;
     padding: 0;
     border-radius: 50%;
-    background: #f1f4f2;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .2);
     line-height: 1;
 }
 
 .edit-modal-container > .close-modal:hover { background: #e2e8e4; }
+
+@media (max-width: 1024px) {
+    .edit-modal-container > .close-modal {
+        right: 10px;
+        top: 10px;
+    }
+}
 
 .queue-item {
     display: flex;

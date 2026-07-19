@@ -176,7 +176,7 @@ const ResearchDetails = ({ setUser, user }) => {
                     <h1>{researchItem.title}</h1>
                     
                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
-                        <button className='edit-details' onClick={openEditModal}>Edit details</button>
+                        <button className='edit-details' onClick={openEditModal}>Edit</button>
                     )}
 
                     <p><strong>Author(s):</strong> {researchItem.authors}</p>

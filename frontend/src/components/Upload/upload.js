@@ -405,7 +405,7 @@ const Upload = ({ setUser, user }) => {
                     <div className="modal-content">
                         <div className="success-icon">✔</div>
                         <h3>Upload Successful!</h3>
-                        <p>Your research information has been added to the catalog.</p>
+                        <p>Your research information has been added.</p>
                         <button className="modal-close-btn" onClick={() => setShowSuccess(false)}>Great!</button>
                     </div>
                 </div>
