@@ -48,6 +48,23 @@ const ResearchDetails = ({ setUser, user }) => {
     const [panelists, setPanelists] = useState('');
     const [course, setCourse] = useState('');
 
+    const openEditModal = () => {
+        setTitle(researchItem.title || '');
+        setAuthors(researchItem.authors || '');
+        setYear(researchItem.year || '');
+        setAbstract(researchItem.abstract || '');
+        setKeywords(researchItem.keywords || '');
+        setPanelists(researchItem.panelists || '');
+        setCourse(researchItem.course || '');
+        setExistingFiles(researchItem.files || []);
+        setNewFiles([]);
+        setFilesToDelete([]);
+        setVideoDemoUrl(researchItem.video_demo_url || '');
+        setIsEditModalOpen(true);
+    };
+
+    const closeEditModal = () => setIsEditModalOpen(false);
+
     useEffect(() => {
         const fetchDetail = async () => {
             try {
@@ -139,7 +156,7 @@ const ResearchDetails = ({ setUser, user }) => {
                     <h1>{researchItem.title}</h1>
                     
                     {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
-                        <button className='edit-details' onClick={() => setIsEditModalOpen(true)}>Edit</button>
+                        <button className='edit-details' onClick={openEditModal}>Edit details</button>
                     )}
 
                     <p><strong>Author(s):</strong> {researchItem.authors}</p>
@@ -197,7 +214,7 @@ const ResearchDetails = ({ setUser, user }) => {
             {/* --- EDIT MODAL --- */}
             {isEditModalOpen && !saving && (
                 <div className="modal-overlay">
-                    <div className="modal-container">
+                    <div className="modal-container edit-modal-container">
                         <button className="close-modal" onClick={() => setIsEditModalOpen(false)}>✕</button>
                         
                         <form className='upload-form edit-form' onSubmit={handleUpdate}>
@@ -225,7 +242,9 @@ const ResearchDetails = ({ setUser, user }) => {
 
                             <div className='form-input'>
                                 <label>Abstract</label>
-                                <textarea rows={5} value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
+                                <p className='field-help'>Drag the lower-right corner to make the writing area taller.</p>
+                                <textarea className="abstract-editor" rows={10} value={abstract} onChange={(e) => setAbstract(e.target.value)} required />
+                                <span className="character-count">{abstract.length.toLocaleString()} characters</span>
                             </div>
 
                             <div className='form-input'>
@@ -281,7 +300,10 @@ const ResearchDetails = ({ setUser, user }) => {
                                 ))}
                             </div>
 
-                            <button type='submit' className='submit-btn'>SAVE CHANGES</button>
+                            <div className="edit-modal-actions">
+                                <button type='button' className='cancel-edit-btn' onClick={closeEditModal}>Cancel</button>
+                                <button type='submit' className='submit-btn'>Save changes</button>
+                            </div>
                         </form>
                     </div>
                 </div>
