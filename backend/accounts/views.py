@@ -245,8 +245,13 @@ def student_reservations(request):
     if request.user.role != User.Role.USER:
         return JsonResponse({"error": "Only student accounts can submit proposals"}, status=403)
 
-    if request.user.title_reservations.count() >= 3:
-        return JsonResponse({"error": "All three title reservation attempts have been used"}, status=400)
+    existing_reservations = request.user.title_reservations.all()
+    if existing_reservations.filter(status=TitleReservation.Status.APPROVED).exists():
+        return JsonResponse({"error": "Your group already has an approved title"}, status=400)
+    if existing_reservations.count() >= 3 and existing_reservations.exclude(
+        status=TitleReservation.Status.REJECTED
+    ).exists():
+        return JsonResponse({"error": "A new reservation is available only when no title is pending or approved"}, status=400)
 
     try:
         data = json.loads(request.body)
@@ -262,6 +267,12 @@ def student_reservations(request):
         return JsonResponse({"error": "All proposal fields are required"}, status=400)
     if course not in TitleReservation.Course.values:
         return JsonResponse({"error": "Select a valid course"}, status=400)
+    members = [member.strip() for member in group_members.split(",") if member.strip()]
+    if not members:
+        return JsonResponse({"error": "Enter at least one group member"}, status=400)
+    if len(members) > 4:
+        return JsonResponse({"error": "A group can have a maximum of four members, separated by commas"}, status=400)
+    group_members = ", ".join(members)
 
     reservation = TitleReservation.objects.create(
         student=request.user,

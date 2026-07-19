@@ -5,6 +5,7 @@ import Header from '../Header/header';
 import './reservation.css';
 
 const MAX_ATTEMPTS = 3;
+const MAX_MEMBERS = 4;
 
 const Reservation = ({ setUser, user }) => {
   const [reservations, setReservations] = useState([]);
@@ -12,6 +13,11 @@ const Reservation = ({ setUser, user }) => {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+
+  const hasApprovedTitle = reservations.some(({ status }) => status === 'APPROVED');
+  const hasPendingTitle = reservations.some(({ status }) => status === 'PENDING');
+  const canStartNewCycle = reservations.length >= MAX_ATTEMPTS && !hasApprovedTitle && !hasPendingTitle;
+  const canSubmit = !hasApprovedTitle && (reservations.length < MAX_ATTEMPTS || canStartNewCycle);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/`, { withCredentials: true })
@@ -28,8 +34,16 @@ const Reservation = ({ setUser, user }) => {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (reservations.length >= MAX_ATTEMPTS) {
-      setMessage('You have already used all three title reservation attempts.');
+    const members = form.members.split(',').map((member) => member.trim()).filter(Boolean);
+    if (members.length > MAX_MEMBERS) {
+      setMessage('A group can have a maximum of four members, separated by commas.');
+      return;
+    }
+
+    if (!canSubmit) {
+      setMessage(hasApprovedTitle
+        ? 'Your group already has an approved title.'
+        : 'Please wait for the review of your submitted titles.');
       return;
     }
 
@@ -40,7 +54,7 @@ const Reservation = ({ setUser, user }) => {
         {
           title: form.title.trim(),
           overview: form.overview.trim(),
-          group_members: form.members.trim(),
+          group_members: members.join(', '),
           course: form.course,
           section: form.section.trim()
         },
@@ -67,7 +81,9 @@ const Reservation = ({ setUser, user }) => {
               <h1>New Title Reservation</h1>
               <p>Requesting title approval for upcoming title defense.</p>
             </div>
-            <span className="attempt-badge">ATTEMPT {Math.min(reservations.length + 1, MAX_ATTEMPTS)} / {MAX_ATTEMPTS}</span>
+            <span className="attempt-badge">
+              {canStartNewCycle ? 'NEW RESERVATION' : `ATTEMPT ${Math.min(reservations.length + 1, MAX_ATTEMPTS)} / ${MAX_ATTEMPTS}`}
+            </span>
           </div>
 
           <form className="reservation-form" onSubmit={handleSubmit}>
@@ -79,7 +95,30 @@ const Reservation = ({ setUser, user }) => {
               onChange={handleChange}
               placeholder="Enter your first priority title..."
               required
-              disabled={reservations.length >= MAX_ATTEMPTS}
+              disabled={!canSubmit}
+            />
+
+            <label htmlFor="reservation-overview">Overview / Objectives</label>
+            <textarea
+              id="reservation-overview"
+              name="overview"
+              value={form.overview}
+              onChange={handleChange}
+              placeholder="Explain your title scope..."
+              required
+              disabled={!canSubmit}
+            />
+
+            <label htmlFor="reservation-members">Group Members (Full Name)</label>
+            <p className="reservation-field-help">Maximum of 4 members. Separate each full name with a comma.</p>
+            <input
+              id="reservation-members"
+              name="members"
+              value={form.members}
+              onChange={handleChange}
+              placeholder="Member 1, Member 2, Member 3, Member 4"
+              required
+              disabled={!canSubmit}
             />
 
             <div className="reservation-field-row">
@@ -91,7 +130,7 @@ const Reservation = ({ setUser, user }) => {
                   value={form.course}
                   onChange={handleChange}
                   required
-                  disabled={reservations.length >= MAX_ATTEMPTS}
+                  disabled={!canSubmit}
                 >
                   <option value="" disabled>Select your course...</option>
                   <option value="BSCS">BS Computer Science</option>
@@ -109,34 +148,12 @@ const Reservation = ({ setUser, user }) => {
                   placeholder="e.g. 4Y1-1"
                   maxLength="50"
                   required
-                  disabled={reservations.length >= MAX_ATTEMPTS}
+                  disabled={!canSubmit}
                 />
               </div>
             </div>
 
-            <label htmlFor="reservation-overview">Overview / Objectives</label>
-            <textarea
-              id="reservation-overview"
-              name="overview"
-              value={form.overview}
-              onChange={handleChange}
-              placeholder="Explain your title scope..."
-              required
-              disabled={reservations.length >= MAX_ATTEMPTS}
-            />
-
-            <label htmlFor="reservation-members">Group Members (Full Name)</label>
-            <input
-              id="reservation-members"
-              name="members"
-              value={form.members}
-              onChange={handleChange}
-              placeholder="Member 1 (Leader), Member 2 ..."
-              required
-              disabled={reservations.length >= MAX_ATTEMPTS}
-            />
-
-            <button type="submit" disabled={reservations.length >= MAX_ATTEMPTS || submitting}>
+            <button type="submit" disabled={!canSubmit || submitting}>
               {submitting ? 'Submitting...' : 'Submit Title Reservation'}
             </button>
             {message && <p className="reservation-message" role="status">{message}</p>}

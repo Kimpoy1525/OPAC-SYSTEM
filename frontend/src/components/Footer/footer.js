@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaFacebook, FaGithub, FaGlobe } from 'react-icons/fa';
+import { FaFacebook, FaGlobe } from 'react-icons/fa';
 import './footer.css';
 import { useLocation } from 'react-router-dom';
 
@@ -34,7 +34,6 @@ const Footer = () => {
                     <div className="social-icons">
                         <a href="https://fatima.edu.ph" target="_blank" rel="noreferrer"><FaGlobe /></a>
                         <a href="https://www.facebook.com/our.lady.of.fatima.university/"><FaFacebook /></a>
-                        <a href="https://github.com/"><FaGithub /></a>
                     </div>
                 </div>
             </div>

@@ -42,6 +42,29 @@ class TitleReservationWorkflowTests(TestCase):
             self.assertEqual(self.submit(number).status_code, 201)
         self.assertEqual(self.submit(4).status_code, 400)
 
+    def test_student_can_submit_again_when_all_three_titles_are_rejected(self):
+        self.client.force_login(self.student)
+        for number in range(1, 4):
+            self.assertEqual(self.submit(number).status_code, 201)
+        TitleReservation.objects.filter(student=self.student).update(status=TitleReservation.Status.REJECTED)
+        self.assertEqual(self.submit(4).status_code, 201)
+
+    def test_group_cannot_have_more_than_four_comma_separated_members(self):
+        self.client.force_login(self.student)
+        response = self.client.post(
+            reverse("student_reservations"),
+            data=json.dumps({
+                "title": "Proposal",
+                "overview": "Overview",
+                "group_members": "One, Two, Three, Four, Five",
+                "course": "BSIT",
+                "section": "4Y1-1",
+            }),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("maximum of four members", response.json()["error"])
+
     def test_admin_and_superadmin_can_access_and_review_queue(self):
         reservation = TitleReservation.objects.create(
             student=self.student,
