@@ -31,6 +31,7 @@ const ResearchDetails = ({ setUser, user }) => {
     const [loading, setLoading] = useState(true);
     const [showSuccess, setShowSuccess] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [updateError, setUpdateError] = useState('');
     
     // --- FILE STATES ---
     const [existingFiles, setExistingFiles] = useState([]); 
@@ -49,6 +50,7 @@ const ResearchDetails = ({ setUser, user }) => {
     const [course, setCourse] = useState('');
 
     const openEditModal = () => {
+        setUpdateError('');
         setTitle(researchItem.title || '');
         setAuthors(researchItem.authors || '');
         setYear(researchItem.year || '');
@@ -107,6 +109,7 @@ const ResearchDetails = ({ setUser, user }) => {
 
     const handleUpdate = async (e) => {
         e.preventDefault();
+        setUpdateError('');
         setSaving(true);
 
         const formData = new FormData();
@@ -125,24 +128,26 @@ const ResearchDetails = ({ setUser, user }) => {
         });
 
         try {
-            await axios.put(`${process.env.REACT_APP_API_URL}/home/detail/${id}/update/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            });
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/home/detail/${id}/update/`, formData);
            
             setSaving(false);
+            setResearchItem(response.data);
+            setExistingFiles(response.data.files || []);
             setIsEditModalOpen(false);
             setShowSuccess(true);
             
         } catch (err) {
             setSaving(false);
             console.error(err);
-            alert("Update failed.");
+            const serverMessage = err.response?.data && typeof err.response.data === 'object'
+                ? Object.values(err.response.data).flat().join(' ')
+                : '';
+            setUpdateError(serverMessage || 'We could not save the changes. Please check your connection and try again.');
         }
     };
 
     const handleCloseSuccess = () => {
         setShowSuccess(false);
-        window.location.reload();
     };
 
     if (loading) return <LoadingOverlay message="Loading research details..." />;
@@ -215,7 +220,7 @@ const ResearchDetails = ({ setUser, user }) => {
             {isEditModalOpen && !saving && (
                 <div className="modal-overlay">
                     <div className="modal-container edit-modal-container">
-                        <button className="close-modal" onClick={() => setIsEditModalOpen(false)}>✕</button>
+                        <button type="button" className="close-modal" onClick={closeEditModal} aria-label="Close edit research details">&times;</button>
                         
                         <form className='upload-form edit-form' onSubmit={handleUpdate}>
                             <h2 className='form-header'>Edit Research Details</h2>
@@ -237,7 +242,8 @@ const ResearchDetails = ({ setUser, user }) => {
 
                             <div className='form-input'>
                                 <label>Keywords</label>
-                                <input type='text' value={keywords} onChange={(e) => setKeywords(e.target.value)} />
+                                <p className='field-help'>Add keywords separated by commas. Drag the corner to resize.</p>
+                                <textarea className="keyword-editor" rows={4} value={keywords} onChange={(e) => setKeywords(e.target.value)} />
                             </div>
 
                             <div className='form-input'>
@@ -301,6 +307,7 @@ const ResearchDetails = ({ setUser, user }) => {
                             </div>
 
                             <div className="edit-modal-actions">
+                                {updateError && <p className="edit-error-message" role="alert">{updateError}</p>}
                                 <button type='button' className='cancel-edit-btn' onClick={closeEditModal}>Cancel</button>
                                 <button type='submit' className='submit-btn'>Save changes</button>
                             </div>

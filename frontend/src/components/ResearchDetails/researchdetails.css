@@ -142,6 +142,7 @@
 
 .edit-form > .form-header,
 .edit-form > .form-input:first-of-type,
+.edit-form > .form-input:nth-of-type(4),
 .edit-form > .form-input:nth-of-type(5),
 .edit-form > .form-input:nth-of-type(6),
 .edit-form > .form-input:nth-of-type(9),
@@ -152,9 +153,9 @@
 
 .edit-form > .form-header {
     margin: 0 0 6px;
-    padding-bottom: 20px;
+    padding: 0 52px 20px;
     border-bottom: 1px solid #e3e8e4;
-    text-align: left;
+    text-align: center;
     font-size: 26px;
 }
 
@@ -165,6 +166,14 @@
     max-height: 65vh;
     resize: vertical;
     line-height: 1.6;
+    background: #fafcfb;
+}
+
+.edit-form .keyword-editor {
+    min-height: 110px;
+    max-height: 40vh;
+    resize: vertical;
+    line-height: 1.5;
     background: #fafcfb;
 }
 
@@ -190,6 +199,14 @@
 }
 
 .edit-modal-actions .submit-btn { width: auto; padding: 12px 24px; font-size: 14px; }
+
+.edit-error-message {
+    flex: 1;
+    margin: 0;
+    color: #b42318;
+    font-size: 12px;
+    line-height: 1.4;
+}
 
 .cancel-edit-btn {
     padding: 11px 22px;
@@ -223,8 +240,10 @@
     .edit-form > * { grid-column: 1 !important; }
     .edit-form > .form-header { font-size: 22px; }
     .edit-form .abstract-editor { min-height: 220px; }
-    .edit-modal-actions { bottom: -22px; margin: 4px -18px -22px; padding: 14px 18px; }
-    .edit-modal-actions > * { flex: 1; }
+    .edit-modal-actions { bottom: -22px; flex-wrap: wrap; margin: 4px -18px -22px; padding: 14px 18px; }
+    .edit-modal-actions button { flex: 1; }
+    .edit-error-message { flex: 0 0 100%; }
+    .edit-modal-container > .close-modal { top: 12px; right: 18px; }
 }
 
 /* Close button on the top right */
@@ -248,6 +267,21 @@
     width: 100% !important;
     max-width: none !important;
 }
+
+.edit-modal-container > .close-modal {
+    right: 34px;
+    top: 22px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    background: #f1f4f2;
+    line-height: 1;
+}
+
+.edit-modal-container > .close-modal:hover { background: #e2e8e4; }
 
 .queue-item {
     display: flex;
