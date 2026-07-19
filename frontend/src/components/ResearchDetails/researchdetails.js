@@ -110,6 +110,17 @@ const ResearchDetails = ({ setUser, user }) => {
     const handleUpdate = async (e) => {
         e.preventDefault();
         setUpdateError('');
+
+        const normalizedVideoUrl = videoDemoUrl.trim();
+        if (!course) {
+            setUpdateError('Please select a program before saving.');
+            return;
+        }
+        if (normalizedVideoUrl && !getYouTubeEmbedUrl(normalizedVideoUrl)) {
+            setUpdateError('Please enter a valid YouTube or youtu.be video link.');
+            return;
+        }
+
         setSaving(true);
 
         const formData = new FormData();
@@ -121,7 +132,11 @@ const ResearchDetails = ({ setUser, user }) => {
         formData.append('panelists', panelists);
         formData.append('course', course);
         formData.append('delete_files', JSON.stringify(filesToDelete));
-        formData.append('video_demo_url', videoDemoUrl.trim());
+
+        const savedVideoUrl = (researchItem.video_demo_url || '').trim();
+        if (normalizedVideoUrl !== savedVideoUrl) {
+            formData.append('video_demo_url', normalizedVideoUrl);
+        }
 
         newFiles.forEach((file) => {
             formData.append('new_files', file);
@@ -255,7 +270,7 @@ const ResearchDetails = ({ setUser, user }) => {
 
                             <div className='form-input'>
                                 <label>Panelists</label>
-                                <input type='text' value={panelists} onChange={(e) => setPanelists(e.target.value)} required />
+                                <input type='text' value={panelists} onChange={(e) => setPanelists(e.target.value)} />
                             </div>
 
                             <div className='form-input'>
