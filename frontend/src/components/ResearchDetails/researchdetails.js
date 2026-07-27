@@ -179,21 +179,25 @@ const ResearchDetails = ({ setUser, user }) => {
                         <button className='edit-details' onClick={openEditModal}>Edit</button>
                     )}
 
-                    <p><strong>Author(s):</strong> {researchItem.authors}</p>
-                    <p><strong>Year:</strong> {researchItem.year}</p>
+                    <p><strong>Authors:</strong> {researchItem.authors || "No authors specified"}</p>
                     <p className='details-abstract'><strong>Abstract:</strong> {researchItem.abstract}</p>
-                    <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>
                     <p><strong>Keywords:</strong> {researchItem.keywords || "No keywords specified"}</p>
+                    <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>
 
                     {researchItem.video_demo_url && getYouTubeEmbedUrl(researchItem.video_demo_url) && (
                         <section className='video-section'>
-                            <strong>Thesis Video Demo Link</strong>
+                            <strong>Video link</strong>
                             <div className='video-frame'>
                                 <iframe src={getYouTubeEmbedUrl(researchItem.video_demo_url)} title={`${researchItem.title} video demonstration`} allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' allowFullScreen />
                             </div>
                             <a className='youtube-link' href={researchItem.video_demo_url} target='_blank' rel='noreferrer'>Watch on YouTube</a>
                         </section>
                     )}
+                    {(!researchItem.video_demo_url || !getYouTubeEmbedUrl(researchItem.video_demo_url)) && (
+                        <p><strong>Video link:</strong> No video link specified</p>
+                    )}
+
+                    <p><strong>Year:</strong> {researchItem.year}</p>
 
                     <div className='file-section'>
                         <strong>Files:</strong>
