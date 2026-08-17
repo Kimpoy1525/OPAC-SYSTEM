@@ -1,6 +1,6 @@
 .details-page{
     min-height: 100vh;
-    background: rgba(238, 238, 238, 0.93);
+    background: transparent;
     padding: 34px clamp(18px, 5vw, 64px) 70px;
     display: flex;
     flex-direction: column;

@@ -4,4 +4,29 @@
     padding: 0;
 }
 
-.app-container { min-height: 100vh; display: flex; flex-direction: column; background: #eeeeee; }
+.app-container {
+    position: relative;
+    isolation: isolate;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background);
+    background-image:
+        radial-gradient(circle at 8% 12%, rgba(5, 134, 50, .13) 0, rgba(5, 134, 50, 0) 26rem),
+        radial-gradient(circle at 93% 36%, rgba(244, 190, 45, .10) 0, rgba(244, 190, 45, 0) 22rem),
+        linear-gradient(135deg, #f8fbf8 0%, #edf5ef 52%, #f7faf7 100%);
+}
+
+/* A subtle institutional pattern gives every authenticated area visual depth. */
+.app-container::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .55;
+    background-image:
+        linear-gradient(30deg, rgba(5, 134, 50, .035) 12%, transparent 12.5%, transparent 87%, rgba(5, 134, 50, .035) 87.5%),
+        linear-gradient(150deg, rgba(5, 134, 50, .035) 12%, transparent 12.5%, transparent 87%, rgba(5, 134, 50, .035) 87.5%);
+    background-size: 72px 126px;
+}

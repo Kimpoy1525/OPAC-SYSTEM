@@ -1,4 +1,4 @@
-.repo-page { min-height: 100vh; padding: 38px clamp(16px,5vw,72px) 80px; display: flex; flex-direction: column; align-items: center; background: #eeeeee; }
+.repo-page { min-height: 100vh; padding: 38px clamp(16px,5vw,72px) 80px; display: flex; flex-direction: column; align-items: center; background: transparent; }
 .repository-header { max-width: 760px; margin: 4px 0 28px; text-align: center; }
 .repository-eyebrow { margin-bottom: 5px !important; color: #058632 !important; font-size: 10px !important; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
 .repository-header h1 { margin: 0 0 8px; color: #058632; font-size: clamp(30px,4vw,44px); letter-spacing: -.025em; }
