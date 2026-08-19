@@ -1,48 +1,50 @@
-import React from 'react';
-import { FaFacebook, FaGlobe } from 'react-icons/fa';
-import './footer.css';
-import { useLocation } from 'react-router-dom';
+import React from "react";
+import { FaFacebook, FaGlobe } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+import "./footer.css";
 
 const Footer = () => {
-    const location = useLocation();
-    const currentYear = new Date().getFullYear();
+  const location = useLocation();
+  const currentYear = new Date().getFullYear();
 
-    // ADD THIS LOGIC:
-    // If the path is not exactly "/", return null so nothing renders
-    if (location.pathname !== '/' && location.pathname !== '/homepage') {
-        return null;
-    }
+  if (location.pathname !== "/" && location.pathname !== "/homepage") {
+    return null;
+  }
 
-    return (
-        <footer className="footer">
-            <div className="footer-content">
-                <div className="footer-section">
-                    <h3>OLFU CCS OPAC VAL</h3>
-                    <p>College of Computer Studies Research Repository</p>
-                </div>
+  return (
+    <footer className="footer">
+      <div className="footer-content">
+        <section className="footer-identity" aria-labelledby="footer-title">
+          <h3 id="footer-title">OLFU CCS OPAC Valenzuela</h3>
+          <p>College of Computer Studies<br />Research Repository</p>
+        </section>
 
-                <div className="footer-section">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="/repository">Browse Research</a></li>
-                        <li><a href="https://fatima.edu.ph">About CCS</a></li>
-                    </ul>
-                </div>
+        <nav className="footer-section" aria-label="Footer navigation">
+          <h4>Quick links</h4>
+          <ul>
+            <li><a href="/repository">Browse research</a></li>
+            <li><a href="https://fatima.edu.ph" target="_blank" rel="noreferrer">About OLFU</a></li>
+          </ul>
+        </nav>
 
-                <div className="footer-section">
-                    <h4>Connect</h4>
-                    <div className="social-icons">
-                        <a href="https://fatima.edu.ph" target="_blank" rel="noreferrer"><FaGlobe /></a>
-                        <a href="https://www.facebook.com/our.lady.of.fatima.university/"><FaFacebook /></a>
-                    </div>
-                </div>
-            </div>
+        <section className="footer-section" aria-labelledby="connect-title">
+          <h4 id="connect-title">Connect</h4>
+          <div className="social-icons">
+            <a href="https://fatima.edu.ph" target="_blank" rel="noreferrer" aria-label="OLFU website">
+              <FaGlobe aria-hidden="true" />
+            </a>
+            <a href="https://www.facebook.com/our.lady.of.fatima.university/" target="_blank" rel="noreferrer" aria-label="OLFU on Facebook">
+              <FaFacebook aria-hidden="true" />
+            </a>
+          </div>
+        </section>
+      </div>
 
-            <div className="footer-bottom">
-                <p>&copy; {currentYear} Our Lady of Fatima University. All rights reserved.</p>
-            </div>
-        </footer>
-    );
+      <p className="footer-copyright">
+        &copy; {currentYear} Our Lady of Fatima University. All rights reserved.
+      </p>
+    </footer>
+  );
 };
 
 export default Footer;
