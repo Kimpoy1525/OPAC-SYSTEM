@@ -1,7 +1,7 @@
-.approval-page { min-height: 100vh; background: transparent; color: #171717; }
+.approval-page { min-height: 100vh; background: transparent; color: #171717; font-family: "Montserrat", sans-serif; }
 .dashboard-summary { width: min(1120px,calc(100% - 48px)); margin: 32px auto 0; padding: 24px 28px; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-radius: 13px; background: #fff; border: 1px solid #d9dedb; box-shadow: 0 6px 20px rgba(19,54,31,.07); }
 .dashboard-summary p { margin: 0 0 5px; color: #058632; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.dashboard-summary h1 { margin: 0 0 6px; font-size: 24px; }
+.dashboard-summary h1 { margin: 0 0 6px; font-size: 32px; line-height: 1.2; font-weight: 700; }
 .dashboard-summary > div > span { color: #667069; font-size: 11px; }
 .dashboard-metrics { display: flex; gap: 9px; }
 .dashboard-metrics article { min-width: 72px; padding: 12px; display: flex; flex-direction: column; align-items: center; border-radius: 9px; background: #f2f7f3; }
@@ -48,4 +48,4 @@
 .queue-empty { padding: 40px 10px; text-align: center; color: #777; font-size: 11px; }
 @media (max-width: 850px) { .approval-layout { grid-template-columns: 1fr; } .approval-queue { grid-row: 1; min-height: auto; } }
 @media (max-width: 700px) { .dashboard-summary { width: calc(100% - 24px); padding: 20px; align-items: stretch; flex-direction: column; } .dashboard-metrics { display: grid; grid-template-columns: repeat(4,1fr); } .dashboard-metrics article { min-width: 0; padding: 10px 5px; } }
-@media (max-width: 560px) { .approval-layout { width: calc(100% - 24px); margin-top: 18px; } .proposal-header { padding: 11px 18px; justify-content: space-between; } .proposal-body { padding: 25px 18px 30px; } .approval-actions { margin: 0; gap: 10px; } .approval-actions button { flex: 1; min-width: 0; } .dashboard-summary h1 { font-size: 20px; } }
+@media (max-width: 560px) { .approval-layout { width: calc(100% - 24px); margin-top: 18px; } .proposal-header { padding: 11px 18px; justify-content: space-between; } .proposal-body { padding: 25px 18px 30px; } .approval-actions { margin: 0; gap: 10px; } .approval-actions button { flex: 1; min-width: 0; } .dashboard-summary h1 { font-size: 1.4rem; } }

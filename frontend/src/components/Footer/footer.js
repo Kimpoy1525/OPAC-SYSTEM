@@ -17,7 +17,7 @@ const Footer = () => {
     <footer className="footer">
       <div className="footer-content">
         <section className="footer-identity" aria-labelledby="footer-title">
-          <h3 id="footer-title">OLFU CCS OPAC Valenzuela</h3>
+          <h3 id="footer-title">OLFU CCS Valenzuela</h3>
           <p>College of Computer Studies<br />Research Repository</p>
         </section>
 

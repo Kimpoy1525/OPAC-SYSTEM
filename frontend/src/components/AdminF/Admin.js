@@ -76,27 +76,26 @@ export default function Admin({ setUser }) {
               <button type="button" className="admin-dialog-close" onClick={() => setShowLogin(false)} aria-label="Close admin login dialog">
                 &times;
               </button>
-              <h2 id="admin-dialog-title">Admin login</h2>
-              <p className="admin-dialog-intro">Enter your authorized staff credentials.</p>
+              <h2 id="admin-dialog-title">Admin Login</h2>
 
               <form onSubmit={handleAdminLogin}>
                 <label className="admin-field">
-                  <span>Username</span>
-                  <input type="text" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
+                  <span className="admin-field-label">Email Address</span>
+                  <input type="text" placeholder="Email Address" value={username} onChange={(event) => setUsername(event.target.value)} autoComplete="username" required />
                 </label>
 
                 <label className="admin-field">
-                  <span>Password</span>
+                  <span className="admin-field-label">Password</span>
                   <div className="admin-password-field">
-                    <input type={showPassword ? "text" : "password"} value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
+                    <input type={showPassword ? "text" : "password"} placeholder="Password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required />
                     <button type="button" className="admin-password-toggle" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? "Hide password" : "Show password"}>
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                      {showPassword ? <FaEye /> : <FaEyeSlash />}
                     </button>
                   </div>
                 </label>
 
                 {error && <p className="admin-login-error" role="alert">{error}</p>}
-                <button type="submit" className="admin-submit-login">Log in</button>
+                <button type="submit" className="admin-submit-login">Login</button>
               </form>
             </section>
           </div>

@@ -73,8 +73,7 @@ export default function LoginModal({ close, setUser }) {
         <button type="button" className="login-modal-close" onClick={close} aria-label="Close login dialog">
           &times;
         </button>
-        <h2 id="login-modal-title">Student login</h2>
-        <p className="login-modal-intro">Sign in to access the CCS research repository.</p>
+        <h2 id="login-modal-title">Student Login</h2>
         <div id="googleLoginBtn" className="google-login-button" />
         <p className="login-modal-hint">
           Use your <strong>@student.fatima.edu.ph</strong> Google account.
