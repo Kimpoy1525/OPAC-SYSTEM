@@ -71,9 +71,15 @@ const Header = ({ setUser, user }) => {
 </nav>
 
 
-            <div className='hamburger' onClick={() => setOpen(!open)}>
+            <button
+                type="button"
+                className="hamburger"
+                onClick={() => setOpen(!open)}
+                aria-label={open ? "Close navigation" : "Open navigation"}
+                aria-expanded={open}
+            >
                 {open ? <FiX size={28}/> : <FiMenu size={28}/>}
-            </div>
+            </button>
 
             {/* 3. Pass setUser down to the Logout modal */}
             <Logout
