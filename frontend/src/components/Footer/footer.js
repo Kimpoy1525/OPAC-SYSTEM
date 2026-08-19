@@ -7,7 +7,9 @@ const Footer = () => {
   const location = useLocation();
   const currentYear = new Date().getFullYear();
 
-  if (location.pathname !== "/" && location.pathname !== "/homepage") {
+  const footerRoutes = ["/", "/homepage", "/adminsecretportal2026"];
+
+  if (!footerRoutes.includes(location.pathname)) {
     return null;
   }
 

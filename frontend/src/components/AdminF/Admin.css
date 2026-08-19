@@ -2,9 +2,9 @@
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: #103b24;
+  background: var(--institutional-green-dark);
   color: #fff;
-  font-family: "Montserrat", Arial, sans-serif;
+  font-family: var(--institutional-font);
 }
 
 .admin-login-header {
@@ -17,7 +17,7 @@
   padding: 10px clamp(20px, 4vw, 56px);
   display: flex;
   align-items: center;
-  background: #0b5d2b;
+  background: var(--institutional-green);
   box-shadow: 0 1px 8px rgba(9, 38, 22, 0.18);
 }
 
@@ -52,7 +52,7 @@
 .admin-submit-login {
   padding: 12px 38px;
   border: 2px solid #fff;
-  border-radius: 6px;
+  border-radius: var(--institutional-control-radius);
   background: #fff;
   color: #05772d;
   font: inherit;
@@ -61,7 +61,7 @@
   cursor: pointer;
 }
 
-.admin-open-login:hover { background: #058632; color: #fff; }
+.admin-open-login:hover { background: var(--institutional-green); color: #fff; }
 
 .admin-dialog-overlay {
   position: fixed;
@@ -79,8 +79,8 @@
   position: relative;
   width: min(420px, 100%);
   padding: 38px 32px 32px;
-  border-top: 5px solid #058632;
-  border-radius: 8px;
+  border-top: 5px solid var(--institutional-green);
+  border-radius: var(--institutional-dialog-radius);
   background: #fff;
   box-shadow: 0 18px 50px rgba(0, 25, 10, 0.35);
   color: #1d2721;
@@ -88,17 +88,17 @@
 }
 
 .admin-dialog-close { position: absolute; top: 8px; right: 12px; width: 38px; height: 38px; border: 0; background: transparent; color: #34433a; font: inherit; font-size: 1.8rem; line-height: 1; cursor: pointer; }
-.admin-dialog h2 { margin: 8px 0 8px; color: #05772d; font-size: 1.65rem; text-align: center; text-transform: none; }
+.admin-dialog h2 { margin: 8px 0 10px; color: var(--institutional-green); font-size: 1.65rem; text-align: center; text-transform: none; }
 .admin-dialog-intro { margin: 0 0 24px; color: #536159; text-align: center; line-height: 1.5; }
 .admin-field { display: block; margin-bottom: 18px; color: #334139; font-size: 0.88rem; font-weight: 600; }
 .admin-field > span { display: block; margin-bottom: 7px; }
-.admin-field input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #aebbb3; border-radius: 5px; background: #fff; color: #17231c; font: inherit; }
-.admin-field input:focus { border-color: #058632; outline: 2px solid rgba(5, 134, 50, 0.2); }
+.admin-field input { box-sizing: border-box; width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #aebbb3; border-radius: var(--institutional-control-radius); background: #fff; color: #17231c; font: inherit; }
+.admin-field input:focus { border-color: var(--institutional-green); outline: 2px solid rgba(11, 93, 43, 0.2); }
 .admin-password-field { position: relative; }
 .admin-password-field input { padding-right: 48px; }
 .admin-password-toggle { position: absolute; top: 0; right: 0; width: 44px; height: 44px; border: 0; background: transparent; color: #425148; cursor: pointer; }
-.admin-submit-login { width: 100%; border-color: #058632; background: #058632; color: #fff; }
-.admin-submit-login:hover { background: #046f2a; }
+.admin-submit-login { width: 100%; border-color: var(--institutional-green); background: var(--institutional-green); color: #fff; }
+.admin-submit-login:hover { background: var(--institutional-green-dark); }
 .admin-login-error { margin: -4px 0 14px; color: #a61b1b; font-size: 0.85rem; text-align: center; }
 
 @media (max-width: 600px) {

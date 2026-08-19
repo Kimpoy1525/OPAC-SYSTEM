@@ -11,14 +11,14 @@
 
 .login-modal {
   position: relative;
-  width: min(390px, 100%);
+  width: min(420px, 100%);
   padding: 38px 32px 32px;
-  border-top: 5px solid #058632;
-  border-radius: 8px;
+  border-top: 5px solid var(--institutional-green);
+  border-radius: var(--institutional-dialog-radius);
   background: #fff;
   box-shadow: 0 18px 50px rgba(0, 25, 10, 0.35);
   color: #1d2721;
-  font-family: "Montserrat", Arial, sans-serif;
+  font-family: var(--institutional-font);
   text-align: center;
 }
 
@@ -40,16 +40,16 @@
 }
 
 .login-modal-close:hover,
-.login-modal-close:focus-visible { color: #058632; }
+.login-modal-close:focus-visible { color: var(--institutional-green); }
 
 .login-modal h2 {
   margin: 8px 0 10px;
-  color: #05772d;
+  color: var(--institutional-green);
   font-size: 1.65rem;
 }
 
 .login-modal-intro,
-.login-modal-hint { color: #536159; line-height: 1.55; }
+.login-modal-hint { color: #536159; line-height: 1.5; }
 .login-modal-intro { margin: 0 0 24px; }
 .google-login-button { min-height: 44px; display: flex; justify-content: center; }
 

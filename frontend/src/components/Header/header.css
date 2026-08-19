@@ -7,7 +7,7 @@
   position: sticky;
   top: 0;
   z-index: 999;
-  background: #0b5d2b;
+  background: var(--institutional-green);
   color: #fff;
   box-shadow: 0 1px 8px rgba(9, 38, 22, 0.18);
 }
@@ -38,7 +38,7 @@
 .logout-btn {
   padding: 8px 14px;
   border: 1px solid rgba(255, 255, 255, 0.48);
-  border-radius: 5px;
+  border-radius: var(--institutional-control-radius);
   background: transparent;
   color: #fff;
   cursor: pointer;
@@ -74,7 +74,7 @@
 
 @media (max-width: 900px) {
   .logo2 { flex-basis: 270px; }
-  .nav-links { position: absolute; top: 100%; left: 0; right: 0; padding: 18px 24px 22px; display: none; flex-direction: column; gap: 8px; background: #0b5d2b; box-shadow: 0 8px 18px rgba(9, 38, 22, 0.2); }
+  .nav-links { position: absolute; top: 100%; left: 0; right: 0; padding: 18px 24px 22px; display: none; flex-direction: column; gap: 8px; background: var(--institutional-green); box-shadow: 0 8px 18px rgba(9, 38, 22, 0.2); }
   .nav-links.show { display: flex; }
   .nav-links > a { width: min(420px, 100%); text-align: center; }
   .user-area { margin-top: 6px; }

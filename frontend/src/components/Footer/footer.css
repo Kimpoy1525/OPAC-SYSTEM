@@ -2,9 +2,9 @@
   width: 100%;
   margin-top: auto;
   padding: 42px clamp(24px, 5vw, 72px) 22px;
-  background: #103b24;
+  background: var(--institutional-green-dark);
   color: #f5f7f5;
-  font-family: "Montserrat", Arial, sans-serif;
+  font-family: var(--institutional-font);
 }
 
 .footer-content {

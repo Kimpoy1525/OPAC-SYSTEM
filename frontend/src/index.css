@@ -9,11 +9,16 @@
   --border: #d9dedb;
   --shadow-sm: 0 2px 8px rgba(19, 54, 31, 0.08);
   --shadow-md: 0 12px 30px rgba(19, 54, 31, 0.12);
+  --institutional-green: #0b5d2b;
+  --institutional-green-dark: #103b24;
+  --institutional-font: "Montserrat", Arial, sans-serif;
+  --institutional-control-radius: 6px;
+  --institutional-dialog-radius: 8px;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 html { min-width: 320px; background: var(--background); scroll-behavior: smooth; }
-body { margin: 0; overflow-x: hidden; color: var(--text); background: var(--background); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+body { margin: 0; overflow-x: hidden; color: var(--text); background: var(--background); font-family: var(--institutional-font); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 img, video, iframe { max-width: 100%; }
 button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
