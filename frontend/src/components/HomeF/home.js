@@ -1,48 +1,32 @@
 import React, { useState } from "react";
 import "./home.css";
 
-import logo from '../Images/Logo Olfu.png'
-import bgImage from '../Images/bgImage.jpg'
+import logo from "../Images/Logo Olfu.png";
+import bgImage from "../Images/bgImage.jpg";
 import LoginModal from "../LoginF/loginModal";
 
-// Added { setUser } as a prop so we can pass it to the Modal
-export default function HomeF({ setUser }) { 
-    const [showModal, setShowModal] = useState(false);
+export default function HomeF({ setUser }) {
+  const [showModal, setShowModal] = useState(false);
 
-    return (
-        <div className="home-container">
-            <header className="header">
-                <img className="logo" src={logo} alt="Logo" />
-                <div className="header-inner">
-                    {/* Header content stays the same */}
-                </div>
-            </header>
+  return (
+    <main className="landing-page">
+      <header className="landing-header">
+        <img className="landing-logo" src={logo} alt="Our Lady of Fatima University" />
+      </header>
 
-            <div className="home-background">
-                <img src={bgImage} alt="background" className="bg-img" />
-                <div className="gradient-overlay"></div>
-            </div>
+      <img src={bgImage} alt="Our Lady of Fatima University campus" className="landing-background" />
+      <div className="landing-shade" aria-hidden="true" />
 
-            <div className="home-content">
-                <h1>OUR LADY OF FATIMA UNIVERSITY</h1>
-                <h2>COLLEGE OF COMPUTER STUDIES</h2>
-                <p>CCSTECHVAULT</p>
+      <section className="landing-content" aria-labelledby="landing-title">
+        <h1 id="landing-title">Our Lady of Fatima University</h1>
+        <h2>College of Computer Studies</h2>
+        <p>CCSTECHVAULT</p>
+        <button type="button" className="landing-login-button" onClick={() => setShowModal(true)}>
+          Log in
+        </button>
+      </section>
 
-                <button 
-                    className="login-btn"
-                    onClick={() => setShowModal(true)}
-                >
-                    LOGIN
-                </button>
-            </div>
-
-            {/* Pass setUser to the LoginModal here */}
-            {showModal && (
-                <LoginModal 
-                    close={() => setShowModal(false)} 
-                    setUser={setUser} 
-                />
-            )}
-        </div>
-    );
+      {showModal && <LoginModal close={() => setShowModal(false)} setUser={setUser} />}
+    </main>
+  );
 }
