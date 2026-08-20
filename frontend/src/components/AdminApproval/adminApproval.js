@@ -72,6 +72,7 @@ const AdminApproval = ({ setUser, user }) => {
                 <div>
                   <h1>Student Proposal</h1>
                   <p>Student # {String(selected.student_id).padStart(7, '0')}</p>
+                  <p className="proposal-email">{selected.student_email}</p>
                 </div>
                 <span className="student-chip"><i />{selected.student_name}</span>
               </div>
@@ -121,6 +122,7 @@ const AdminApproval = ({ setUser, user }) => {
               <strong>Pending Review</strong>
               <span>{proposal.course} · Student # {String(proposal.student_id).padStart(7, '0')}</span>
               <small>{proposal.title}</small>
+              <em className="queue-email">{proposal.student_email}</em>
             </button>
           ))}
           {!loading && !filteredProposals.length && <p className="queue-empty">No pending reviews for this course</p>}

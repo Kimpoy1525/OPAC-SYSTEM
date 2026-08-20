@@ -111,6 +111,7 @@ class UploadLog(models.Model):
 class EditLog(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     title = models.CharField(max_length=255) # The title of the research paper that was edited
+    changes = models.JSONField(default=list, blank=True, help_text="List of {field, old, new} dicts describing what changed.")
     edited_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

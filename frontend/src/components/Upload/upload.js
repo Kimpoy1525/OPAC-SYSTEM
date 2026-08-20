@@ -89,7 +89,8 @@ const Upload = ({ setUser, user }) => {
 
         try {
             await axios.post(`${process.env.REACT_APP_API_URL}/home/upload/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true
             });
 
             setUploading(false);
@@ -142,7 +143,8 @@ const Upload = ({ setUser, user }) => {
 
         try {
             const res = await axios.post(`${process.env.REACT_APP_API_URL}/home/upload-csv/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true
             });
 
             if (res.data.requires_confirmation) {
@@ -187,7 +189,8 @@ const Upload = ({ setUser, user }) => {
 
         try {
             const res = await axios.post(`${process.env.REACT_APP_API_URL}/home/upload-csv/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
+                headers: { 'Content-Type': 'multipart/form-data' },
+                withCredentials: true
             });
             setCsvUploading(false);
             setCsvResults(extractCsvResult(res.data));

@@ -10,6 +10,15 @@ class DocumentSerializer(serializers.ModelSerializer):
     # files is read_only because the DocumentUpdateView handles file creation/deletion manually
     files = ResearchFileSerializer(many=True, read_only=True)
 
+    # Override the URLField so an empty string is accepted (optional field).
+    # Without this, Django's URLField rejects "" even though the field is optional.
+    video_demo_url = serializers.URLField(
+        required=False,
+        allow_blank=True,
+        allow_null=True,
+        max_length=500,
+    )
+
     class Meta:
         model = Document
         fields = [
@@ -31,7 +40,6 @@ class DocumentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'keywords': {'required': False, 'allow_blank': True, 'allow_null': True},
             'panelists': {'required': False, 'allow_blank': True},
-            'video_demo_url': {'required': False, 'allow_blank': True, 'allow_null': True},
         }
 
     def validate_video_demo_url(self, value):

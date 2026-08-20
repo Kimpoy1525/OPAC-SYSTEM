@@ -89,7 +89,7 @@ const Repository = ({ setUser, user }) => {
     if (!itemToDelete) return;
     setDeleting(true);
     try {
-      await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${itemToDelete.id}/delete/`);
+      await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${itemToDelete.id}/delete/`, { withCredentials: true });
       setResearches((current) => current.filter((item) => item.id !== itemToDelete.id));
       setShowDeleteConfirm(false);
       setShowDeleteSuccess(true);

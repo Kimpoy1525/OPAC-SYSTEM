@@ -143,7 +143,7 @@ const ResearchDetails = ({ setUser, user }) => {
         });
 
         try {
-            const response = await axios.put(`${process.env.REACT_APP_API_URL}/home/detail/${id}/update/`, formData);
+            const response = await axios.put(`${process.env.REACT_APP_API_URL}/home/detail/${id}/update/`, formData, { withCredentials: true });
            
             setSaving(false);
             setResearchItem(response.data);

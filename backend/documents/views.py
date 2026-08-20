@@ -60,7 +60,7 @@ class DocumentListView(generics.ListAPIView):
     serializer_class = DocumentSerializer
 
     def get_queryset(self):
-        queryset = Document.objects.all().order_by('-uploaded_at')
+        queryset = Document.objects.all().order_by('-uploaded_at').prefetch_related('files')
         year = self.request.query_params.get('year')
         course = self.request.query_params.get('course')
         search_query = self.request.query_params.get('search')
@@ -94,20 +94,25 @@ class DocumentUpdateView(generics.UpdateAPIView):
     parser_classes = (MultiPartParser, FormParser)
     permission_classes = [IsCatalogAdmin]
 
+    # Fields tracked for the change log (excludes uploaded_at / id / files)
+    TRACKED_FIELDS = [
+        'title', 'authors', 'year', 'abstract', 'keywords',
+        'panelists', 'course', 'video_demo_url',
+    ]
+
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         
         if serializer.is_valid():
+            # Capture original values BEFORE saving
+            old_values = {f: getattr(instance, f) for f in self.TRACKED_FIELDS}
+
             document = serializer.save()
-            
-            # --- NEW: LOG THE EDIT EVENT ---
-            if request.user.is_authenticated:
-                EditLog.objects.create(
-                    user=request.user,
-                    title=document.title
-                )
-            
+
+            # Count files before/after to detect file add/removal
+            old_file_ids = set(instance.files.values_list('id', flat=True))
+
             delete_ids_raw = request.data.get('delete_files')
             if delete_ids_raw:
                 try:
@@ -119,6 +124,35 @@ class DocumentUpdateView(generics.UpdateAPIView):
             new_files = request.FILES.getlist('new_files')
             for file_data in new_files:
                 ResearchFile.objects.create(document=document, file=file_data)
+
+            # --- Build the change list (field-by-field diff) ---
+            changes = []
+            for field in self.TRACKED_FIELDS:
+                old_value = old_values[field]
+                new_value = getattr(document, field)
+                if old_value != new_value:
+                    changes.append({
+                        "field": field,
+                        "old": str(old_value) if old_value is not None else "",
+                        "new": str(new_value) if new_value is not None else "",
+                    })
+
+            # Detect file count changes
+            new_file_ids = set(document.files.values_list('id', flat=True))
+            removed_count = len(old_file_ids - new_file_ids)
+            added_count = len(new_files)
+            if removed_count:
+                changes.append({"field": "files", "old": f"{removed_count} file(s)", "new": "removed"})
+            if added_count:
+                changes.append({"field": "files", "old": f"{added_count} file(s)", "new": "added"})
+
+            # --- LOG THE EDIT EVENT WITH CHANGES ---
+            if request.user.is_authenticated:
+                EditLog.objects.create(
+                    user=request.user,
+                    title=document.title,
+                    changes=changes
+                )
 
             return Response(DocumentSerializer(document).data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

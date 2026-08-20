@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django.utils.html import format_html
 from .models import User, AccessLog, DownloadLog, TitleReservation
 
 @admin.register(User)
@@ -48,9 +49,40 @@ class UploadLogAdmin(admin.ModelAdmin):
 class EditLogAdmin(admin.ModelAdmin):
     list_display = ('user', 'title', 'edited_at')
     list_filter = ('edited_at', 'user')
-    readonly_fields = ('user', 'title', 'edited_at')
+    readonly_fields = ('user', 'title', 'edited_at', 'formatted_changes')
 
     def has_add_permission(self, request): return False
+
+    @admin.display(description="Changes")
+    def formatted_changes(self, obj):
+        """Render the changes JSON as a readable Field: Old → New table."""
+        if not obj.changes:
+            return format_html("<em>No changes recorded</em>")
+
+        rows = []
+        for change in obj.changes:
+            field = change.get("field", "?")
+            old = change.get("old", "")
+            new = change.get("new", "")
+            rows.append(
+                format_html(
+                    "<tr><td><strong>{}</strong></td><td>{}</td><td>→</td><td>{}</td></tr>",
+                    field,
+                    old,
+                    new,
+                )
+            )
+
+        return format_html(
+            "<table style='border-collapse: collapse; width: 100%;'>"
+            "<thead><tr style='border-bottom: 2px solid #ccc;'>"
+            "<th style='padding: 6px; text-align: left;'>Field</th>"
+            "<th style='padding: 6px; text-align: left;'>Old</th>"
+            "<th style='padding: 6px;'></th>"
+            "<th style='padding: 6px; text-align: left;'>New</th>"
+            "</tr></thead><tbody>{}</tbody></table>",
+            format_html("".join(rows)),
+        )
 
 @admin.register(DeleteLog)
 class DeleteLogAdmin(admin.ModelAdmin):
