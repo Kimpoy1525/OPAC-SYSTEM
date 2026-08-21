@@ -17,6 +17,7 @@ ALLOWED_STUDENT_DOMAIN = "@student.fatima.edu.ph"
 ALLOWED_TEACHER_DOMAIN = "@fatima.edu.ph"
 LOGIN_ATTEMPT_LIMIT = 5
 LOGIN_LOCKOUT_SECONDS = 15 * 60
+MAX_TITLE_ATTEMPTS = 3
 
 # Optimized for Railway/Cloud Proxies
 def get_client_ip(request):
@@ -210,8 +211,30 @@ def secure_logout(request):
     return response
 
 
+@csrf_exempt
+def session_status(request):
+    """Return the currently authenticated user, or 401 if the session is invalid/expired."""
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    return JsonResponse({
+        "user": {
+            "id": request.user.id,
+            "email": request.user.email,
+            "first_name": request.user.first_name,
+            "last_name": request.user.last_name,
+            "role": request.user.role,
+            "picture": request.user.picture,
+        }
+    })
+
+
 def _reservation_json(reservation):
     student_name = reservation.student.get_full_name() or reservation.student.username
+    reviewer_name = ""
+    if reservation.reviewed_by_id:
+        reviewer_name = reservation.reviewed_by.get_full_name() or reservation.reviewed_by.username
     return {
         "id": reservation.id,
         "student_id": reservation.student_id,
@@ -227,6 +250,7 @@ def _reservation_json(reservation):
         "status_label": reservation.get_status_display(),
         "created_at": reservation.created_at.isoformat(),
         "reviewed_at": reservation.reviewed_at.isoformat() if reservation.reviewed_at else None,
+        "reviewed_by_name": reviewer_name,
     }
 
 
@@ -246,12 +270,15 @@ def student_reservations(request):
         return JsonResponse({"error": "Only student accounts can submit proposals"}, status=403)
 
     existing_reservations = request.user.title_reservations.all()
-    if existing_reservations.filter(status=TitleReservation.Status.APPROVED).exists():
-        return JsonResponse({"error": "Your group already has an approved title"}, status=400)
-    if existing_reservations.count() >= 3 and existing_reservations.exclude(
+    # Only PENDING and APPROVED reservations consume an attempt.
+    # REJECTED reservations are excluded, effectively refunding that attempt.
+    used_attempts = existing_reservations.exclude(
         status=TitleReservation.Status.REJECTED
-    ).exists():
-        return JsonResponse({"error": "A new reservation is available only when no title is pending or approved"}, status=400)
+    ).count()
+    if used_attempts >= MAX_TITLE_ATTEMPTS:
+        return JsonResponse({
+            "error": f"You have used all {MAX_TITLE_ATTEMPTS} title reservation attempts"
+        }, status=400)
 
     try:
         data = json.loads(request.body)
@@ -328,3 +355,20 @@ def review_reservation(request, reservation_id):
     reservation.reviewed_at = timezone.now()
     reservation.save(update_fields=["status", "reviewed_by", "reviewed_at"])
     return JsonResponse({"reservation": _reservation_json(reservation)})
+
+
+@csrf_exempt
+def reservation_history(request):
+    """Admin-only endpoint returning ALL submissions (pending, approved, rejected)."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Admin access required"}, status=403)
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    reservations = TitleReservation.objects.select_related("student", "reviewed_by")
+    return JsonResponse({
+        "reservations": [_reservation_json(item) for item in reservations],
+        "total": reservations.count(),
+    })

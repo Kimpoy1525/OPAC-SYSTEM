@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Upload from './components/Upload/upload'
 import HomeF from './components/HomeF/home';
 import Homepage from './components/HomepageF/homepage';
@@ -31,12 +31,46 @@ function App() {
       return null;
     }
   });
+  const [sessionChecked, setSessionChecked] = useState(false);
+
+  // Validate the backend session on app load.
+  // If the session cookie is missing/expired, clear local state and force re-login.
+  useEffect(() => {
+    const validateSession = async () => {
+      const savedUser = localStorage.getItem("user");
+      if (!savedUser) {
+        setSessionChecked(true);
+        return;
+      }
+      try {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/session/`, {
+          credentials: "include",
+        });
+        if (!res.ok) {
+          // Session is invalid/expired — clear local state so protected routes lock.
+          localStorage.removeItem("user");
+          setUser(null);
+        }
+      } catch {
+        // Server unreachable — keep the user logged in locally to avoid disruption.
+      } finally {
+        setSessionChecked(true);
+      }
+    };
+    validateSession();
+  }, []);
 
   const isAuthenticated = !!user;
   const normalizedRole = user?.role?.toUpperCase();
   const isAdmin = normalizedRole === "ADMIN" || normalizedRole === "SUPERADMIN";
   const isStudent = normalizedRole === "USER";
   const authenticatedHome = isAdmin ? "/admin-approval" : "/homepage";
+
+  // While the session is being validated, show a blank screen to avoid flashing
+  // protected pages to a user whose session has expired.
+  if (!sessionChecked) {
+    return <div className="app-container" />;
+  }
 
   return (
    
@@ -101,8 +135,6 @@ function App() {
   
    
     
-    
-
 
   );
 }

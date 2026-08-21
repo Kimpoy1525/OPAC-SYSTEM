@@ -180,6 +180,7 @@ const ResearchDetails = ({ setUser, user }) => {
                     )}
 
                     <p><strong>Authors:</strong> {researchItem.authors || "No authors specified"}</p>
+                    <p><strong>Course:</strong> {researchItem.course || "No course specified"}</p>
                     <p className='details-abstract'><strong>Abstract:</strong> {researchItem.abstract}</p>
                     <p><strong>Keywords:</strong> {researchItem.keywords || "No keywords specified"}</p>
                     <p><strong>Panelists:</strong> {researchItem.panelists || "No panelists specified"}</p>

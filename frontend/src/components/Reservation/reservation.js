@@ -14,10 +14,11 @@ const Reservation = ({ setUser, user }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const hasApprovedTitle = reservations.some(({ status }) => status === 'APPROVED');
-  const hasPendingTitle = reservations.some(({ status }) => status === 'PENDING');
-  const canStartNewCycle = reservations.length >= MAX_ATTEMPTS && !hasApprovedTitle && !hasPendingTitle;
-  const canSubmit = !hasApprovedTitle && (reservations.length < MAX_ATTEMPTS || canStartNewCycle);
+  // Only PENDING and APPROVED reservations consume an attempt.
+  // REJECTED reservations are excluded, effectively refunding that attempt.
+  const usedAttempts = reservations.filter(({ status }) => status !== 'REJECTED').length;
+  const attemptsLeft = Math.max(0, MAX_ATTEMPTS - usedAttempts);
+  const canSubmit = attemptsLeft > 0;
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/`, { withCredentials: true })
@@ -41,9 +42,7 @@ const Reservation = ({ setUser, user }) => {
     }
 
     if (!canSubmit) {
-      setMessage(hasApprovedTitle
-        ? 'Your group already has an approved title.'
-        : 'Please wait for the review of your submitted titles.');
+      setMessage('You have used all your title reservation attempts.');
       return;
     }
 
@@ -82,7 +81,7 @@ const Reservation = ({ setUser, user }) => {
               <p>Requesting title approval for upcoming title defense.</p>
             </div>
             <span className="attempt-badge">
-              {canStartNewCycle ? 'NEW RESERVATION' : `ATTEMPT ${Math.min(reservations.length + 1, MAX_ATTEMPTS)} / ${MAX_ATTEMPTS}`}
+              {attemptsLeft > 0 ? `${attemptsLeft} ATTEMPT${attemptsLeft > 1 ? 'S' : ''} LEFT` : 'ALL ATTEMPTS USED'}
             </span>
           </div>
 

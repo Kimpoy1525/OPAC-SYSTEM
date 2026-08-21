@@ -3,8 +3,10 @@ from .views import (
     approval_queue,
     google_login,
     manual_admin_login,
+    reservation_history,
     review_reservation,
     secure_logout,
+    session_status,
     student_reservations,
 )
 
@@ -15,7 +17,9 @@ urlpatterns = [
     # Endpoint for Manual Admin/Superadmin Login
     path('admin-login/', manual_admin_login, name='admin_login'),
     path('logout/', secure_logout, name='secure_logout'),
+    path('session/', session_status, name='session_status'),
     path('reservations/', student_reservations, name='student_reservations'),
     path('reservations/approval-queue/', approval_queue, name='approval_queue'),
+    path('reservations/history/', reservation_history, name='reservation_history'),
     path('reservations/<int:reservation_id>/review/', review_reservation, name='review_reservation'),
 ]
