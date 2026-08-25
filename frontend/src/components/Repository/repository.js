@@ -144,7 +144,7 @@ const Repository = ({ setUser, user }) => {
               <p className='results-count'>{researches.length} research {researches.length === 1 ? 'record' : 'records'} found</p>
               {researches.map((research) => (
                 <article key={research.id} className='research-card'>
-                  {(user?.role === 'ADMIN' || user?.role === 'SUPERADMIN') && <button className='card-delete-btn' onClick={() => { setItemToDelete({ id: research.id, title: research.title }); setShowDeleteConfirm(true); }} title='Delete research' aria-label={`Delete ${research.title}`}><FaTrash /></button>}
+                  {(user?.role === 'CONTENT_MANAGER' || user?.role === 'SUPERADMIN') && <button className='card-delete-btn' onClick={() => { setItemToDelete({ id: research.id, title: research.title }); setShowDeleteConfirm(true); }} title='Delete research' aria-label={`Delete ${research.title}`}><FaTrash /></button>}
                   <h2><HighlightText text={research.title} query={activeSearch} /></h2>
                   <p><span className='labels'>Author(s):</span> <HighlightText text={research.authors} query={activeSearch} /></p>
                   <p><span className='labels'>Year:</span> {research.year}</p>

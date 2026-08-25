@@ -31,8 +31,8 @@ export default function Admin({ setUser }) {
         return;
       }
 
-      if (data.user.role !== "SUPERADMIN" && data.user.role !== "ADMIN") {
-        setError("Access denied: Not an administrator.");
+      if (data.user.role !== "SUPERADMIN" && data.user.role !== "CONTENT_MANAGER") {
+        setError("Access denied: Not a content manager.");
         return;
       }
 
@@ -63,11 +63,11 @@ export default function Admin({ setUser }) {
       <section className="admin-login-content" aria-labelledby="admin-page-title">
         {!showLogin ? (
           <>
-            <h1 id="admin-page-title">Admin Portal</h1>
+            <h1 id="admin-page-title">Content Manager Portal</h1>
             <h2>College of Computer Studies</h2>
             <p>Online Public Access Catalog</p>
             <button type="button" className="admin-open-login" onClick={() => setShowLogin(true)}>
-              Admin login
+              Content Manager login
             </button>
           </>
         ) : (
@@ -76,7 +76,7 @@ export default function Admin({ setUser }) {
               <button type="button" className="admin-dialog-close" onClick={() => setShowLogin(false)} aria-label="Close admin login dialog">
                 &times;
               </button>
-              <h2 id="admin-dialog-title">Admin Login</h2>
+              <h2 id="admin-dialog-title">Content Manager Login</h2>
 
               <form onSubmit={handleAdminLogin}>
                 <label className="admin-field">

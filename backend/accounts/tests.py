@@ -11,7 +11,7 @@ class TitleReservationWorkflowTests(TestCase):
     def setUp(self):
         self.student = User.objects.create_user(username="student", role=User.Role.USER)
         self.superadmin = User.objects.create_user(username="superadmin", role=User.Role.SUPERADMIN)
-        self.admin = User.objects.create_user(username="admin", role=User.Role.ADMIN)
+        self.admin = User.objects.create_user(username="admin", role=User.Role.CONTENT_MANAGER)
 
     def submit(self, number=1):
         return self.client.post(
@@ -97,7 +97,7 @@ class AuthenticationSecurityTests(TestCase):
         self.admin = User.objects.create_user(
             username="secure-admin",
             password="StrongTestPassword!123",
-            role=User.Role.ADMIN,
+            role=User.Role.CONTENT_MANAGER,
         )
 
     def test_logout_terminates_authenticated_session(self):

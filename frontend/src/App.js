@@ -62,7 +62,7 @@ function App() {
 
   const isAuthenticated = !!user;
   const normalizedRole = user?.role?.toUpperCase();
-  const isAdmin = normalizedRole === "ADMIN" || normalizedRole === "SUPERADMIN";
+  const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
   const isStudent = normalizedRole === "USER";
   const authenticatedHome = isAdmin ? "/admin-approval" : "/homepage";
 

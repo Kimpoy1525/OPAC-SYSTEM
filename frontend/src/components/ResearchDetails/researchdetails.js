@@ -175,7 +175,7 @@ const ResearchDetails = ({ setUser, user }) => {
                 <div className='details-content'>
                     <h1>{researchItem.title}</h1>
                     
-                    {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN') && (
+                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
                         <button className='edit-details' onClick={openEditModal}>Edit</button>
                     )}
 
@@ -209,7 +209,7 @@ const ResearchDetails = ({ setUser, user }) => {
                                         {fileObj.file.split('/').pop()}
                                     </span>
                                     
-                                    {user && (user.role === 'ADMIN' || user.role === 'SUPERADMIN' || user.role === 'TEACHER') ? (
+                                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN' || user.role === 'TEACHER') ? (
                                         <a 
                                             href={`${process.env.REACT_APP_API_URL}/home/download/${fileObj.id}/`} 
                                             className='download-icon'
@@ -218,7 +218,7 @@ const ResearchDetails = ({ setUser, user }) => {
                                             <LuDownload />
                                         </a>
                                     ) : (
-                                        <span className='lock-icon' title="Access Restricted to Admins">
+                                        <span className='lock-icon' title="Access Restricted to Content Managers">
                                             <FaLock />
                                         </span>
                                     )}

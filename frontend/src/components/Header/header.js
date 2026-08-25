@@ -11,7 +11,7 @@ const Header = ({ setUser, user }) => {
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
     // 2. Updated Admin Check: Use the is_staff flag from your Django user object
     const normalizedRole = user?.role?.toUpperCase();
-    const isAdmin = normalizedRole === "ADMIN" || normalizedRole === "SUPERADMIN";
+    const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
     const isStudent = normalizedRole === "USER";
     const homePath = isAdmin ? '/admin-approval' : '/homepage';
 
@@ -22,7 +22,7 @@ const Header = ({ setUser, user }) => {
             </Link>
 
       <nav className={`nav-links ${open ? "show" : ""}`}>
-    <Link to={homePath}>{isAdmin ? 'Admin Dashboard' : 'Home'}</Link>
+    <Link to={homePath}>{isAdmin ? 'Content Manager Dashboard' : 'Home'}</Link>
 
     {isAdmin && (
       <Link to='/upload'>Upload</Link>

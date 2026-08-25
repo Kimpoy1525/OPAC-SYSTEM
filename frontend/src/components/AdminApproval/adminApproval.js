@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FiList, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiList, FiClock, FiCheckCircle, FiXCircle, FiEye } from 'react-icons/fi';
 import Header from '../Header/header';
 import './adminApproval.css';
 
@@ -14,6 +14,7 @@ const AdminApproval = ({ setUser, user }) => {
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
+  const [historyDetail, setHistoryDetail] = useState(null);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/approval-queue/`, { withCredentials: true })
@@ -190,6 +191,7 @@ const AdminApproval = ({ setUser, user }) => {
                     <th>Submitted</th>
                     <th>Reviewed By</th>
                     <th>Reviewed At</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -206,6 +208,11 @@ const AdminApproval = ({ setUser, user }) => {
                       <td>{reservation.created_at ? new Date(reservation.created_at).toLocaleString() : '—'}</td>
                       <td>{reservation.reviewed_by_name || '—'}</td>
                       <td>{reservation.reviewed_at ? new Date(reservation.reviewed_at).toLocaleString() : '—'}</td>
+                      <td>
+                        <button type="button" className="history-view-btn" onClick={() => setHistoryDetail(reservation)}>
+                          <FiEye aria-hidden="true" /> View
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -218,6 +225,52 @@ const AdminApproval = ({ setUser, user }) => {
             </div>
           )}
         </section>
+      )}
+
+      {/* --- HISTORY DETAIL MODAL --- */}
+      {historyDetail && (
+        <div className="modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setHistoryDetail(null); }}>
+          <div className="modal-container history-detail-modal">
+            <button type="button" className="close-modal" onClick={() => setHistoryDetail(null)} aria-label="Close submission details">&times;</button>
+            <h2 className="history-detail-heading">Submission Details</h2>
+
+            <div className="history-detail-status-wrap">
+              <span className={`history-status status-${historyDetail.status.toLowerCase()}`}>{historyDetail.status_label}</span>
+            </div>
+
+            <div className="history-detail-body">
+              <h3>Title Name</h3>
+              <p className="history-detail-title">{historyDetail.title}</p>
+
+              <div className="proposal-academic-info">
+                <div><span>Student</span><strong>{historyDetail.student_name}</strong></div>
+                <div><span>Student Email</span><strong>{historyDetail.student_email}</strong></div>
+                <div><span>Course</span><strong>{historyDetail.course_label || historyDetail.course}</strong></div>
+                <div><span>Section</span><strong>{historyDetail.section}</strong></div>
+              </div>
+
+              <h3>Overview / Objectives</h3>
+              <p className="proposal-overview">{historyDetail.overview}</p>
+
+              <h3>Group Members (Full Name)</h3>
+              <div className="member-list">
+                {historyDetail.group_members.split(/[,\n]/).filter(Boolean).map((member) => (
+                  <span className="member-chip" key={member.trim()}><i />{member.trim()}</span>
+                ))}
+              </div>
+
+              <div className="history-detail-meta">
+                <div><span>Submitted</span><strong>{historyDetail.created_at ? new Date(historyDetail.created_at).toLocaleString() : '—'}</strong></div>
+                <div><span>Reviewed By</span><strong>{historyDetail.reviewed_by_name || '—'}</strong></div>
+                <div><span>Reviewed At</span><strong>{historyDetail.reviewed_at ? new Date(historyDetail.reviewed_at).toLocaleString() : '—'}</strong></div>
+              </div>
+            </div>
+
+            <div className="history-detail-actions">
+              <button type="button" className="history-detail-close-btn" onClick={() => setHistoryDetail(null)}>Close</button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );

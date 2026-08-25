@@ -169,8 +169,8 @@ def manual_admin_login(request):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            # Check for Admin or Superadmin role
-            if user.role in [User.Role.ADMIN, User.Role.SUPERADMIN]:
+            # Check for Content Manager or Superadmin role
+            if user.role in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
                 login(request, user)
                 request.session.cycle_key()
                 _clear_failed_logins(request, "admin")
@@ -179,7 +179,7 @@ def manual_admin_login(request):
                 AccessLog.objects.create(user=user, ip_address=get_client_ip(request))
 
                 return JsonResponse({
-                    "message": "Admin login successful",
+                    "message": "Content Manager login successful",
                     "user": {
                         "username": user.username,
                         "email": user.email,
@@ -316,8 +316,8 @@ def student_reservations(request):
 def approval_queue(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
-    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
-        return JsonResponse({"error": "Admin access required"}, status=403)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
@@ -331,8 +331,8 @@ def approval_queue(request):
 def review_reservation(request, reservation_id):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
-    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
-        return JsonResponse({"error": "Admin access required"}, status=403)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
     if request.method != "PATCH":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
@@ -362,8 +362,8 @@ def reservation_history(request):
     """Admin-only endpoint returning ALL submissions (pending, approved, rejected)."""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
-    if request.user.role not in [User.Role.ADMIN, User.Role.SUPERADMIN]:
-        return JsonResponse({"error": "Admin access required"}, status=403)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
     if request.method != "GET":
         return JsonResponse({"error": "Invalid method"}, status=405)
 
