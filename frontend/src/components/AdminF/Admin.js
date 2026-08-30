@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import LoadingOverlay from "../LoadingOverlay/loadingOverlay";
 import "./Admin.css";
 
 import logo from "../Images/Logo Olfu.png";
@@ -12,11 +13,14 @@ export default function Admin({ setUser }) {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
   const navigate = useNavigate();
 
   const handleAdminLogin = async (event) => {
     event.preventDefault();
 
+    setSigningIn(true);
+    setError("");
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/admin-login/`, {
         method: "POST",
@@ -42,6 +46,8 @@ export default function Admin({ setUser }) {
       navigate("/admin-approval", { replace: true });
     } catch (err) {
       setError("Cannot connect to the server. Please try again later.");
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -101,6 +107,7 @@ export default function Admin({ setUser }) {
           </div>
         )}
       </section>
+      {signingIn && <LoadingOverlay message="Signing in..." />}
     </main>
   );
 }

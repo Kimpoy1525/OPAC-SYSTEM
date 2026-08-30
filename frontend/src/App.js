@@ -10,6 +10,8 @@ import Reservation from './components/Reservation/reservation';
 import AdminApproval from './components/AdminApproval/adminApproval';
 import './App.css';
 import Footer from './components/Footer/footer';
+import LoadingOverlay from './components/LoadingOverlay/loadingOverlay';
+import Chatbot from './components/Chatbot/chatbot';
 
 
 // The Gatekeeper Component
@@ -69,7 +71,7 @@ function App() {
   // While the session is being validated, show a blank screen to avoid flashing
   // protected pages to a user whose session has expired.
   if (!sessionChecked) {
-    return <div className="app-container" />;
+    return <LoadingOverlay message="Checking your session..." />;
   }
 
   return (
@@ -131,6 +133,7 @@ function App() {
       
     </Routes>
       <Footer/>
+      <Chatbot />
       </div>
   
    

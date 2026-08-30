@@ -6,12 +6,14 @@ from .views import (
     DocumentDetailView, 
     DocumentUpdateView,
     DocumentCSVUploadView,
-    FileDownloadView  
+    FileDownloadView,
+    RepositoryChatView
 )
 
 urlpatterns = [
     path('upload/', DocumentUploadView.as_view(), name='document-upload'),
     path('all/', DocumentListView.as_view(), name='document-list'),
+    path('chat/', RepositoryChatView.as_view(), name='repository-chat'),
     path('detail/<int:id>/', DocumentDetailView.as_view(), name='document-detail'),
     path('detail/<int:id>/update/', DocumentUpdateView.as_view(), name='document-update'),
     path('detail/<int:id>/delete/', DocumentDeleteView.as_view(), name='document-delete'),

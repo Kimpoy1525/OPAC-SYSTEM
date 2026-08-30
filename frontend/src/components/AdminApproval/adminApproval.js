@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FiList, FiClock, FiCheckCircle, FiXCircle, FiEye } from 'react-icons/fi';
 import Header from '../Header/header';
+import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './adminApproval.css';
 
 const AdminApproval = ({ setUser, user }) => {
@@ -15,6 +16,7 @@ const AdminApproval = ({ setUser, user }) => {
   const [error, setError] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
   const [historyDetail, setHistoryDetail] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/approval-queue/`, { withCredentials: true })
@@ -29,9 +31,11 @@ const AdminApproval = ({ setUser, user }) => {
 
   useEffect(() => {
     if (view !== 'history') return;
+    setHistoryLoading(true);
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/history/`, { withCredentials: true })
       .then(({ data }) => setHistory(Array.isArray(data?.reservations) ? data.reservations : []))
-      .catch((requestError) => setError(requestError.response?.data?.error || 'Unable to load the submission history.'));
+      .catch((requestError) => setError(requestError.response?.data?.error || 'Unable to load the submission history.'))
+      .finally(() => setHistoryLoading(false));
   }, [view]);
 
   const selected = proposals.find((proposal) => proposal.id === selectedId) || null;
@@ -272,6 +276,11 @@ const AdminApproval = ({ setUser, user }) => {
           </div>
         </div>
       )}
+
+      {/* --- LOADING OVERLAYS --- */}
+      {loading && <LoadingOverlay message="Loading approval queue..." />}
+      {view === 'history' && historyLoading && <LoadingOverlay message="Loading submission history..." />}
+      {reviewing && <LoadingOverlay message="Updating proposal..." />}
     </main>
   );
 };

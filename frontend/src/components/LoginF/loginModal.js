@@ -1,13 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingOverlay from "../LoadingOverlay/loadingOverlay";
 import "./loginModal.css";
 
 export default function LoginModal({ close, setUser }) {
   const navigate = useNavigate();
   const dialogRef = useRef(null);
   const [error, setError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
   const handleGoogleLogin = useCallback(async (response) => {
+    setSigningIn(true);
+    setError("");
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/google/`, {
         method: "POST",
@@ -28,6 +32,8 @@ export default function LoginModal({ close, setUser }) {
       navigate("/homepage", { replace: true });
     } catch (err) {
       setError("Cannot connect to the server. Please try again later.");
+    } finally {
+      setSigningIn(false);
     }
   }, [close, navigate, setUser]);
 
@@ -80,6 +86,7 @@ export default function LoginModal({ close, setUser }) {
         </p>
         {error && <p className="login-modal-error" role="alert">{error}</p>}
       </section>
+      {signingIn && <LoadingOverlay message="Signing in..." />}
     </div>
   );
 }

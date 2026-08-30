@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FiCheckSquare } from 'react-icons/fi';
 import Header from '../Header/header';
+import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './reservation.css';
 
 const MAX_ATTEMPTS = 3;
@@ -26,6 +27,8 @@ const Reservation = ({ setUser, user }) => {
       .catch(() => setMessage('Unable to load your reservations. Please try again.'))
       .finally(() => setLoading(false));
   }, []);
+
+  if (loading) return <LoadingOverlay message="Loading your reservations..." />;
 
   const handleChange = ({ target: { name, value } }) => {
     setForm((current) => ({ ...current, [name]: value }));

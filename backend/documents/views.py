@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
 from rest_framework.permissions import BasePermission
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.conf import settings 
 from django.http import FileResponse, Http404 
 from django.shortcuts import get_object_or_404 
@@ -14,6 +14,8 @@ import json
 import os 
 import csv
 import io
+import urllib.request
+import urllib.error
 from datetime import date
 
 class IsCatalogAdmin(BasePermission):
@@ -371,3 +373,102 @@ class FileDownloadView(APIView):
             return FileResponse(open(file_path, 'rb'), as_attachment=True)
         else:
             raise Http404(f"File not found at: {file_path}")
+# --- AI REPOSITORY CHATBOT (metadata only) ---
+class RepositoryChatView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return Response({"error": "Please sign in to use the AI assistant."}, status=status.HTTP_401_UNAUTHORIZED)
+
+        api_key = os.environ.get("GEMINI_API_KEY", "").strip()
+        if not api_key:
+            return Response({"error": "The AI assistant is not configured yet. Please contact the administrator."}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+
+        try:
+            body = json.loads(request.body) if request.body else {}
+        except (json.JSONDecodeError, TypeError):
+            body = {}
+
+        raw_messages = body.get("messages") or []
+        if not isinstance(raw_messages, list):
+            return Response({"error": "Invalid messages payload."}, status=status.HTTP_400_BAD_REQUEST)
+
+        messages = []
+        for m in raw_messages:
+            if isinstance(m, dict) and isinstance(m.get("content"), str) and m.get("content").strip():
+                messages.append({"role": "model" if m.get("role") == "assistant" else "user", "content": m["content"].strip()})
+        messages = messages[-12:]
+
+        docs = Document.objects.all().order_by("-uploaded_at")[:150]
+        lines = []
+        for doc in docs:
+            abstract = (doc.abstract or "").strip()
+            if len(abstract) > 600:
+                abstract = abstract[:600] + "..."
+            lines.append(
+                "Title: {0}\n  Authors: {1}\n  Year: {2}\n  Course: {3}\n  Keywords: {4}\n  Panelists: {5}\n  Abstract: {6}".format(
+                    doc.title, doc.authors, doc.year, doc.course, doc.keywords or "N/A", doc.panelists or "N/A", abstract
+                )
+            )
+        repository_text = "\n\n".join(lines) if lines else "(The repository currently has no research titles.)"
+
+        total = Document.objects.count()
+        course_counts = {r["course"]: r["c"] for r in Document.objects.values("course").annotate(c=Count("id"))}
+
+        matrix = {}
+        for r in Document.objects.values("course", "year").annotate(c=Count("id")):
+            matrix.setdefault(r["course"], {})[str(r["year"])] = r["c"]
+        years = sorted({y for d in matrix.values() for y in d})
+
+        fact_lines = [
+            "IMPORTANT FACTS (these are authoritative, do not contradict them):",
+            f"- Total research titles in the repository: {total}",
+        ]
+        for c in ["BSCS", "BSIT", "BSEMC"]:
+            fact_lines.append(f"- {c} titles: {course_counts.get(c, 0)}")
+        fact_lines.append("- Per-course breakdown by year:")
+        for c in ["BSCS", "BSIT", "BSEMC"]:
+            pieces = [matrix.get(c, {}).get(y, 0) for y in years]
+            fact_lines.append(f"    {c}: " + "; ".join(f"{y}: {n}" for y, n in zip(years, pieces)))
+        facts = "\n".join(fact_lines)
+
+        system_prompt = (
+            "You are the CCSTECHVAULT AI assistant for Our Lady of Fatima University - College of Computer Studies. "
+            "Answer questions ONLY using the research metadata provided below. "
+            "For ANY question about counts or how many titles (including combined filters like course and year), use the IMPORTANT FACTS section - do not count from the list yourself. "
+            "You do NOT have access to files, PDFs, documents, download links, or video content - never mention them. "
+            "If the answer is not in the metadata, say you do not have that information. Be concise and helpful.\n\n"
+            + facts + "\n\n"
+            + "REPOSITORY METADATA (title, authors, year, course, keywords, panelists, abstract ONLY):\n\n"
+            + repository_text
+        )
+
+        contents = []
+        for m in messages:
+            contents.append({"role": m["role"], "parts": [{"text": m["content"]}]})
+
+        payload = {
+            "system_instruction": {"parts": [{"text": system_prompt}]},
+            "contents": contents,
+            "generationConfig": {"temperature": 0.6, "maxOutputTokens": 2048},
+        }
+
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
+        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model_name + ":generateContent?key=" + api_key
+        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                result = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.HTTPError as exc:
+            return Response({"error": "AI service error ({0}). Please try again later.".format(exc.code)}, status=status.HTTP_502_BAD_GATEWAY)
+        except (urllib.error.URLError, OSError):
+            return Response({"error": "Could not reach the AI service. Please try again later."}, status=status.HTTP_502_BAD_GATEWAY)
+
+        try:
+            reply = result["candidates"][0]["content"]["parts"][0]["text"].strip()
+        except (KeyError, IndexError, TypeError):
+            reply = "I'm sorry, I could not generate a response. Please try again."
+
+        return Response({"reply": reply})
+

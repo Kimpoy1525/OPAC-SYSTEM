@@ -160,6 +160,7 @@ const Repository = ({ setUser, user }) => {
         </section>
       </div>
 
+      {loading && <LoadingOverlay message='Loading repository...' />}
       {deleting && <LoadingOverlay message='Deleting record...' />}
       {showDeleteConfirm && !deleting && <div className='modal-overlay'><div className='modal-content'><div className='success-icon' style={{ color: '#d9534f' }}><FaTrash /></div><h3>Confirm deletion</h3><p>Delete <strong>“{itemToDelete?.title}”</strong>? This action cannot be undone.</p><div className='modal-actions'><button className='modal-confirm-btn' onClick={handleConfirmDelete}>Delete</button><button className='modal-cancel-btn' onClick={() => setShowDeleteConfirm(false)}>Cancel</button></div></div></div>}
       {showDeleteSuccess && <div className='modal-overlay'><div className='modal-content'><div className='success-icon'>✓</div><h3>Record deleted</h3><p>The research record has been permanently removed.</p><button className='modal-close-btn' onClick={() => setShowDeleteSuccess(false)}>Dismiss</button></div></div>}
