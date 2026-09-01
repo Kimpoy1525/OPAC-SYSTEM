@@ -49,6 +49,28 @@ class Document(models.Model):
         help_text="Optional unlisted YouTube link for the thesis video demonstration.",
     )
 
+    # --- Semantic search embeddings (Gemini, used by the NumPy cosine search) ---
+    search_embedding = models.JSONField(
+        null=True,
+        blank=True,
+        help_text="Embedding vector (list of floats) used for semantic cosine search.",
+    )
+    embedding_version = models.IntegerField(
+        default=0,
+        help_text="Version of the embedding model used (bump to force re-embedding).",
+    )
+    embedding_model = models.CharField(
+        max_length=120,
+        null=True,
+        blank=True,
+        help_text="Name of the embedding model used (e.g. gemini-embedding-001).",
+    )
+    embedding_updated_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When the search embedding was last generated.",
+    )
+
     def __str__(self):
         return self.title
 

@@ -1,7 +1,14 @@
-import csv
+﻿import csv
 import sys
 from django.core.management.base import BaseCommand, CommandError
 from documents.models import Document
+from django.utils import timezone
+from documents.embeddings import (
+    EMBEDDING_VERSION,
+    GEMINI_EMBEDDING_MODEL,
+    build_document_text,
+    embed_texts,
+)
 
 # Map CSV column names to model field names
 # This handles variations like "author" -> "authors", "panelist" -> "panelists"
@@ -63,6 +70,7 @@ class Command(BaseCommand):
                 error_count = 0
                 row_num = 1
 
+                created_docs = []
                 for row in reader:
                     row_num += 1
                     try:
@@ -116,7 +124,7 @@ class Command(BaseCommand):
                             continue
 
                         # Create the document
-                        Document.objects.create(
+                        doc = Document.objects.create(
                             title=data['title'],
                             authors=data['authors'],
                             year=year_val,
@@ -125,6 +133,7 @@ class Command(BaseCommand):
                             panelists=data['panelists'],
                             keywords=data.get('keywords', '') or '',
                         )
+                        created_docs.append(doc)
 
                         self.stdout.write(self.style.SUCCESS(
                             f'Row {row_num}: Imported "{data["title"]}"'
@@ -137,6 +146,21 @@ class Command(BaseCommand):
                         ))
                         error_count += 1
 
+                # Generate semantic-search embeddings for the newly imported rows (best-effort batch)。
+                if created_docs:
+                    self.stdout.write("Generating semantic search embeddings...")
+                    try:
+                        now = timezone.now()
+                        vectors = embed_texts([build_document_text(doc) for doc in created_docs])
+                        for doc, vector in zip(created_docs, vectors):
+                            doc.search_embedding = vector
+                            doc.embedding_version = EMBEDDING_VERSION
+                            doc.embedding_model = GEMINI_EMBEDDING_MODEL
+                            doc.embedding_updated_at = now
+                        Document.objects.bulk_update(created_docs, ["search_embedding", "embedding_version", "embedding_model", "embedding_updated_at"])
+                        self.stdout.write(self.style.SUCCESS(f"Embedded {len(created_docs)} document(s)."))
+                    except Exception as exc:
+                        self.stdout.write(self.style.WARNING(f"Embedding generation skipped ({exc}); run 'python manage.py generate_embeddings' later."))
                 # Summary
                 self.stdout.write('=' * 60)
                 self.stdout.write(self.style.SUCCESS(f'Import complete!'))

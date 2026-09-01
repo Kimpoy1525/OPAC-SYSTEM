@@ -43,3 +43,14 @@
 @keyframes repoSpin { to { transform: rotate(360deg); } }
 @media (max-width: 760px) { .repo-page { padding-top: 26px; } .filter-container { grid-template-columns: 1fr 1fr; } .filter-actions { grid-column: 1/-1; } .filter-actions button { flex: 1; } }
 @media (max-width: 520px) { .repo-page { padding-inline: 12px; padding-bottom: 55px; } .repository-header { margin-bottom: 20px; } .repository-header h1 { font-size: 1.4rem; } .filter-container { grid-template-columns: 1fr; padding: 12px; } .filter-actions { grid-column: auto; } .research-card { padding: 20px 16px; } .research-card h2 { margin-right: 30px; } .research-card-footer { align-items: stretch; flex-direction: column; } .detail-below { justify-content: space-between; } .research-card-footer .details-btn { width: 100%; text-align: center; } .repository-state { min-height: 180px; padding: 24px 16px; } }
+.semantic-score-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border-radius: 12px;
+  background: #e2f2e7;
+  border: 1px solid #bcdcc6;
+  color: #056b2a;
+  font-weight: 700;
+  line-height: 1.2;
+}

@@ -1,9 +1,9 @@
-from rest_framework.views import APIView
+﻿from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework import status, generics
 from rest_framework.permissions import BasePermission
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Case, When
 from django.conf import settings 
 from django.http import FileResponse, Http404 
 from django.shortcuts import get_object_or_404 
@@ -29,6 +29,61 @@ class IsCatalogAdmin(BasePermission):
         )
 
 
+# --- SEMANTIC SEARCH HELPERS (best-effort: never block the primary flow on embedding failures) ---
+def _reembed_document(doc):
+    """Embed/refresh a single document's search vector."""
+    try:
+        from django.utils import timezone
+        from .embeddings import (
+            EMBEDDING_VERSION,
+            GEMINI_EMBEDDING_MODEL,
+            build_document_text,
+            embed_texts,
+        )
+        vectors = embed_texts([build_document_text(doc)])
+        if not vectors:
+            return
+        doc.search_embedding = vectors[0]
+        doc.embedding_version = EMBEDDING_VERSION
+        doc.embedding_model = GEMINI_EMBEDDING_MODEL
+        doc.embedding_updated_at = timezone.now()
+        doc.save(update_fields=["search_embedding", "embedding_version", "embedding_model", "embedding_updated_at"])
+        from .search import invalidate_cache
+        invalidate_cache()
+    except Exception:
+        # Uploads/updates must never fail because embeddings could not be generated.
+        pass
+
+def _reembed_many(docs):
+    """Batch-embed a list of documents (e.g. right after a CSV import)."""
+    if not docs:
+        return
+    try:
+        from django.utils import timezone
+        from .embeddings import (
+            EMBEDDING_VERSION,
+            GEMINI_EMBEDDING_MODEL,
+            build_document_text,
+            embed_texts,
+        )
+        vectors = embed_texts([build_document_text(d) for d in docs])
+        if not vectors:
+            return
+        now = timezone.now()
+        for doc, vector in zip(docs, vectors):
+            doc.search_embedding = vector
+            doc.embedding_version = EMBEDDING_VERSION
+            doc.embedding_model = GEMINI_EMBEDDING_MODEL
+            doc.embedding_updated_at = now
+        Document.objects.bulk_update(
+            docs, ["search_embedding", "embedding_version", "embedding_model", "embedding_updated_at"]
+        )
+        from .search import invalidate_cache
+        invalidate_cache()
+    except Exception:
+        pass
+
+
 # 1. Handles the initial upload of a paper
 class DocumentUploadView(APIView):
     parser_classes = (MultiPartParser, FormParser)
@@ -39,6 +94,9 @@ class DocumentUploadView(APIView):
         if serializer.is_valid():
             document = serializer.save()
             
+            # Generate its semantic-search embedding (best-effort, never blocks the upload).
+            _reembed_document(document)
+
             # --- NEW: LOG THE UPLOAD EVENT ---
             if request.user.is_authenticated:
                 UploadLog.objects.create(
@@ -62,6 +120,7 @@ class DocumentListView(generics.ListAPIView):
     serializer_class = DocumentSerializer
 
     def get_queryset(self):
+        self._semantic_scores = {}
         queryset = Document.objects.all().order_by('-uploaded_at').prefetch_related('files')
         year = self.request.query_params.get('year')
         course = self.request.query_params.get('course')
@@ -74,6 +133,33 @@ class DocumentListView(generics.ListAPIView):
         if course:
             queryset = queryset.filter(course=course)
         if search_query:
+            # 1) Semantic (cosine) ranking - exact year/course filters above are applied first.
+
+
+
+            try:
+                from .search import semantic_search
+                ranked = semantic_search(search_query)
+
+
+
+                if ranked:
+                    self._semantic_scores = {}
+                    for doc_id, score in ranked:
+                        self._semantic_scores[doc_id] = score
+
+
+
+                    ids = [doc_id for doc_id, _ in ranked]
+                    return queryset.filter(id__in=ids)
+
+
+            except Exception:
+                pass  # Fall through to keyword search below
+
+
+
+        if search_query:
             queryset = queryset.filter(
                 Q(title__icontains=search_query) | 
                 Q(authors__icontains=search_query) |
@@ -81,6 +167,17 @@ class DocumentListView(generics.ListAPIView):
                 Q(abstract__icontains=search_query)
             )
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        items = list(queryset)
+        if getattr(self, '_semantic_scores', None):
+            items.sort(key=lambda item: self._semantic_scores.get(item.id, -1.0), reverse=True)
+        data = self.get_serializer(items, many=True).data
+        if getattr(self, '_semantic_scores', None):
+            for item in data:
+                item['semantic_score'] = round(self._semantic_scores.get(item['id'], 0.0), 4)
+        return Response(data)
 
 # 3. Handles viewing the details of a single paper
 class DocumentDetailView(generics.RetrieveAPIView):
@@ -111,6 +208,9 @@ class DocumentUpdateView(generics.UpdateAPIView):
             old_values = {f: getattr(instance, f) for f in self.TRACKED_FIELDS}
 
             document = serializer.save()
+
+            # Refresh its semantic-search embedding since the metadata changed (best-effort).
+            _reembed_document(document)
 
             # Count files before/after to detect file add/removal
             old_file_ids = set(instance.files.values_list('id', flat=True))
@@ -206,7 +306,7 @@ class DocumentCSVUploadView(APIView):
                 except (UnicodeDecodeError, UnicodeError):
                     continue
             if decoded is None:
-                return Response({"error": "Could not decode CSV file. Try saving it as UTF-8 in Excel (File → Save As → CSV UTF-8)."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "Could not decode CSV file. Try saving it as UTF-8 in Excel (File â†’ Save As â†’ CSV UTF-8)."}, status=status.HTTP_400_BAD_REQUEST)
             reader = csv.DictReader(io.StringIO(decoded))
 
             if not reader.fieldnames:
@@ -282,6 +382,7 @@ class DocumentCSVUploadView(APIView):
             error_count = 0
             skipped_count = len(rows_data) - len(rows_to_process) if (skip_duplicates and duplicate_titles) else 0
 
+            created_docs = []
             for entry in rows_to_process:
                 row_num = entry['row_num']
                 data = entry['data']
@@ -324,7 +425,7 @@ class DocumentCSVUploadView(APIView):
                     continue
 
                 try:
-                    Document.objects.create(
+                    document = Document.objects.create(
                         title=data['title'],
                         authors=data['authors'],
                         year=year_val,
@@ -333,11 +434,15 @@ class DocumentCSVUploadView(APIView):
                         panelists=data['panelists'],
                         keywords=data.get('keywords', '') or '',
                     )
+                    created_docs.append(document)
                     results.append({"row": row_num, "title": title, "status": "success"})
                     success_count += 1
                 except Exception as e:
                     results.append({"row": row_num, "title": title, "status": "error", "message": str(e)})
                     error_count += 1
+
+            # Generate semantic-search embeddings for the newly imported rows (best-effort batch)ã€‚
+            _reembed_many(created_docs)
 
             return Response({
                 "success_count": success_count,
@@ -399,7 +504,22 @@ class RepositoryChatView(APIView):
                 messages.append({"role": "model" if m.get("role") == "assistant" else "user", "content": m["content"].strip()})
         messages = messages[-12:]
 
-        docs = Document.objects.all().order_by("-uploaded_at")[:150]
+        # --- Semantic retrieval: inject only the most relevant titles instead of dumping the catalog ---
+        last_user = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+        docs = []
+        if last_user:
+            try:
+                from .search import semantic_search
+                ranked = semantic_search(last_user, limit=20)
+                if ranked:
+                    rank_map = {doc_id: index for index, (doc_id, _) in enumerate(ranked)}
+                    docs = list(Document.objects.filter(id__in=[doc_id for doc_id, _ in ranked]))
+                    docs.sort(key=lambda doc: rank_map.get(doc.id, 9999))
+            except Exception:
+                pass  # Fall back to the full catalog dump below
+        if not docs:
+            docs = list(Document.objects.all().order_by("-uploaded_at")[:150])
+
         lines = []
         for doc in docs:
             abstract = (doc.abstract or "").strip()

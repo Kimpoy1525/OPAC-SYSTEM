@@ -150,7 +150,7 @@ const Repository = ({ setUser, user }) => {
                   <p><span className='labels'>Year:</span> {research.year}</p>
                   {research.keywords && <p><span className='labels'>Keywords:</span> <HighlightText text={research.keywords} query={activeSearch} /></p>}
                   <p className='abstract'><HighlightText text={(research.abstract || 'No abstract available.').substring(0, 250)} query={activeSearch} />{research.abstract?.length > 250 ? '…' : ''}</p>
-                  <div className='research-card-footer'><div className='detail-below'><span className='card-program'>{research.course}</span><span>{research.files?.length || 0} Document(s)</span></div><Link to={`/details/${research.id}`} className='details-btn'>View details</Link></div>
+                  <div className='research-card-footer'><div className='detail-below'><span className='card-program'>{research.course}</span>{(typeof research.semantic_score === 'number') && <span className='semantic-score-badge'>{Math.round(research.semantic_score * 100)}% match</span>}<span>{research.files?.length || 0} Document(s)</span></div><Link to={`/details/${research.id}`} className='details-btn'>View details</Link></div>
                 </article>
               ))}
             </>
