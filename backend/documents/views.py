@@ -7,6 +7,7 @@ from django.db.models import Q, Count, Case, When
 from django.conf import settings 
 from django.http import FileResponse, Http404 
 from django.shortcuts import get_object_or_404 
+import time
 from .models import Document, ResearchFile
 from .serializers import DocumentSerializer
 from accounts.models import DownloadLog, UploadLog, EditLog, DeleteLog # Added all log models here
@@ -573,17 +574,53 @@ class RepositoryChatView(APIView):
             "generationConfig": {"temperature": 0.6, "maxOutputTokens": 2048},
         }
 
-        model_name = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
-        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model_name + ":generateContent?key=" + api_key
-        req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+        primary_model = os.environ.get("GEMINI_MODEL", "gemini-3.6-flash").strip()
+        fallback_models = [m.strip() for m in os.environ.get("GEMINI_MODEL_FALLBACKS", "gemini-3.5-flash-lite").split(",") if m.strip()]
+        models_to_try = [primary_model] + fallback_models
 
-        try:
-            with urllib.request.urlopen(req, timeout=60) as resp:
-                result = json.loads(resp.read().decode("utf-8"))
-        except urllib.error.HTTPError as exc:
-            return Response({"error": "AI service error ({0}). Please try again later.".format(exc.code)}, status=status.HTTP_502_BAD_GATEWAY)
-        except (urllib.error.URLError, OSError):
-            return Response({"error": "Could not reach the AI service. Please try again later."}, status=status.HTTP_502_BAD_GATEWAY)
+        retryable_codes = {429, 500, 502, 503, 504}
+        last_error = "The AI assistant is temporarily busy. Please try again in a moment."
+        result = None
+        for model in models_to_try:
+
+            for attempt in range(2):
+                url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + api_key
+                req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), headers={"Content-Type": "application/json"}, method="POST")
+                try:
+                    with urllib.request.urlopen(req, timeout=60) as resp:
+                        result = json.loads(resp.read().decode("utf-8"))
+                    break
+                except urllib.error.HTTPError as exc:
+
+                    if exc.code in retryable_codes:
+
+                        if attempt < 1:
+                            time.sleep(2 + 2 * attempt)
+                            continue
+                        last_error = "The AI service is temporarily busy. Please try again in a moment. ({0})".format(exc.code)
+                        continue
+                    return Response({"error": "AI service error ({0}). Please try again later.".format(exc.code)}, status=status.HTTP_502_BAD_GATEWAY)
+
+                except TimeoutError:
+                    if attempt < 1:
+                        time.sleep(3)
+                        continue
+                    last_error = "The AI service took too long. Please try again."
+                    continue
+
+                except (urllib.error.URLError, OSError):
+
+                    if attempt < 1:
+                        time.sleep(3)
+                        continue
+                    last_error = "Could not reach the AI service. Please try again later."
+                    continue
+
+            if result is not None:
+                break
+
+        if result is None:
+            return Response({"error": last_error}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
 
         try:
             reply = result["candidates"][0]["content"]["parts"][0]["text"].strip()

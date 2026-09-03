@@ -41,11 +41,20 @@ const Chatbot = () => {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/home/chat/`,
         { messages: next },
-        { withCredentials: true }
+        { withCredentials: true, timeout: 90000 }
       );
       setMessages((current) => [...current, { role: 'assistant', content: data.reply }]);
     } catch (error) {
-      const msg = error.response?.data?.error || 'Sorry, something went wrong. Please try again.';
+      let msg = error.response?.data?.error;
+      if (!msg) {
+        if (error.code === 'ECONNABORTED') {
+          msg = 'The request timed out - please try again.';
+        } else if (!error.response) {
+          msg = 'Cannot reach the server. Please check your connection.';
+        } else {
+          msg = `The server returned an error (${error.response.status}). Please try again.`;
+        }
+      }
       setMessages((current) => [...current, { role: 'assistant', content: msg }]);
     } finally {
       setThinking(false);

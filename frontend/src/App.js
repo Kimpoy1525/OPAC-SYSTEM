@@ -133,7 +133,7 @@ function App() {
       
     </Routes>
       <Footer/>
-      <Chatbot />
+      {isAuthenticated && <Chatbot />}
       </div>
   
    
