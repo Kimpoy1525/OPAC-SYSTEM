@@ -13,7 +13,7 @@ const Header = ({ setUser, user }) => {
     const normalizedRole = user?.role?.toUpperCase();
     const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
     const isStudent = normalizedRole === "USER";
-    const homePath = isAdmin ? '/admin-approval' : '/homepage';
+    const homePath = '/homepage';
 
     return (
         <header className='header2'>
@@ -22,13 +22,18 @@ const Header = ({ setUser, user }) => {
             </Link>
 
       <nav className={`nav-links ${open ? "show" : ""}`}>
-    <Link to={homePath}>{isAdmin ? 'Content Manager Dashboard' : 'Home'}</Link>
+    <Link to='/homepage'>Home</Link>
+
+    <Link to='/repository'>Repository</Link>
 
     {isAdmin && (
       <Link to='/upload'>Upload</Link>
     )}
 
-    <Link to='/repository'>Repository</Link>
+    {isAdmin && (
+      <Link to='/admin-approval'>Title Approval</Link>
+    )}
+
     {isStudent && <Link to='/reservation'>Reservation</Link>}
 
 <div className="user-area">

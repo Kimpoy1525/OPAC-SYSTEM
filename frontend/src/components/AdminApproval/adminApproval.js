@@ -81,7 +81,7 @@ const AdminApproval = ({ setUser, user }) => {
     <main className="approval-page">
       <Header setUser={setUser} user={user} />
       <section className="dashboard-summary">
-        <div><p>Proposal Management</p><h1>Title Reservation Dashboard</h1><span>Review and manage student title submissions.</span></div>
+        <div><p>Proposal Management</p><h1>Title Approval</h1><span>Review and manage student title submissions.</span></div>
         <div className="dashboard-metrics">
           <article><strong>{proposals.length}</strong><span>Pending</span></article>
           {['BSCS', 'BSIT', 'BSEMC'].map((course) => <article key={course}><strong>{courseCounts[course]}</strong><span>{course}</span></article>)}

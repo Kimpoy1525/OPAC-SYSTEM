@@ -97,6 +97,23 @@
     background: #eeeeee;
     color: black;
 }
+
+.details-delete-btn{
+    position: absolute;
+    top: 17px;
+    left: 17px;
+    padding: 7px;
+    background: transparent;
+    border: 0;
+    color: #b3261e;
+    font-size: 16px;
+    cursor: pointer;
+    z-index: 11;
+}
+
+.details-delete-btn:hover{
+    color: #8f1d16;
+}
 /* Modal Overlay - Darkens background */
 .modal-overlay {
     position: fixed;

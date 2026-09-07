@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { LuDownload } from "react-icons/lu";
-import { FaLock } from "react-icons/fa";
+import { FaLock, FaTrash } from "react-icons/fa";
 import axios from 'axios';
 import Header from '../Header/header';
 import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
@@ -32,6 +32,10 @@ const ResearchDetails = ({ setUser, user }) => {
     const [showSuccess, setShowSuccess] = useState(false);
     const [saving, setSaving] = useState(false);
     const [updateError, setUpdateError] = useState('');
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
+    const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
     
     // --- FILE STATES ---
     const [existingFiles, setExistingFiles] = useState([]); 
@@ -66,6 +70,27 @@ const ResearchDetails = ({ setUser, user }) => {
     };
 
     const closeEditModal = () => setIsEditModalOpen(false);
+
+    const handleConfirmDelete = async () => {
+        if (!researchItem) return;
+        setDeleting(true);
+        setDeleteError('');
+        try {
+            await axios.delete(`${process.env.REACT_APP_API_URL}/home/detail/${researchItem.id}/delete/`, { withCredentials: true });
+            setShowDeleteConfirm(false);
+            setShowDeleteSuccess(true);
+        } catch {
+            setDeleteError('The record could not be deleted. Please try again.');
+            setShowDeleteConfirm(false);
+        } finally {
+            setDeleting(false);
+        }
+    };
+
+    const handleDeleteSuccessClose = () => {
+        setShowDeleteSuccess(false);
+        navigate('/repository');
+    };
 
     useEffect(() => {
         const fetchDetail = async () => {
@@ -173,6 +198,9 @@ const ResearchDetails = ({ setUser, user }) => {
             <Header setUser={setUser} user={user} />
             <div className='details-page'>
                 <div className='details-content'>
+                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
+                        <button className='details-delete-btn' onClick={() => setShowDeleteConfirm(true)} title='Delete research' aria-label={`Delete ${researchItem.title}`}><FaTrash /></button>
+                    )}
                     <h1>{researchItem.title}</h1>
                     
                     {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
@@ -235,6 +263,7 @@ const ResearchDetails = ({ setUser, user }) => {
 
             {/* Loading overlay for save */}
             {saving && <LoadingOverlay message="Saving changes..." />}
+            {deleting && <LoadingOverlay message="Deleting record..." />}
 
             {/* --- EDIT MODAL --- */}
             {isEditModalOpen && !saving && (
@@ -332,6 +361,34 @@ const ResearchDetails = ({ setUser, user }) => {
                                 <button type='submit' className='submit-btn'>Save changes</button>
                             </div>
                         </form>
+                    </div>
+                </div>
+            )}
+
+            {/* --- CONFIRM DELETE MODAL --- */}
+            {showDeleteConfirm && !deleting && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="success-icon" style={{ color: '#d9534f' }}><FaTrash /></div>
+                        <h3>Confirm deletion</h3>
+                        <p>Delete <strong>"{researchItem.title}"</strong>? This action cannot be undone.</p>
+                        {deleteError && <p className="edit-error-message" role="alert">{deleteError}</p>}
+                        <div className="modal-actions">
+                            <button className="modal-confirm-btn" onClick={handleConfirmDelete} disabled={deleting}>Delete</button>
+                            <button className="modal-cancel-btn" onClick={() => { setDeleteError(''); setShowDeleteConfirm(false); }}>Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* --- RECORD DELETED SUCCESS POPUP --- */}
+            {showDeleteSuccess && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <div className="success-icon">✓</div>
+                        <h3>Record deleted</h3>
+                        <p>The research record has been permanently removed.</p>
+                        <button className="modal-close-btn" onClick={handleDeleteSuccessClose}>Dismiss</button>
                     </div>
                 </div>
             )}

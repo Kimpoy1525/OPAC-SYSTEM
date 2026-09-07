@@ -43,7 +43,7 @@ export default function Admin({ setUser }) {
       setUser(data.user);
       localStorage.setItem("user", JSON.stringify(data.user));
       setError("");
-      navigate("/admin-approval", { replace: true });
+      navigate("/homepage", { replace: true });
     } catch (err) {
       setError("Cannot connect to the server. Please try again later.");
     } finally {

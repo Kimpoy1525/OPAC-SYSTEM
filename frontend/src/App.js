@@ -66,7 +66,7 @@ function App() {
   const normalizedRole = user?.role?.toUpperCase();
   const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
   const isStudent = normalizedRole === "USER";
-  const authenticatedHome = isAdmin ? "/admin-approval" : "/homepage";
+  const authenticatedHome = "/homepage";
 
   // While the session is being validated, show a blank screen to avoid flashing
   // protected pages to a user whose session has expired.
