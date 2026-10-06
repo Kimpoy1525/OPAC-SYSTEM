@@ -31,6 +31,21 @@ const Logout = ({ isOpen, onClose, setUser }) => {
             // If we cannot tell, default to also ending the Google session (safer on shared PCs).
         }
 
+        // Open Google's sign-out page in a small popup SYNCHRONOUSLY - popup
+        // blockers suppress window.open() calls made after an await, so this
+        // must happen while still inside the click gesture. Google processes
+        // the sign-out there and clears its browser session. The popup uses
+        // the plain Logout URL because Google now rejects `continue` to
+        // non-Google domains with a 400 error; a popup keeps our main window
+        // in the app, so no auto-return URL is needed.
+        const googlePopup = isGoogleLogin
+            ? window.open(
+                  "https://accounts.google.com/Logout",
+                  "google-session-logout",
+                  "width=520,height=600"
+              )
+            : null;
+
         try {
             await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/logout/`, {
                 method: "POST",
@@ -49,17 +64,21 @@ const Logout = ({ isOpen, onClose, setUser }) => {
         onClose();
 
         // 4. End the sessions:
-        //    - Google users: redirect through Google's sign-out page, which clears
-        //      the browser's Google session too (automatic, no manual Google logout).
-        //      Google then redirects back to our login page, and the next sign-in
-        //      asks for the Google password again. Note: this also signs the user
-        //      out of other Google services (Gmail/Classroom) in THIS browser.
+        //    - Google users: the popup above already ended the browser's Google
+        //      session (automatic - no manual Google logout), the main window
+        //      returns to the landing/login page by itself, and the next
+        //      "Sign in with Google" asks for the password again. The popup is
+        //      auto-closed after a short delay. If a popup blocker suppressed
+        //      it, OUR session still ends - only the Google hop is skipped.
         //    - Content-manager portal users: plain SPA redirect (no Google involved).
-        if (isGoogleLogin) {
-            const returnUrl = window.location.origin + "/";
-            window.location.replace(
-                "https://accounts.google.com/Logout?continue=" + encodeURIComponent(returnUrl)
-            );
+        if (googlePopup) {
+            window.setTimeout(() => {
+                try {
+                    googlePopup.close();
+                } catch {
+                    // The user may have already closed the popup themselves.
+                }
+            }, 1800);
             return;
         }
         navigate("/");
