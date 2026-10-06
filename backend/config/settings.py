@@ -200,8 +200,7 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
     X_FRAME_OPTIONS = 'DENY'
 
+# Hard session limit: a login session lives at most 8 hours from login,
+# regardless of activity. Logging out (POST /api/accounts/logout/) flushes
+# the server session immediately, so the next login requires credentials again.
 SESSION_COOKIE_AGE = 60 * 60 * 8
-SESSION_SAVE_EVERY_REQUEST = True
-# Session cookie dies when the browser process exits (no persistent cookie),
-# so closing the browser always forces a fresh login.
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True

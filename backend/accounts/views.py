@@ -1,5 +1,4 @@
 import json
-import time
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth import login, logout, authenticate, get_user_model
@@ -19,22 +18,6 @@ ALLOWED_TEACHER_DOMAIN = "@fatima.edu.ph"
 LOGIN_ATTEMPT_LIMIT = 5
 LOGIN_LOCKOUT_SECONDS = 15 * 60
 MAX_TITLE_ATTEMPTS = 3
-
-# --- Tab-close (leave the site) session enforcement ---
-# The frontend fires a pagehide beacon when the tab closes or the user navigates
-# away from the site. We don't kill the session instantly: a short grace window
-# lets an ordinary page refresh (which also fires pagehide) keep the user in.
-TAB_CLOSE_GRACE_SECONDS = 15
-# Keep the flag around long enough that the NEXT visit still enforces it
-# (matches SESSION_COOKIE_AGE so it never outlives the session itself).
-TAB_CLOSE_FLAG_TTL = 60 * 60 * 8
-
-
-def _tab_close_key(request):
-    session_key = request.session.session_key
-    if not session_key:
-        return None
-    return f"tab-close:{session_key}"
 
 # Optimized for Railway/Cloud Proxies
 def get_client_ip(request):
@@ -217,30 +200,6 @@ def manual_admin_login(request):
 
 
 @csrf_exempt
-def tab_close(request):
-    """Frontend beacon endpoint.
-
-    action="mark"  -> tab closed / user left the site (session pending close)
-    action="cancel" -> user is back (tab backgrounded & restored) -> clear flag
-    """
-    if request.method != "POST":
-        return JsonResponse({"error": "Invalid method"}, status=405)
-    try:
-        data = json.loads(request.body or b"{}")
-    except json.JSONDecodeError:
-        data = {}
-    action = str(data.get("action", "mark")).lower()
-
-    key = _tab_close_key(request)
-    if key:
-        if action == "cancel":
-            cache.delete(key)
-        else:
-            cache.set(key, time.time(), TAB_CLOSE_FLAG_TTL)
-    return JsonResponse({"ok": True})
-
-
-@csrf_exempt
 def secure_logout(request):
     if request.method != "POST":
         return JsonResponse({"error": "Invalid method"}, status=405)
@@ -249,6 +208,9 @@ def secure_logout(request):
     logout(request)
     response = JsonResponse({"message": "Logout successful"})
     response["Cache-Control"] = "no-store"
+    # Explicitly destroy the session cookie too, so the very next visit MUST
+    # sign in again (Google sign-in or content-manager password).
+    response.delete_cookie(settings.SESSION_COOKIE_NAME)
     return response
 
 
@@ -257,19 +219,6 @@ def session_status(request):
     """Return the currently authenticated user, or 401 if the session is invalid/expired."""
     if request.method != "GET":
         return JsonResponse({"error": "Invalid method"}, status=405)
-
-    # Enforce the tab-close beacon: a stale pending flag means the tab/site was
-    # closed and the user never returned within the grace window -> end session.
-    # A fresh flag means an ordinary page refresh -> clear it and keep the user in.
-    tab_close_key = _tab_close_key(request)
-    if tab_close_key:
-        marked_at = cache.get(tab_close_key)
-        if marked_at is not None:
-            cache.delete(tab_close_key)
-            if time.time() - float(marked_at) > TAB_CLOSE_GRACE_SECONDS:
-                logout(request)
-                return JsonResponse({"authenticated": False, "error": "Session expired"}, status=401)
-
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
     return JsonResponse({

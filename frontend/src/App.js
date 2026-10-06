@@ -67,44 +67,6 @@ function App() {
     validateSession();
   }, [validateSession]);
 
-  // --- Tab-close session lifecycle beacons ---
-  // pagehide fires when the tab closes OR the user navigates away from the site
-  // (it does NOT fire on in-app route changes) => mark the session pending-close.
-  // A ~15s grace window on the backend keeps ordinary refreshes logged in.
-  // visibilitychange back to visible (tab switch / app backgrounded) => cancel.
-  // pageshow restored from bfcache (Back button) => re-validate immediately.
-  useEffect(() => {
-    const sendBeacon = (action) => {
-      try {
-        if (navigator.sendBeacon) {
-          navigator.sendBeacon(
-            `${process.env.REACT_APP_API_URL}/api/accounts/tab-close/`,
-            new Blob([JSON.stringify({ action })], { type: "text/plain" })
-          );
-        }
-      } catch {
-        // Beacon is best-effort; browser-close cookie + 8h timeout are the backstops.
-      }
-    };
-
-    const handlePageHide = () => sendBeacon("mark");
-    const handlePageShow = (event) => {
-      if (event.persisted) validateSession();
-    };
-    const handleVisibility = () => {
-      if (document.visibilityState === "visible") sendBeacon("cancel");
-    };
-
-    window.addEventListener("pagehide", handlePageHide);
-    window.addEventListener("pageshow", handlePageShow);
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      window.removeEventListener("pagehide", handlePageHide);
-      window.removeEventListener("pageshow", handlePageShow);
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [validateSession]);
-
   const isAuthenticated = !!user;
   const normalizedRole = user?.role?.toUpperCase();
   const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
