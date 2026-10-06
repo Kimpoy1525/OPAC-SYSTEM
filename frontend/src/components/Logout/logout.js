@@ -10,6 +10,27 @@ const Logout = ({ isOpen, onClose, setUser }) => {
     if (!isOpen) return null;
 
     const handleConfirmLogout = async () => {
+        // Detect how this session was created BEFORE clearing local state, so
+        // Google-signed-in users (students/teachers) ALSO get signed out of
+        // Google - the next "Sign in with Google" then requires the password.
+        let isGoogleLogin = true;
+        try {
+            const saved = localStorage.getItem("user");
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.via) {
+                    isGoogleLogin = parsed.via === "google";
+                } else {
+                    // Sessions created before the `via` flag existed:
+                    // only content managers/superadmins ever use the password portal.
+                    const role = parsed && parsed.role ? parsed.role.toUpperCase() : "";
+                    isGoogleLogin = role !== "CONTENT_MANAGER" && role !== "SUPERADMIN";
+                }
+            }
+        } catch {
+            // If we cannot tell, default to also ending the Google session (safer on shared PCs).
+        }
+
         try {
             await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/logout/`, {
                 method: "POST",
@@ -24,11 +45,24 @@ const Logout = ({ isOpen, onClose, setUser }) => {
         // 2. Clear the React state in App.js (this locks the ProtectedRoutes)
         setUser(null);
 
-        // 3. Redirect to the landing page
-        navigate("/");
-
-        // 4. Close the modal
+        // 3. Close the modal
         onClose();
+
+        // 4. End the sessions:
+        //    - Google users: redirect through Google's sign-out page, which clears
+        //      the browser's Google session too (automatic, no manual Google logout).
+        //      Google then redirects back to our login page, and the next sign-in
+        //      asks for the Google password again. Note: this also signs the user
+        //      out of other Google services (Gmail/Classroom) in THIS browser.
+        //    - Content-manager portal users: plain SPA redirect (no Google involved).
+        if (isGoogleLogin) {
+            const returnUrl = window.location.origin + "/";
+            window.location.replace(
+                "https://accounts.google.com/Logout?continue=" + encodeURIComponent(returnUrl)
+            );
+            return;
+        }
+        navigate("/");
     };
 
     return (

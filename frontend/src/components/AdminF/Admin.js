@@ -41,7 +41,9 @@ export default function Admin({ setUser }) {
       }
 
       setUser(data.user);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // `via: "password"` marks a portal login - logout must NOT send this
+      // user through Google's sign-out page (they never signed in with Google).
+      localStorage.setItem("user", JSON.stringify({ ...data.user, via: "password" }));
       setError("");
       navigate("/homepage", { replace: true });
     } catch (err) {

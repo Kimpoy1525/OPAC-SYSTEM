@@ -26,7 +26,9 @@ export default function LoginModal({ close, setUser }) {
         return;
       }
 
-      localStorage.setItem("user", JSON.stringify(data.user));
+      // `via` records how this session was created so logout knows whether to
+      // also end the browser's Google session (Google-signed-in users only).
+      localStorage.setItem("user", JSON.stringify({ ...data.user, via: "google" }));
       setUser(data.user);
       close();
       navigate("/homepage", { replace: true });
