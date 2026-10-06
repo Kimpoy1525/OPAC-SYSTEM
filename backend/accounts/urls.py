@@ -8,6 +8,7 @@ from .views import (
     secure_logout,
     session_status,
     student_reservations,
+    tab_close,
 )
 
 urlpatterns = [
@@ -18,6 +19,7 @@ urlpatterns = [
     path('admin-login/', manual_admin_login, name='admin_login'),
     path('logout/', secure_logout, name='secure_logout'),
     path('session/', session_status, name='session_status'),
+    path('tab-close/', tab_close, name='tab_close'),
     path('reservations/', student_reservations, name='student_reservations'),
     path('reservations/approval-queue/', approval_queue, name='approval_queue'),
     path('reservations/history/', reservation_history, name='reservation_history'),

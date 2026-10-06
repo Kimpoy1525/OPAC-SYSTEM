@@ -55,6 +55,9 @@ export default function LoginModal({ close, setUser }) {
     window.google.accounts.id.initialize({
       client_id: "937933959495-68b9nk1vdsvitocjj4hpco107esdovlq.apps.googleusercontent.com",
       callback: handleGoogleLogin,
+      // Always show the Google account chooser — never silently reuse the
+      // last-used account (important on shared/lab computers).
+      prompt: "select_account",
     });
     window.google.accounts.id.renderButton(
       document.getElementById("googleLoginBtn"),

@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Upload from './components/Upload/upload'
 import HomeF from './components/HomeF/home';
 import Homepage from './components/HomepageF/homepage';
@@ -35,32 +35,75 @@ function App() {
   });
   const [sessionChecked, setSessionChecked] = useState(false);
 
-  // Validate the backend session on app load.
-  // If the session cookie is missing/expired, clear local state and force re-login.
-  useEffect(() => {
-    const validateSession = async () => {
-      const savedUser = localStorage.getItem("user");
-      if (!savedUser) {
-        setSessionChecked(true);
-        return;
+  // Validate the backend session on app load (and on bfcache restores).
+  // If the session cookie is missing/expired/flagged as closed, clear local
+  // state and force re-login. Fails CLOSED: if the server is unreachable we
+  // also clear the local user instead of trusting an unvalidated session.
+  const validateSession = useCallback(async () => {
+    const savedUser = localStorage.getItem("user");
+    if (!savedUser) {
+      setSessionChecked(true);
+      return;
+    }
+    try {
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/session/`, {
+        credentials: "include",
+      });
+      if (!res.ok) {
+        // Session is invalid/expired/ended — clear local state so protected routes lock.
+        localStorage.removeItem("user");
+        setUser(null);
       }
+    } catch {
+      // Server unreachable — fail closed rather than trusting an unvalidated session.
+      localStorage.removeItem("user");
+      setUser(null);
+    } finally {
+      setSessionChecked(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    validateSession();
+  }, [validateSession]);
+
+  // --- Tab-close session lifecycle beacons ---
+  // pagehide fires when the tab closes OR the user navigates away from the site
+  // (it does NOT fire on in-app route changes) => mark the session pending-close.
+  // A ~15s grace window on the backend keeps ordinary refreshes logged in.
+  // visibilitychange back to visible (tab switch / app backgrounded) => cancel.
+  // pageshow restored from bfcache (Back button) => re-validate immediately.
+  useEffect(() => {
+    const sendBeacon = (action) => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/accounts/session/`, {
-          credentials: "include",
-        });
-        if (!res.ok) {
-          // Session is invalid/expired — clear local state so protected routes lock.
-          localStorage.removeItem("user");
-          setUser(null);
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon(
+            `${process.env.REACT_APP_API_URL}/api/accounts/tab-close/`,
+            new Blob([JSON.stringify({ action })], { type: "text/plain" })
+          );
         }
       } catch {
-        // Server unreachable — keep the user logged in locally to avoid disruption.
-      } finally {
-        setSessionChecked(true);
+        // Beacon is best-effort; browser-close cookie + 8h timeout are the backstops.
       }
     };
-    validateSession();
-  }, []);
+
+    const handlePageHide = () => sendBeacon("mark");
+    const handlePageShow = (event) => {
+      if (event.persisted) validateSession();
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") sendBeacon("cancel");
+    };
+
+    window.addEventListener("pagehide", handlePageHide);
+    window.addEventListener("pageshow", handlePageShow);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("pagehide", handlePageHide);
+      window.removeEventListener("pageshow", handlePageShow);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [validateSession]);
 
   const isAuthenticated = !!user;
   const normalizedRole = user?.role?.toUpperCase();

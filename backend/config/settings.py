@@ -202,3 +202,6 @@ if not DEBUG:
 
 SESSION_COOKIE_AGE = 60 * 60 * 8
 SESSION_SAVE_EVERY_REQUEST = True
+# Session cookie dies when the browser process exits (no persistent cookie),
+# so closing the browser always forces a fresh login.
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
