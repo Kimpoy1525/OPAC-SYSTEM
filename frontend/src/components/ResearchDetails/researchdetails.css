@@ -41,6 +41,13 @@
     color: #000000;
 }
 
+.research-details-options{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
+}
+
 
 .file-section{
     margin: 30px 0;
@@ -81,9 +88,6 @@
 }
 
 .edit-details{
-    position: absolute;
-    top: 20px;
-    right: 20px;
     border: none;
     background-color: #058632;
     color: white;
@@ -99,9 +103,6 @@
 }
 
 .details-delete-btn{
-    position: absolute;
-    top: 17px;
-    left: 17px;
     padding: 7px;
     background: transparent;
     border: 0;
@@ -130,12 +131,11 @@
 }
 
 /* Modal Container */
-.modal-container {
+.modal-container1 {
     background: white;
     padding: 34px;
-    border-radius: 12px;
-    width: 100%;
-    max-width: 600px;
+    width: 80%;
+    max-width: 400px;
     max-height: 90vh;
     overflow-y: auto;
     position: relative;
@@ -143,18 +143,19 @@
 
 /* Admin research editor */
 .edit-modal-container {
-    width: min(920px, calc(100% - 48px));
-    max-width: 920px;
+    width: min(800px, calc(100% - 48px));
+    max-width: 700px;
     max-height: calc(100vh - 48px);
     padding: 30px;
-    border-radius: 16px;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+    
+ 
 }
 
 .edit-form {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 18px 22px;
+    border:none !important;
 }
 
 .edit-form > .form-header,

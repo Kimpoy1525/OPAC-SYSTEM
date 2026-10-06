@@ -114,11 +114,13 @@ const AdminApproval = ({ setUser, user }) => {
                 <h2>Title Name</h2>
                 <h3>{selected.title}</h3>
                 <div className="proposal-academic-info">
-                  <div><span>Course</span><strong>{selected.course_label || selected.course}</strong></div>
-                  <div><span>Section</span><strong>{selected.section}</strong></div>
+                  <div><strong>Course</strong><span>{selected.course_label || selected.course}</span></div>
+                  <div><strong>Section</strong><span>{selected.section}</span></div>
                 </div>
                 <h2>Overview / Objectives</h2>
                 <p className="proposal-overview">{selected.overview}</p>
+                <h2>Keywords</h2>
+                <p className="proposal-overview">{selected.keywords}</p>
                 <h2>Group Members (Full Name)</h2>
                 <div className="member-list">
                   {selected.group_members.split(/[,\n]/).filter(Boolean).map((member) => (
@@ -247,14 +249,16 @@ const AdminApproval = ({ setUser, user }) => {
               <p className="history-detail-title">{historyDetail.title}</p>
 
               <div className="proposal-academic-info">
-                <div><span>Student</span><strong>{historyDetail.student_name}</strong></div>
-                <div><span>Student Email</span><strong>{historyDetail.student_email}</strong></div>
-                <div><span>Course</span><strong>{historyDetail.course_label || historyDetail.course}</strong></div>
-                <div><span>Section</span><strong>{historyDetail.section}</strong></div>
+                <div><strong>Student</strong><span>{historyDetail.student_name}</span></div>
+                <div><strong>Student Email</strong><span>{historyDetail.student_email}</span></div>
+                <div><strong>Course</strong><span>{historyDetail.course_label || historyDetail.course}</span></div>
+                <div><strong>Section</strong><span>{historyDetail.section}</span></div>
               </div>
 
               <h3>Overview / Objectives</h3>
               <p className="proposal-overview">{historyDetail.overview}</p>
+              <h3>Keywords</h3>
+              <p className="proposal-overview">{historyDetail.keywords}</p>
 
               <h3>Group Members (Full Name)</h3>
               <div className="member-list">

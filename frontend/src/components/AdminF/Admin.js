@@ -71,7 +71,7 @@ export default function Admin({ setUser }) {
           <>
             <h1 id="admin-page-title">Content Manager Portal</h1>
             <h2>College of Computer Studies</h2>
-            <p>Online Public Access Catalog</p>
+            <p>CCSTECHVAULT</p>
             <button type="button" className="admin-open-login" onClick={() => setShowLogin(true)}>
               Content Manager login
             </button>

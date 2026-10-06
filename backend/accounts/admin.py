@@ -98,4 +98,4 @@ class TitleReservationAdmin(admin.ModelAdmin):
     list_display = ('title', 'student', 'course', 'section', 'status', 'created_at', 'reviewed_by')
     list_filter = ('status', 'course', 'section', 'created_at')
     search_fields = ('title', 'student__username', 'student__email', 'group_members')
-    readonly_fields = ('student', 'title', 'overview', 'group_members', 'course', 'section', 'created_at')
+    readonly_fields = ('student', 'title', 'overview', 'keywords', 'group_members', 'course', 'section', 'created_at')

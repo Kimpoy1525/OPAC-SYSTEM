@@ -46,6 +46,7 @@ class TitleReservation(models.Model):
     )
     title = models.CharField(max_length=255)
     overview = models.TextField()
+    keywords = models.CharField(max_length=500, default="")
     group_members = models.TextField()
     course = models.CharField(max_length=10, choices=Course.choices)
     section = models.CharField(max_length=50)

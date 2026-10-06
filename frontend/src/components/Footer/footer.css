@@ -95,10 +95,12 @@
 
 .footer-copyright {
   width: min(1120px, 100%);
-  margin: 38px auto 0;
+  margin: 100px auto 0;
+  padding-top: 20px;
   color: rgba(245, 247, 245, 0.56);
   font-size: 0.76rem;
   line-height: 1.5;
+  text-align: center;
 }
 
 @media (max-width: 700px) {

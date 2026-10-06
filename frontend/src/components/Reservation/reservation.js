@@ -4,16 +4,18 @@ import { FiCheckSquare } from 'react-icons/fi';
 import Header from '../Header/header';
 import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './reservation.css';
+import '../Upload/upload.css';
 
 const MAX_ATTEMPTS = 3;
 const MAX_MEMBERS = 4;
 
 const Reservation = ({ setUser, user }) => {
   const [reservations, setReservations] = useState([]);
-  const [form, setForm] = useState({ title: '', overview: '', members: '', course: '', section: '' });
+  const [form, setForm] = useState({ title: '', overview: '', keywords: '', members: '', course: '', section: '' });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Only PENDING and APPROVED reservations consume an attempt.
   // REJECTED reservations are excluded, effectively refunding that attempt.
@@ -35,8 +37,9 @@ const Reservation = ({ setUser, user }) => {
     setMessage('');
   };
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = (event) => {
     event.preventDefault();
+    setMessage('');
 
     const members = form.members.split(',').map((member) => member.trim()).filter(Boolean);
     if (members.length > MAX_MEMBERS) {
@@ -49,13 +52,20 @@ const Reservation = ({ setUser, user }) => {
       return;
     }
 
+    setShowConfirm(true);
+  };
+
+  const submitReservation = async () => {
+    setShowConfirm(false);
     setSubmitting(true);
+    const members = form.members.split(',').map((member) => member.trim()).filter(Boolean);
     try {
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/api/accounts/reservations/`,
         {
           title: form.title.trim(),
           overview: form.overview.trim(),
+          keywords: form.keywords.trim(),
           group_members: members.join(', '),
           course: form.course,
           section: form.section.trim()
@@ -63,7 +73,7 @@ const Reservation = ({ setUser, user }) => {
         { withCredentials: true }
       );
       setReservations((current) => [data.reservation, ...current]);
-      setForm({ title: '', overview: '', members: '', course: '', section: '' });
+      setForm({ title: '', overview: '', keywords: '', members: '', course: '', section: '' });
       setMessage('Your title reservation was submitted for review.');
     } catch (error) {
       setMessage(error.response?.data?.error || 'Unable to submit your reservation.');
@@ -107,6 +117,17 @@ const Reservation = ({ setUser, user }) => {
               value={form.overview}
               onChange={handleChange}
               placeholder="Explain your title scope..."
+              required
+              disabled={!canSubmit}
+            />
+
+            <label htmlFor="reservation-keywords">Keywords</label>
+            <textarea
+              id="reservation-keywords"
+              name="keywords"
+              value={form.keywords}
+              onChange={handleChange}
+              placeholder="e.g. AI, Machine Learning, Database"
               required
               disabled={!canSubmit}
             />
@@ -180,6 +201,30 @@ const Reservation = ({ setUser, user }) => {
           )}
         </aside>
       </div>
+
+      {/* Confirmation modal - asks to verify details before final submit */}
+      {showConfirm && !submitting && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="warning-icon" role="img" aria-label="Review your submission">⚠️</div>
+            <h3>Confirm your submission</h3>
+            <p>Have you made sure of the details? Review everything before you submit.</p>
+            <div className="reservation-confirm-summary">
+              <p><strong>Title:</strong> {form.title}</p>
+              <p><strong>Overview / Objectives:</strong> {form.overview}</p>
+              <p><strong>Keywords:</strong> {form.keywords}</p>
+              <p><strong>Group Members:</strong> {form.members}</p>
+              <p><strong>Course:</strong> {form.course} · <strong>Section:</strong> {form.section}</p>
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="modal-confirm-btn-new" onClick={submitReservation} disabled={submitting}>Submit</button>
+              <button type="button" className="modal-cancel-btn" onClick={() => setShowConfirm(false)} disabled={submitting}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {submitting && <LoadingOverlay message="Submitting your reservation..." />}
     </main>
   );
 };

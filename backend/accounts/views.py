@@ -242,6 +242,7 @@ def _reservation_json(reservation):
         "student_email": reservation.student.email,
         "title": reservation.title,
         "overview": reservation.overview,
+        "keywords": reservation.keywords,
         "group_members": reservation.group_members,
         "course": reservation.course,
         "course_label": reservation.get_course_display(),
@@ -287,10 +288,11 @@ def student_reservations(request):
 
     title = str(data.get("title", "")).strip()
     overview = str(data.get("overview", "")).strip()
+    keywords = str(data.get("keywords", "")).strip()
     group_members = str(data.get("group_members", "")).strip()
     course = str(data.get("course", "")).strip().upper()
     section = str(data.get("section", "")).strip()
-    if not all([title, overview, group_members, course, section]):
+    if not all([title, overview, keywords, group_members, course, section]):
         return JsonResponse({"error": "All proposal fields are required"}, status=400)
     if course not in TitleReservation.Course.values:
         return JsonResponse({"error": "Select a valid course"}, status=400)
@@ -305,6 +307,7 @@ def student_reservations(request):
         student=request.user,
         title=title,
         overview=overview,
+        keywords=keywords,
         group_members=group_members,
         course=course,
         section=section,

@@ -11,7 +11,7 @@
   --shadow-md: 0 12px 30px rgba(19, 54, 31, 0.12);
   --institutional-green: #0b5d2b;
   --institutional-green-dark: #103b24;
-  --institutional-font: "Montserrat", Arial, sans-serif;
+  --institutional-font: "Montserrat", sans-serif;
   --institutional-control-radius: 8px;
   --institutional-dialog-radius: 8px;
 }
@@ -20,7 +20,6 @@
 html { min-width: 320px; background: var(--background); scroll-behavior: smooth; }
 body { margin: 0; overflow-x: hidden; color: var(--text); background: var(--background); font-family: var(--institutional-font); -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
 img, video, iframe { max-width: 100%; }
-button, input, textarea, select { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 3px solid rgba(5, 134, 50, .28); outline-offset: 2px; }
 ::selection { color: #fff; background: var(--olfu-green); }

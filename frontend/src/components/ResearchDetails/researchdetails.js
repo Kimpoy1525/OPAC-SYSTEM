@@ -198,14 +198,21 @@ const ResearchDetails = ({ setUser, user }) => {
             <Header setUser={setUser} user={user} />
             <div className='details-page'>
                 <div className='details-content'>
-                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
-                        <button className='details-delete-btn' onClick={() => setShowDeleteConfirm(true)} title='Delete research' aria-label={`Delete ${researchItem.title}`}><FaTrash /></button>
-                    )}
-                    <h1>{researchItem.title}</h1>
+
+                    <div className='research-details-options'>
+                        {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
+                            <button className='details-delete-btn' onClick={() => setShowDeleteConfirm(true)} title='Delete research' aria-label={`Delete ${researchItem.title}`}><FaTrash /></button>
+                        )}
+
+                        {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
+                            <button className='edit-details' onClick={openEditModal}>Edit</button>
+                        )}
+
+                        
+                    </div>
                     
-                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
-                        <button className='edit-details' onClick={openEditModal}>Edit</button>
-                    )}
+
+                    <h1>{researchItem.title}</h1>
 
                     <p><strong>Authors:</strong> {researchItem.authors || "No authors specified"}</p>
                     <p><strong>Course:</strong> {researchItem.course || "No course specified"}</p>
@@ -268,8 +275,7 @@ const ResearchDetails = ({ setUser, user }) => {
             {/* --- EDIT MODAL --- */}
             {isEditModalOpen && !saving && (
                 <div className="modal-overlay">
-                    <div className="modal-container edit-modal-container">
-                        <button type="button" className="close-modal" onClick={closeEditModal} aria-label="Close edit research details">&times;</button>
+                    <div className="modal-container1 edit-modal-container">
                         
                         <form className='upload-form edit-form' onSubmit={handleUpdate}>
                             <h2 className='form-header'>Edit Research Details</h2>
