@@ -186,7 +186,7 @@ def manual_admin_login(request):
                 # Step 2 is the authenticator code; first-time users are sent
                 # through enrollment instead (no paired device yet).
                 _clear_failed_logins(request, "admin")
-                if user.totp_devices.exists():
+                if has_usable_device(user):
                     return JsonResponse({
                         "requires_2fa": True,
                         "tmp_token": _issue_pending("2fa", user),
@@ -431,6 +431,23 @@ def _verify_code(user, code):
     return verify_and_consume_backup_code(user, normalized)
 
 
+def has_usable_device(user):
+    """True when at least one paired device has a decryptable secret.
+
+    Secrets encrypted under a different encryption key (for example when
+    SECRET_KEY differed between environments) cannot be read; accounts in
+    that state are sent through re-enrollment instead of looping on
+    'invalid code'.
+    """
+    for device in user.totp_devices.all():
+        try:
+            decrypt_secret(device.secret)
+            return True
+        except Exception:
+            continue
+    return False
+
+
 def _portal_role_required(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required"}, status=401)
@@ -494,6 +511,14 @@ def two_factor_confirm(request):
     if not valid:
         _record_failed_login(request, "2fa")
         return JsonResponse({"error": "Invalid code. Please try again."}, status=401)
+    # Remove stale devices whose secrets can no longer be decrypted (for
+    # example, encrypted under an older encryption key) so re-enrollment
+    # starts from a clean slate and never counts toward the device limit.
+    for device in user.totp_devices.all():
+        try:
+            decrypt_secret(device.secret)
+        except Exception:
+            device.delete()
     if user.totp_devices.count() >= TOTP_DEVICE_LIMIT:
         return JsonResponse({"error": "Device limit reached."}, status=400)
     TwoFactorDevice.objects.create(user=user, name=device_name, secret=encrypt_secret(setup["secret"]))

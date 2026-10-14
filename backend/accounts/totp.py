@@ -6,6 +6,7 @@
 """
 import base64
 import hashlib
+import os
 import secrets
 import string
 
@@ -16,9 +17,19 @@ from cryptography.fernet import Fernet
 from django.conf import settings
 
 
+def _encryption_material():
+    """Key material for encrypting TOTP secrets at rest.
+
+    Uses the TWO_FACTOR_ENCRYPTION_KEY environment variable when set, so
+    that every environment (localhost and Railway) shares ONE key and can
+    read each other's secrets. Falls back to SECRET_KEY when unset.
+    """
+    return os.environ.get("TWO_FACTOR_ENCRYPTION_KEY") or settings.SECRET_KEY
+
+
 def _fernet():
     key = base64.urlsafe_b64encode(
-        hashlib.sha256(settings.SECRET_KEY.encode("utf-8")).digest()
+        hashlib.sha256(_encryption_material().encode("utf-8")).digest()
     )
     return Fernet(key)
 
