@@ -19,6 +19,9 @@ class User(AbstractUser):
     )
     picture = models.URLField(max_length=500, null=True, blank=True)
 
+    # SHA-256 hashes of unused one-time backup codes (2FA safety net).
+    backup_codes = models.JSONField(default=list, blank=True)
+
 class InstituteAccount(models.Model):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
@@ -133,3 +136,24 @@ class DeleteLog(models.Model):
 
     def __str__(self):
         return f"{self.user.username} deleted '{self.title}'"
+
+
+class TwoFactorDevice(models.Model):
+    """One paired authenticator app (e.g. a phone) for a portal account.
+
+    Secrets are stored Fernet-encrypted at rest (see accounts.totp).
+    """
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="totp_devices",
+    )
+    name = models.CharField(max_length=50, default="Authenticator")
+    secret = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at"]
+
+    def __str__(self):
+        return f"{self.name} ({self.user.username})"

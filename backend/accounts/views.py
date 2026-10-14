@@ -1,4 +1,6 @@
 import json
+import secrets
+import pyotp
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth import login, logout, authenticate, get_user_model
@@ -7,7 +9,16 @@ from django.core.cache import cache
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.utils import timezone
-from .models import AccessLog, TitleReservation
+from .models import AccessLog, TitleReservation, TwoFactorDevice
+from .totp import (
+    build_otpauth_url,
+    decrypt_secret,
+    encrypt_secret,
+    generate_backup_codes,
+    hash_code,
+    render_qr_svg,
+    verify_and_consume_backup_code,
+)
 
 # Get our Custom User model
 User = get_user_model()
@@ -171,20 +182,18 @@ def manual_admin_login(request):
         if user is not None:
             # Check for Content Manager or Superadmin role
             if user.role in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
-                login(request, user)
-                request.session.cycle_key()
+                # Portal login is two-factor: the password above is step 1.
+                # Step 2 is the authenticator code; first-time users are sent
+                # through enrollment instead (no paired device yet).
                 _clear_failed_logins(request, "admin")
-
-                # --- LOG THE ACCESS ---
-                AccessLog.objects.create(user=user, ip_address=get_client_ip(request))
-
+                if user.totp_devices.exists():
+                    return JsonResponse({
+                        "requires_2fa": True,
+                        "tmp_token": _issue_pending("2fa", user),
+                    })
                 return JsonResponse({
-                    "message": "Content Manager login successful",
-                    "user": {
-                        "username": user.username,
-                        "email": user.email,
-                        "role": user.role
-                    }
+                    "requires_setup": True,
+                    "tmp_token": _issue_pending("setup", user),
                 })
             _record_failed_login(request, "admin")
             return JsonResponse({"error": "Invalid username or password"}, status=401)
@@ -377,4 +386,343 @@ def reservation_history(request):
     return JsonResponse({
         "reservations": [_reservation_json(item) for item in reservations],
         "total": reservations.count(),
+    })
+
+# --- TWO-FACTOR AUTHENTICATION (portal accounts only) ---
+# Login becomes: password (step 1) -> authenticator code (step 2).
+# First-time users are forced through enrollment (QR pairing) before entry.
+PENDING_TTL_SECONDS = 300
+TOTP_DEVICE_LIMIT = 3
+
+
+def _issue_pending(kind, user):
+    token = secrets.token_urlsafe(32)
+    cache.set(f"2fa-pending:{token}", {"kind": kind, "user_id": user.id}, PENDING_TTL_SECONDS)
+    return token
+
+
+def _peek_pending(token, kind):
+    data = cache.get(f"2fa-pending:{token}") if token else None
+    if not data or data.get("kind") != kind:
+        return None
+    return data
+
+
+def _finalize_portal_login(request, user):
+    """Create the real session (used by 2FA verify / enrollment confirm)."""
+    login(request, user)
+    request.session.cycle_key()
+    AccessLog.objects.create(user=user, ip_address=get_client_ip(request))
+    return {"username": user.username, "email": user.email, "role": user.role}
+
+
+def _verify_code(user, code):
+    """Verify a 6-digit TOTP code from ANY paired device, or a backup code."""
+    normalized = (code or "").strip()
+    if len(normalized) == 6 and normalized.isdigit():
+        for device in user.totp_devices.all():
+            try:
+                secret = decrypt_secret(device.secret)
+            except Exception:
+                continue
+            if pyotp.TOTP(secret).verify(normalized, valid_window=1):
+                return True
+        return False
+    return verify_and_consume_backup_code(user, normalized)
+
+
+def _portal_role_required(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
+    return None
+
+
+@csrf_exempt
+def two_factor_setup(request):
+    """Enrollment step 1: return a fresh QR/secret for the login-time setup."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    try:
+        data = json.loads(request.body)
+        tmp_token = str(data.get("tmp_token", ""))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    pending = _peek_pending(tmp_token, "setup")
+    if not pending:
+        return JsonResponse({"error": "Setup session expired. Please log in again."}, status=401)
+    user = User.objects.filter(pk=pending["user_id"]).first()
+    if not user:
+        return JsonResponse({"error": "Account not found"}, status=404)
+    secret = pyotp.random_base32()
+    cache.set(f"2fa-setup:{tmp_token}", {"secret": secret}, PENDING_TTL_SECONDS)
+    otpauth_url = build_otpauth_url(secret, user.email or user.username)
+    return JsonResponse({
+        "qr_svg": render_qr_svg(otpauth_url),
+        "secret": secret,
+        "default_name": "My phone",
+    })
+
+
+@csrf_exempt
+def two_factor_confirm(request):
+    """Enrollment step 2: verify first code, create device, issue backup codes, log in."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        tmp_token = str(data.get("tmp_token", ""))
+        code = str(data.get("code", "")).strip()
+        device_name = str(data.get("device_name", "")).strip()[:50] or "My phone"
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    pending = _peek_pending(tmp_token, "setup")
+    setup = cache.get(f"2fa-setup:{tmp_token}") if pending else None
+    if not pending or not setup:
+        return JsonResponse({"error": "Setup session expired. Please log in again."}, status=401)
+    user = User.objects.filter(pk=pending["user_id"]).first()
+    if not user:
+        return JsonResponse({"error": "Account not found"}, status=404)
+    valid = len(code) == 6 and code.isdigit() and pyotp.TOTP(setup["secret"]).verify(code, valid_window=1)
+    if not valid:
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid code. Please try again."}, status=401)
+    if user.totp_devices.count() >= TOTP_DEVICE_LIMIT:
+        return JsonResponse({"error": "Device limit reached."}, status=400)
+    TwoFactorDevice.objects.create(user=user, name=device_name, secret=encrypt_secret(setup["secret"]))
+    backup_codes = generate_backup_codes()
+    user.backup_codes = [hash_code(c) for c in backup_codes]
+    user.save(update_fields=["backup_codes"])
+    cache.delete(f"2fa-setup:{tmp_token}")
+    cache.delete(f"2fa-pending:{tmp_token}")
+    _clear_failed_logins(request, "2fa")
+    user_json = _finalize_portal_login(request, user)
+    return JsonResponse({
+        "message": "Two-factor authentication enabled",
+        "user": user_json,
+        "backup_codes": backup_codes,
+    })
+
+
+@csrf_exempt
+def two_factor_verify(request):
+    """Login step 2: accept the 6-digit code (or a backup code) for a pending login."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        tmp_token = str(data.get("tmp_token", ""))
+        code = str(data.get("code", "")).strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    pending = _peek_pending(tmp_token, "2fa")
+    if not pending:
+        return JsonResponse({"error": "Verification session expired. Please log in again."}, status=401)
+    user = User.objects.filter(pk=pending["user_id"]).first()
+    if not user:
+        return JsonResponse({"error": "Account not found"}, status=404)
+    if not _verify_code(user, code):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid code. Please try again."}, status=401)
+    cache.delete(f"2fa-pending:{tmp_token}")
+    _clear_failed_logins(request, "2fa")
+    user_json = _finalize_portal_login(request, user)
+    return JsonResponse({"message": "Login successful", "user": user_json})
+
+
+@csrf_exempt
+def two_factor_status(request):
+    """Portal accounts: current 2FA state and the paired-device list."""
+    denied = _portal_role_required(request)
+    if denied:
+        return denied
+    if request.method != "GET":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    devices = [
+        {"id": d.id, "name": d.name, "created_at": d.created_at.isoformat()}
+        for d in request.user.totp_devices.all()
+    ]
+    return JsonResponse({
+        "enabled": bool(devices),
+        "devices": devices,
+        "has_backup_codes": bool(request.user.backup_codes),
+    })
+
+
+@csrf_exempt
+def two_factor_add_device(request):
+    """Pair an additional authenticator app (password + current code required)."""
+    denied = _portal_role_required(request)
+    if denied:
+        return denied
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        password = str(data.get("password", ""))
+        code = str(data.get("code", "")).strip()
+        name = str(data.get("name", "")).strip()[:50] or "Authenticator"
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    user = request.user
+    if not user.check_password(password):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid password"}, status=401)
+    if not _verify_code(user, code):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid code"}, status=401)
+    if user.totp_devices.count() >= TOTP_DEVICE_LIMIT:
+        return JsonResponse({"error": "You can pair at most 3 authenticator devices."}, status=400)
+    secret = pyotp.random_base32()
+    device = TwoFactorDevice.objects.create(user=user, name=name, secret=encrypt_secret(secret))
+    _clear_failed_logins(request, "2fa")
+    otpauth_url = build_otpauth_url(secret, user.email or user.username)
+    return JsonResponse({
+        "message": "Scan the QR code with your new device",
+        "device": {"id": device.id, "name": device.name},
+        "qr_svg": render_qr_svg(otpauth_url),
+        "secret": secret,
+    })
+
+
+@csrf_exempt
+def two_factor_remove_device(request):
+    """Remove one paired device (a valid authenticator code is required)."""
+    denied = _portal_role_required(request)
+    if denied:
+        return denied
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        device_id = data.get("device_id")
+        code = str(data.get("code", "")).strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    user = request.user
+    if not _verify_code(user, code):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid code"}, status=401)
+    device = user.totp_devices.filter(pk=device_id).first()
+    if not device:
+        return JsonResponse({"error": "Device not found"}, status=404)
+    device_name = device.name
+    device.delete()
+    _clear_failed_logins(request, "2fa")
+    remaining = user.totp_devices.count()
+    if remaining == 0:
+        # Last device removed - two-factor protection is now off.
+        user.backup_codes = []
+        user.save(update_fields=["backup_codes"])
+    return JsonResponse({"message": f"Device removed", "remaining": remaining})
+
+
+@csrf_exempt
+def two_factor_disable(request):
+    """Turn 2FA off entirely (password + code required)."""
+    denied = _portal_role_required(request)
+    if denied:
+        return denied
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        password = str(data.get("password", ""))
+        code = str(data.get("code", "")).strip()
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+    user = request.user
+    if not user.check_password(password):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid password"}, status=401)
+    if not _verify_code(user, code):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid code"}, status=401)
+    user.totp_devices.all().delete()
+    user.backup_codes = []
+    user.save(update_fields=["backup_codes"])
+    _clear_failed_logins(request, "2fa")
+    return JsonResponse({"message": "Two-factor authentication disabled"})
+
+
+def _end_other_sessions(user, current_key):
+    from django.contrib.sessions.models import Session
+
+    for session in Session.objects.filter(expire_date__gte=timezone.now()):
+        try:
+            data = session.get_decoded()
+        except Exception:
+            continue
+        if str(data.get("_auth_user_id")) == str(user.pk) and session.session_key != current_key:
+            session.delete()
+
+
+@csrf_exempt
+def change_password(request):
+    """Portal accounts: change password (current password + 2FA code required)."""
+    denied = _portal_role_required(request)
+    if denied:
+        return denied
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+    if not _origin_is_allowed(request):
+        return JsonResponse({"error": "Request origin is not allowed"}, status=403)
+    if _is_rate_limited(request, "2fa"):
+        return _rate_limit_response()
+    try:
+        data = json.loads(request.body)
+        current_password = str(data.get("current_password", ""))
+        new_password = str(data.get("new_password", ""))
+        confirm_password = str(data.get("confirm_password", ""))
+        code = str(data.get("code", "")).strip()
+        logout_others = bool(data.get("logout_others", False))
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid request"}, status=400)
+
+    user = request.user
+    if not user.check_password(current_password):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Current password is incorrect"}, status=401)
+    # Report new-password format problems before checking the 2FA code.
+    if len(new_password) < 8:
+        return JsonResponse({"error": "New password must be at least 8 characters"}, status=400)
+    if new_password != confirm_password:
+        return JsonResponse({"error": "New passwords do not match"}, status=400)
+    if new_password == current_password:
+        return JsonResponse({"error": "New password must differ from the current password"}, status=400)
+    if user.totp_devices.exists() and not _verify_code(user, code):
+        _record_failed_login(request, "2fa")
+        return JsonResponse({"error": "Invalid authenticator code"}, status=401)
+
+    user.set_password(new_password)
+    user.save(update_fields=["password"])
+    if logout_others:
+        _end_other_sessions(user, request.session.session_key)
+    _clear_failed_logins(request, "2fa")
+    return JsonResponse({
+        "message": "Password changed successfully",
+        "other_sessions_ended": bool(logout_others),
     })

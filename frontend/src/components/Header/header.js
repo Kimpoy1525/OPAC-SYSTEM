@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from 'react-router-dom'
 import { FiMenu, FiX } from 'react-icons/fi';
 import Logout from "../Logout/logout";
+import Security from "../Security/security";
 import logo from "../Images/Logo Olfu.png"
 import './header.css'
 
@@ -9,6 +10,7 @@ import './header.css'
 const Header = ({ setUser, user }) => {
     const [open, setOpen] = useState(false);
     const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+    const [isSecurityOpen, setIsSecurityOpen] = useState(false);
     // 2. Updated Admin Check: Use the is_staff flag from your Django user object
     const normalizedRole = user?.role?.toUpperCase();
     const isAdmin = normalizedRole === "CONTENT_MANAGER" || normalizedRole === "SUPERADMIN";
@@ -37,6 +39,15 @@ const Header = ({ setUser, user }) => {
     {isStudent && <Link to='/reservation'>Reservation</Link>}
 
 <div className="user-area">
+    {user && isAdmin && (
+      <button
+        className='security-btn'
+        onClick={() => setIsSecurityOpen(true)}
+      >
+        Security
+      </button>
+    )}
+
     {user && (
       <button 
         className='logout-btn' 
@@ -85,6 +96,11 @@ const Header = ({ setUser, user }) => {
               isOpen={isLogoutOpen}
               onClose={() => setIsLogoutOpen(false)}
               setUser={setUser} 
+            />
+
+            <Security
+              isOpen={isSecurityOpen}
+              onClose={() => setIsSecurityOpen(false)}
             />
 
         </header>

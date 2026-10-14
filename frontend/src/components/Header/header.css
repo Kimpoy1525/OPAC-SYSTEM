@@ -37,3 +37,6 @@
   .hamburger { display: block; }
 }
 @media (max-width: 480px) { .header2 { padding-inline: 16px; min-height: 70px; } .logo2 { flex-basis: 225px; } .user-name { display: none; } }
+
+.security-btn { padding: 10px 18px; background: transparent; color: #fff; border: 1px solid #fff; border-radius: 9px; cursor: pointer; font-size: 13px; font-weight: 700; text-transform: uppercase; transition: transform .2s, background .2s, color .2s; }
+.security-btn:hover { transform: translateY(-1px); background: #fff; color: #058632; }
