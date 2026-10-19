@@ -9,6 +9,13 @@ import '../Upload/upload.css';
 const MAX_ATTEMPTS = 3;
 const MAX_MEMBERS = 4;
 
+// Where a server-detected duplicate title lives (from the 409 response).
+const DUPLICATE_SOURCE_LABELS = {
+  repository: 'Repository (uploaded research)',
+  pending: 'Pending Approval (Title Approval queue)',
+  approved: 'Approved Title Reservation',
+};
+
 const Reservation = ({ setUser, user }) => {
   const [reservations, setReservations] = useState([]);
   const [form, setForm] = useState({ title: '', overview: '', keywords: '', members: '', course: '', section: '' });
@@ -16,12 +23,25 @@ const Reservation = ({ setUser, user }) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [dateSort, setDateSort] = useState('newest');
+  const [viewDetail, setViewDetail] = useState(null);
+  const [duplicateInfo, setDuplicateInfo] = useState(null);
 
   // Only PENDING and APPROVED reservations consume an attempt.
   // REJECTED reservations are excluded, effectively refunding that attempt.
   const usedAttempts = reservations.filter(({ status }) => status !== 'REJECTED').length;
   const attemptsLeft = Math.max(0, MAX_ATTEMPTS - usedAttempts);
   const canSubmit = attemptsLeft > 0;
+
+  // Review Progress list: status filter + newest/oldest sorting.
+  const visibleReservations = reservations
+    .filter((reservation) => statusFilter === 'ALL' || reservation.status === statusFilter)
+    .slice()
+    .sort((a, b) => {
+      const diff = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+      return dateSort === 'oldest' ? diff : -diff;
+    });
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/`, { withCredentials: true })
@@ -76,7 +96,13 @@ const Reservation = ({ setUser, user }) => {
       setForm({ title: '', overview: '', keywords: '', members: '', course: '', section: '' });
       setMessage('Your title reservation was submitted for review.');
     } catch (error) {
-      setMessage(error.response?.data?.error || 'Unable to submit your reservation.');
+      const duplicate = error.response?.status === 409 ? error.response.data : null;
+      if (duplicate && duplicate.similar_title) {
+        // Show the similar-title popup instead of the inline message.
+        setDuplicateInfo({ title: duplicate.similar_title, source: duplicate.similar_source || '' });
+      } else {
+        setMessage(error.response?.data?.error || 'Unable to submit your reservation.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -185,8 +211,27 @@ const Reservation = ({ setUser, user }) => {
 
         <aside className="review-card">
           <h2><FiCheckSquare aria-hidden="true" /> Review Progress</h2>
-          {loading ? <div className="review-empty"><p>Loading reservations...</p></div> : reservations.length ? reservations.map((reservation, index) => (
-            <article className="review-item" key={reservation.id}>
+          <div className="review-filters">
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Filter reservations by status">
+              <option value="ALL">All statuses</option>
+              <option value="PENDING">Pending Approval</option>
+              <option value="APPROVED">Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+            <select value={dateSort} onChange={(event) => setDateSort(event.target.value)} aria-label="Sort reservations by date">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </div>
+          {loading ? <div className="review-empty"><p>Loading reservations...</p></div> : visibleReservations.length ? visibleReservations.map((reservation, index) => (
+            <article
+              className="review-item review-item-clickable"
+              key={reservation.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setViewDetail(reservation)}
+              onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setViewDetail(reservation); } }}
+            >
               <div>
                 <strong>TITLE {index + 1}</strong>
                 <p title={reservation.title}>{reservation.title}</p>
@@ -195,7 +240,7 @@ const Reservation = ({ setUser, user }) => {
             </article>
           )) : (
             <div className="review-empty">
-              <p>No title reservations yet.</p>
+              <p>{reservations.length ? 'No reservations match the selected filter.' : 'No title reservations yet.'}</p>
               <span>Your submitted titles will appear here.</span>
             </div>
           )}
@@ -219,6 +264,53 @@ const Reservation = ({ setUser, user }) => {
             <div className="modal-actions">
               <button type="button" className="modal-confirm-btn-new" onClick={submitReservation} disabled={submitting}>Submit</button>
               <button type="button" className="modal-cancel-btn" onClick={() => setShowConfirm(false)} disabled={submitting}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Duplicate-title popup (server-detected similar submission) */}
+      {duplicateInfo && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="warning-icon" role="img" aria-label="Similar title detected">⚠️</div>
+            <h3>Similar title detected</h3>
+            <p>
+              Your title is too similar to an existing submission:{' '}
+              <strong className="duplicate-title-text">&quot;{duplicateInfo.title}&quot;</strong>
+            </p>
+            <p className="duplicate-source-row">
+              Found in:{' '}
+              <span className={`duplicate-source-badge source-${duplicateInfo.source || 'unknown'}`}>
+                {DUPLICATE_SOURCE_LABELS[duplicateInfo.source] || 'Existing submission'}
+              </span>
+            </p>
+            <p>Titles must be original. Please revise your title and submit again.</p>
+            <div className="modal-actions">
+              <button type="button" className="modal-cancel-btn" onClick={() => setDuplicateInfo(null)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Review Progress detail - shows what the student submitted for approval */}
+      {viewDetail && (
+        <div className="modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setViewDetail(null); }}>
+          <div className="modal-content reservation-detail-modal">
+            <span className={`status status-${viewDetail.status.toLowerCase()}`}>{viewDetail.status_label}</span>
+            <h3>{viewDetail.title}</h3>
+            <div className="reservation-confirm-summary">
+              <p><strong>Overview / Objectives:</strong> {viewDetail.overview}</p>
+              <p><strong>Keywords:</strong> {viewDetail.keywords}</p>
+              <p><strong>Group Members:</strong> {viewDetail.group_members}</p>
+              <p><strong>Course:</strong> {viewDetail.course} - <strong>Section:</strong> {viewDetail.section}</p>
+              <p><strong>Submitted:</strong> {viewDetail.created_at ? new Date(viewDetail.created_at).toLocaleString() : '-'}</p>
+              {viewDetail.reviewed_at && (
+                <p><strong>Reviewed:</strong> {new Date(viewDetail.reviewed_at).toLocaleString()}{viewDetail.reviewed_by_name ? ` by ${viewDetail.reviewed_by_name}` : ''}</p>
+              )}
+            </div>
+            <div className="modal-actions">
+              <button type="button" className="modal-cancel-btn" onClick={() => setViewDetail(null)}>Close</button>
             </div>
           </div>
         </div>

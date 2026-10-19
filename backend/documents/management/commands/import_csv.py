@@ -1,5 +1,6 @@
 ﻿import csv
 import sys
+from datetime import date
 from django.core.management.base import BaseCommand, CommandError
 from documents.models import Document
 from django.utils import timezone
@@ -105,11 +106,11 @@ class Command(BaseCommand):
                         # Validate year
                         try:
                             year_val = int(data['year'])
-                            if year_val < 2019 or year_val > 2026:
+                            if year_val < 2021 or year_val > date.today().year:
                                 raise ValueError
                         except (ValueError, TypeError):
                             self.stdout.write(self.style.ERROR(
-                                f'Row {row_num}: SKIPPED - Invalid year "{data["year"]}" (must be 2019-2026)'
+                                f'Row {row_num}: SKIPPED - Invalid year "{data["year"]}" (must be 2021-{date.today().year})'
                             ))
                             error_count += 1
                             continue

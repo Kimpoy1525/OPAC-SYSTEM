@@ -44,7 +44,7 @@ const Header = ({ setUser, user }) => {
         className='security-btn'
         onClick={() => setIsSecurityOpen(true)}
       >
-        Security
+        Account
       </button>
     )}
 

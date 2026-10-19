@@ -411,10 +411,10 @@ class DocumentCSVUploadView(APIView):
                 # Validate year
                 try:
                     year_val = int(data['year'])
-                    if year_val < 2019 or year_val > CURRENT_YEAR:
+                    if year_val < 2021 or year_val > CURRENT_YEAR:
                         raise ValueError
                 except (ValueError, TypeError):
-                    results.append({"row": row_num, "title": title, "status": "error", "message": f"Invalid year '{data['year']}' (must be 2019-{CURRENT_YEAR})"})
+                    results.append({"row": row_num, "title": title, "status": "error", "message": f"Invalid year '{data['year']}' (must be 2021-{CURRENT_YEAR})"})
                     error_count += 1
                     continue
 

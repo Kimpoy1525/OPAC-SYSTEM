@@ -197,7 +197,7 @@ export default function Security({ isOpen, onClose }) {
         <button type="button" className="security-close" onClick={onClose} aria-label="Close security dialog">
           <FiX size={20} />
         </button>
-        <h2 id="security-title">Account Security</h2>
+        <h2 id="security-title">Account</h2>
 
         {error && <p className="security-error" role="alert">{error}</p>}
         {notice && <p className="security-notice" role="status">{notice}</p>}

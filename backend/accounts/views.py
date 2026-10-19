@@ -1,4 +1,5 @@
 import json
+import re
 import secrets
 import pyotp
 from django.views.decorators.csrf import csrf_exempt
@@ -267,6 +268,59 @@ def _reservation_json(reservation):
     }
 
 
+TITLE_STOPWORDS = {"a", "an", "the", "of", "for", "and", "or", "to", "in", "on", "with", "using", "via"}
+
+
+def _title_words(title):
+    """Normalized word set for a title (lowercase, punctuation stripped)."""
+    normalized = re.sub(r"[^a-z0-9\s]", " ", (title or "").lower())
+    return {word for word in normalized.split() if word and word not in TITLE_STOPWORDS}
+
+
+def find_similar_title(title):
+    """Return a dict describing a duplicate/near-duplicate title, else None.
+
+    Word-by-word comparison against repository documents and title
+    reservations (pending + approved; rejected titles may be retried).
+    A clash is declared when the normalized word sets are identical, when
+    the shared words cover at least 75% of the smaller title, or when the
+    Jaccard overlap of distinct words is at least 60%.
+
+    The returned dict carries the matching title and where it lives:
+    {"title": ..., "source": "repository" | "pending" | "approved"}.
+    """
+    from documents.models import Document
+
+    incoming = _title_words(title)
+    if not incoming:
+        return None
+    candidates = [
+        (doc.title, "repository")
+        for doc in Document.objects.only("title").iterator()
+    ]
+    candidates += [
+        (
+            reservation.title,
+            "pending" if reservation.status == TitleReservation.Status.PENDING else "approved",
+        )
+        for reservation in TitleReservation.objects.exclude(
+            status=TitleReservation.Status.REJECTED
+        ).only("title", "status").iterator()
+    ]
+    for existing, source in candidates:
+        words = _title_words(existing)
+        if not words:
+            continue
+        if words == incoming:
+            return {"title": existing, "source": source}
+        shared = len(incoming & words)
+        containment = shared / min(len(incoming), len(words))
+        jaccard = shared / len(incoming | words)
+        if containment >= 0.75 or jaccard >= 0.6:
+            return {"title": existing, "source": source}
+    return None
+
+
 @csrf_exempt
 def student_reservations(request):
     if not request.user.is_authenticated:
@@ -314,6 +368,20 @@ def student_reservations(request):
     if len(members) > 4:
         return JsonResponse({"error": "A group can have a maximum of four members, separated by commas"}, status=400)
     group_members = ", ".join(members)
+
+    # Duplicate protection (TITLE only): word-by-word check against the
+    # repository and against pending/approved reservations.
+    similar = find_similar_title(title)
+    if similar:
+        return JsonResponse({
+            "error": (
+                "This title is too similar to an existing submission: "
+                f'"{similar["title"]}". Titles must be original - please '
+                "revise your title and submit again."
+            ),
+            "similar_title": similar["title"],
+            "similar_source": similar["source"],
+        }, status=409)
 
     reservation = TitleReservation.objects.create(
         student=request.user,
@@ -750,4 +818,47 @@ def change_password(request):
     return JsonResponse({
         "message": "Password changed successfully",
         "other_sessions_ended": bool(logout_others),
+    })
+
+
+@csrf_exempt
+def delete_reservation(request, reservation_id):
+    """Content managers: delete an APPROVED/REJECTED submission (logged)."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    try:
+        reservation = TitleReservation.objects.select_related("student").get(pk=reservation_id)
+    except TitleReservation.DoesNotExist:
+        return JsonResponse({"error": "Submission not found"}, status=404)
+
+    if reservation.status not in [TitleReservation.Status.APPROVED, TitleReservation.Status.REJECTED]:
+        return JsonResponse({
+            "error": "Only approved or rejected submissions can be deleted from the history"
+        }, status=400)
+
+    reservation.delete()
+    return JsonResponse({"message": "Submission deleted", "deleted_id": reservation_id})
+
+
+@csrf_exempt
+def clear_reviewed_reservations(request):
+    """Content managers: permanently delete ALL approved + rejected submissions."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"error": "Authentication required"}, status=401)
+    if request.user.role not in [User.Role.CONTENT_MANAGER, User.Role.SUPERADMIN]:
+        return JsonResponse({"error": "Content Manager access required"}, status=403)
+    if request.method != "POST":
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+    deleted_count, _details = TitleReservation.objects.filter(
+        status__in=[TitleReservation.Status.APPROVED, TitleReservation.Status.REJECTED]
+    ).delete()
+    return JsonResponse({
+        "message": f"Deleted {deleted_count} reviewed submission(s)",
+        "deleted": deleted_count,
     })

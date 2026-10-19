@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { FiList, FiClock, FiCheckCircle, FiXCircle, FiEye } from 'react-icons/fi';
+import { FiList, FiClock, FiCheckCircle, FiXCircle, FiEye, FiTrash2 } from 'react-icons/fi';
 import Header from '../Header/header';
 import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
 import './adminApproval.css';
@@ -15,8 +15,15 @@ const AdminApproval = ({ setUser, user }) => {
   const [reviewing, setReviewing] = useState(false);
   const [error, setError] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
+  const [queueSort, setQueueSort] = useState('newest');
+  const [historySort, setHistorySort] = useState('newest');
   const [historyDetail, setHistoryDetail] = useState(null);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState('');
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [clearError, setClearError] = useState('');
 
   useEffect(() => {
     axios.get(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/approval-queue/`, { withCredentials: true })
@@ -39,7 +46,11 @@ const AdminApproval = ({ setUser, user }) => {
   }, [view]);
 
   const selected = proposals.find((proposal) => proposal.id === selectedId) || null;
-  const filteredProposals = courseFilter ? proposals.filter((proposal) => proposal.course === courseFilter) : proposals;
+  const sortReservations = (items, sort) => items.slice().sort((a, b) => {
+    const diff = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
+    return sort === 'oldest' ? diff : -diff;
+  });
+  const filteredProposals = sortReservations(courseFilter ? proposals.filter((proposal) => proposal.course === courseFilter) : proposals, queueSort);
   const courseCounts = ['BSCS', 'BSIT', 'BSEMC'].reduce((counts, course) => ({ ...counts, [course]: proposals.filter((proposal) => proposal.course === course).length }), {});
 
   const statusCounts = {
@@ -48,12 +59,42 @@ const AdminApproval = ({ setUser, user }) => {
     REJECTED: history.filter((r) => r.status === 'REJECTED').length,
   };
 
-  const filteredHistory = historyFilter ? history.filter((reservation) => reservation.status === historyFilter) : history;
+  const filteredHistory = sortReservations(historyFilter ? history.filter((reservation) => reservation.status === historyFilter) : history, historySort);
 
   const changeCourseFilter = (course) => {
     setCourseFilter(course);
     const filtered = course ? proposals.filter((proposal) => proposal.course === course) : proposals;
     setSelectedId(filtered[0]?.id || null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleting) return;
+    setDeleting(true);
+    setDeleteError('');
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/${deleteTarget.id}/delete/`, {}, { withCredentials: true });
+      setHistory((current) => current.filter((reservation) => reservation.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (requestError) {
+      setDeleteError(requestError.response?.data?.error || 'Unable to delete this submission.');
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const clearReviewed = async () => {
+    if (deleting) return;
+    setDeleting(true);
+    setClearError('');
+    try {
+      await axios.post(`${process.env.REACT_APP_API_URL}/api/accounts/reservations/clear-reviewed/`, {}, { withCredentials: true });
+      setHistory((current) => current.filter((reservation) => reservation.status === 'PENDING'));
+      setShowClearConfirm(false);
+    } catch (requestError) {
+      setClearError(requestError.response?.data?.error || 'Unable to delete the reviewed submissions.');
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const review = async (status) => {
@@ -149,6 +190,12 @@ const AdminApproval = ({ setUser, user }) => {
               <option value="">All courses</option><option value="BSCS">BSCS</option><option value="BSIT">BSIT</option><option value="BSEMC">BSEMC</option>
             </select>
           </label>
+          <label className="queue-filter">Sort
+            <select value={queueSort} onChange={(event) => setQueueSort(event.target.value)}>
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
           {filteredProposals.map((proposal) => (
             <button
               key={proposal.id}
@@ -183,6 +230,15 @@ const AdminApproval = ({ setUser, user }) => {
               <option value="REJECTED">Rejected</option>
             </select>
           </label>
+          <label className="queue-filter history-filter">Sort
+            <select value={historySort} onChange={(event) => setHistorySort(event.target.value)}>
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+            </select>
+          </label>
+          <button type="button" className="history-clear-btn" onClick={() => { setShowClearConfirm(true); setClearError(''); }}>
+            <FiTrash2 aria-hidden="true" /> Delete all approved &amp; rejected
+          </button>
 
           {filteredHistory.length ? (
             <div className="history-table-wrap">
@@ -214,10 +270,15 @@ const AdminApproval = ({ setUser, user }) => {
                       <td>{reservation.created_at ? new Date(reservation.created_at).toLocaleString() : '—'}</td>
                       <td>{reservation.reviewed_by_name || '—'}</td>
                       <td>{reservation.reviewed_at ? new Date(reservation.reviewed_at).toLocaleString() : '—'}</td>
-                      <td>
+                      <td className="history-actions-cell">
                         <button type="button" className="history-view-btn" onClick={() => setHistoryDetail(reservation)}>
                           <FiEye aria-hidden="true" /> View
                         </button>
+                        {(reservation.status === 'APPROVED' || reservation.status === 'REJECTED') && (
+                          <button type="button" className="history-delete-btn" onClick={() => { setDeleteTarget(reservation); setDeleteError(''); }} aria-label={`Delete ${reservation.title}`}>
+                            <FiTrash2 aria-hidden="true" /> Delete
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -281,10 +342,47 @@ const AdminApproval = ({ setUser, user }) => {
         </div>
       )}
 
+      {/* --- DELETE SUBMISSION CONFIRM MODAL --- */}
+      {deleteTarget && !deleting && (
+        <div className="modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setDeleteTarget(null); }}>
+          <div className="modal-container history-delete-modal">
+            <button type="button" className="close-modal" onClick={() => setDeleteTarget(null)} aria-label="Close delete dialog">&times;</button>
+            <h2 className="history-detail-heading">Delete submission</h2>
+            <div className="history-detail-body">
+              <p>Delete <strong>&quot;{deleteTarget.title}&quot;</strong> ({deleteTarget.student_name})? This permanently removes it from the submission history.</p>
+              {deleteError && <p className="approval-error" role="alert">{deleteError}</p>}
+            </div>
+            <div className="history-detail-actions">
+              <button type="button" className="history-delete-confirm-btn" onClick={confirmDelete}>Delete</button>
+              <button type="button" className="history-detail-close-btn" onClick={() => setDeleteTarget(null)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- CLEAR REVIEWED CONFIRM MODAL --- */}
+      {showClearConfirm && !deleting && (
+        <div className="modal-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowClearConfirm(false); }}>
+          <div className="modal-container history-delete-modal">
+            <button type="button" className="close-modal" onClick={() => setShowClearConfirm(false)} aria-label="Close dialog">&times;</button>
+            <h2 className="history-detail-heading">Delete all reviewed submissions</h2>
+            <div className="history-detail-body">
+              <p>This permanently deletes <strong>every approved and rejected submission</strong> ({history.filter((reservation) => reservation.status !== 'PENDING').length} entries). Pending submissions are kept. Students regain the attempts used, and deleted titles become available again.</p>
+              {clearError && <p className="approval-error" role="alert">{clearError}</p>}
+            </div>
+            <div className="history-detail-actions">
+              <button type="button" className="history-delete-confirm-btn" onClick={clearReviewed}>Delete all</button>
+              <button type="button" className="history-detail-close-btn" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* --- LOADING OVERLAYS --- */}
       {loading && <LoadingOverlay message="Loading approval queue..." />}
       {view === 'history' && historyLoading && <LoadingOverlay message="Loading submission history..." />}
       {reviewing && <LoadingOverlay message="Updating proposal..." />}
+      {deleting && <LoadingOverlay message="Deleting submission..." />}
     </main>
   );
 };

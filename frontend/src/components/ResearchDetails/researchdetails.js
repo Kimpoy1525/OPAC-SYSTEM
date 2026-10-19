@@ -235,6 +235,7 @@ const ResearchDetails = ({ setUser, user }) => {
 
                     <p><strong>Year:</strong> {researchItem.year}</p>
 
+                    {user && (user.role === 'CONTENT_MANAGER' || user.role === 'SUPERADMIN') && (
                     <div className='file-section'>
                         <strong>Files:</strong>
                         {researchItem.files && researchItem.files.length > 0 ? (
@@ -263,6 +264,7 @@ const ResearchDetails = ({ setUser, user }) => {
                             <p>No files available for this research.</p>
                         )}
                     </div>
+                    )}
                 
                     <button className='back-btn' onClick={() => navigate(-1)}>Back</button>
                 </div>

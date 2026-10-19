@@ -61,8 +61,8 @@ const Upload = ({ setUser, user }) => {
         e.preventDefault();
         const currentYear = new Date().getFullYear();
         
-        if (year < 2019 || year > currentYear) {
-            alert(`Please enter a year between 2019 and ${currentYear}`);
+        if (year < 2021 || year > currentYear) {
+            alert(`Please enter a year between 2021 and ${currentYear}`);
             return;
         }
 
@@ -242,8 +242,8 @@ const Upload = ({ setUser, user }) => {
                     </div>
 
                     <div className='form-input'>
-                        <label>Year (2019 - Present)</label>
-                        <input type='number' placeholder='e.g. 2024' min="2019" max={new Date().getFullYear()} value={year} onChange={(e) => setYear(e.target.value)} required />
+                        <label>Year (2021 - Present)</label>
+                        <input type='number' placeholder='e.g. 2024' min="2021" max={new Date().getFullYear()} value={year} onChange={(e) => setYear(e.target.value)} required />
                     </div>
 
                     <div className='form-input'>

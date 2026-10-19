@@ -213,3 +213,28 @@
   line-height: 1.55;
   overflow-wrap: anywhere;
 }
+
+/* Review Progress: status filter + date sorting */
+.review-filters { display: flex; gap: 8px; margin: -4px 0 14px; }
+.review-filters select { flex: 1; min-width: 0; padding: 8px 10px; border: 1px solid #dfe4e0; border-radius: 8px; background: #fff; color: #1d2721; font: inherit; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+.review-filters select:focus { outline: 2px solid rgba(11, 93, 43, 0.16); border-color: #9aac9f; }
+
+/* Clickable review items */
+.review-item-clickable { cursor: pointer; transition: transform .15s, box-shadow .15s; }
+.review-item-clickable:hover,
+.review-item-clickable:focus-visible { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(11, 93, 43, 0.14); outline: none; }
+
+/* Submitted-details modal (reuses the site modal styles) */
+.reservation-detail-modal { text-align: left; }
+.reservation-detail-modal .status { display: inline-block; margin-bottom: 4px; }
+.reservation-detail-modal h3 { margin: 8px 0 12px; color: #103b24; font-size: 1.05rem; line-height: 1.35; }
+
+
+/* Duplicate-title popup */
+.duplicate-title-text { color: #a61b1b; }
+.duplicate-source-row { margin: 8px 0 10px; font-size: 0.9rem; }
+.duplicate-source-badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; }
+.duplicate-source-badge.source-repository { background: #e3f0e7; color: #0b5d2b; }
+.duplicate-source-badge.source-pending { background: #fdf1d8; color: #8a6412; }
+.duplicate-source-badge.source-approved { background: #e2e9fb; color: #2a4594; }
+.duplicate-source-badge.source-unknown { background: #eeeeee; color: #4f5551; }

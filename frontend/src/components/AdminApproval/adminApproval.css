@@ -693,3 +693,14 @@
     padding: 40px 18px 22px;
   }
 }
+
+/* Submission-history delete + delete-history log */
+.history-actions-cell { white-space: nowrap; }
+.history-delete-btn { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 6px 10px; border: 1px solid #e6c9c9; border-radius: 8px; background: #fff; color: #a61b1b; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
+.history-delete-btn:hover { background: #a61b1b; color: #fff; border-color: #a61b1b; }
+.history-delete-confirm-btn { padding: 8px 20px; border: 1px solid #a61b1b; border-radius: 8px; background: #a61b1b; color: #fff; font-weight: 700; cursor: pointer; }
+.history-delete-confirm-btn:hover { background: #8f1d16; border-color: #8f1d16; }
+.history-delete-modal { max-width: 480px; }
+
+.history-clear-btn { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 12px; padding: 8px 14px; border: 1px solid #e6c9c9; border-radius: 8px; background: #fff; color: #a61b1b; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+.history-clear-btn:hover { background: #a61b1b; color: #fff; border-color: #a61b1b; }

@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
     approval_queue,
+    delete_reservation,
     google_login,
     manual_admin_login,
     reservation_history,
@@ -9,6 +10,7 @@ from .views import (
     session_status,
     student_reservations,
     change_password,
+    clear_reviewed_reservations,
     two_factor_add_device,
     two_factor_confirm,
     two_factor_disable,
@@ -37,5 +39,7 @@ urlpatterns = [
     path('reservations/', student_reservations, name='student_reservations'),
     path('reservations/approval-queue/', approval_queue, name='approval_queue'),
     path('reservations/history/', reservation_history, name='reservation_history'),
+    path('reservations/clear-reviewed/', clear_reviewed_reservations, name='clear_reviewed_reservations'),
+    path('reservations/<int:reservation_id>/delete/', delete_reservation, name='delete_reservation'),
     path('reservations/<int:reservation_id>/review/', review_reservation, name='review_reservation'),
 ]

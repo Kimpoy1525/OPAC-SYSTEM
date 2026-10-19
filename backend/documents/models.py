@@ -18,10 +18,10 @@ class Document(models.Model):
     # 2019 - Present restriction
     year = models.IntegerField(
         validators=[
-            MinValueValidator(2019), 
+            MinValueValidator(2021), 
             MaxValueValidator(current_year)
         ],
-        help_text="Enter a year between 2019 and the current year."
+        help_text="Enter a year between 2021 and the current year."
     )
     
     abstract = models.TextField()
