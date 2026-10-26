@@ -141,8 +141,6 @@
 .proposal-academic-info strong {
   color: black;
   font-size: 13px;
-  
-
 }
 .proposal-academic-info span {
   font-size: 13px;
@@ -230,6 +228,7 @@
   font-size: 21px;
 }
 .queue-filter {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -240,6 +239,7 @@
   text-transform: uppercase;
 }
 .queue-filter select {
+  position: relative;
   height: 38px;
   padding: 0 10px;
   border: 1px solid #d9dedb;
@@ -248,7 +248,30 @@
   color: #18201b;
   font-size: 11px;
   text-transform: none;
+    appearance: none;
+  cursor: pointer;
 }
+
+.history-dropdown-arrow{
+  position: absolute;
+  right: 15px;
+  bottom: 13px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  fill: #058632;
+}
+
+.history-dropdown-arrow2{
+  position: absolute;
+  right: 15px;
+  bottom: 13px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  fill: #058632;
+}
+
 .queue-item {
   width: 100%;
   margin-bottom: 10px;
@@ -397,6 +420,13 @@
 .history-metric.rejected strong {
   color: #ae0808;
 }
+
+.filter-container2{
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .history-filter {
   max-width: 220px;
   margin: 0 0 16px;
@@ -610,6 +640,7 @@
   font-size: 20px;
   font-weight: 700;
   color: #18201b;
+    text-align:center;
 }
 .history-detail-status-wrap {
   margin-bottom: 18px;
@@ -619,6 +650,10 @@
   font-size: 12px;
   color: black;
   letter-spacing: 0.05em;
+}
+
+.history-detail-body p{
+  text-align:justify;
 }
 .history-detail-title {
   margin: 0;
@@ -668,6 +703,7 @@
   margin-top: 24px;
   display: flex;
   justify-content: flex-end;
+  gap: 12px;
 }
 .history-detail-close-btn {
   padding: 10px 26px;
@@ -695,12 +731,61 @@
 }
 
 /* Submission-history delete + delete-history log */
-.history-actions-cell { white-space: nowrap; }
-.history-delete-btn { display: inline-flex; align-items: center; gap: 4px; margin-left: 8px; padding: 6px 10px; border: 1px solid #e6c9c9; border-radius: 8px; background: #fff; color: #a61b1b; font-size: 0.78rem; font-weight: 700; cursor: pointer; }
-.history-delete-btn:hover { background: #a61b1b; color: #fff; border-color: #a61b1b; }
-.history-delete-confirm-btn { padding: 8px 20px; border: 1px solid #a61b1b; border-radius: 8px; background: #a61b1b; color: #fff; font-weight: 700; cursor: pointer; }
-.history-delete-confirm-btn:hover { background: #8f1d16; border-color: #8f1d16; }
-.history-delete-modal { max-width: 480px; }
+.history-actions-cell {
+  white-space: nowrap;
+}
+.history-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+  padding: 6px 10px;
+  border: 1px solid #e6c9c9;
+  border-radius: 8px;
+  background: #fff;
+  color: #a61b1b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.history-delete-btn:hover {
+  background: #a61b1b;
+  color: #fff;
+  border-color: #a61b1b;
+}
+.history-delete-confirm-btn {
+  padding: 8px 20px;
+  border: 1px solid #a61b1b;
+  border-radius: 8px;
+  background: #a61b1b;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+.history-delete-confirm-btn:hover {
+  background: #8f1d16;
+  border-color: #8f1d16;
+}
+.history-delete-modal {
+  max-width: 480px;
+}
 
-.history-clear-btn { display: inline-flex; align-items: center; gap: 6px; margin: 4px 0 12px; padding: 8px 14px; border: 1px solid #e6c9c9; border-radius: 8px; background: #fff; color: #a61b1b; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
-.history-clear-btn:hover { background: #a61b1b; color: #fff; border-color: #a61b1b; }
+.history-clear-btn {
+ display: block;
+  align-items:center;
+  gap: 6px;
+  margin: 4px 0 12px auto;
+  padding: 8px 14px;
+  border: 1px solid #e6c9c9;
+  border-radius: 8px;
+  background: #fff;
+  color: #a61b1b;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.history-clear-btn:hover {
+  background: #a61b1b;
+  color: #fff;
+  border-color: #a61b1b;
+}

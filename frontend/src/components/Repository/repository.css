@@ -28,7 +28,7 @@
   line-height: 1.6;
 }
 .filter-container {
-  width: min(760px, 100%);
+  width: min(970px, 100%);
   margin: 16px 0 34px;
   padding: 15px;
   display: grid;
@@ -140,7 +140,8 @@
 }
 .research-card {
   position: relative;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   padding: 25px 28px;
   background: #fff;
   border: 1px solid #000;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FaChevronDown } from 'react-icons/fa6';
 import { FiList, FiClock, FiCheckCircle, FiXCircle, FiEye, FiTrash2 } from 'react-icons/fi';
 import Header from '../Header/header';
 import LoadingOverlay from '../LoadingOverlay/loadingOverlay';
@@ -222,20 +223,27 @@ const AdminApproval = ({ setUser, user }) => {
             </div>
           </div>
 
-          <label className="queue-filter history-filter">Filter by status
-            <select value={historyFilter} onChange={(event) => setHistoryFilter(event.target.value)}>
-              <option value="">All statuses</option>
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-            </select>
-          </label>
-          <label className="queue-filter history-filter">Sort
-            <select value={historySort} onChange={(event) => setHistorySort(event.target.value)}>
-              <option value="newest">Newest first</option>
-              <option value="oldest">Oldest first</option>
-            </select>
-          </label>
+          <div className='filter-container2'>
+            <label className="queue-filter history-filter">Filter by status
+              <select value={historyFilter} onChange={(event) => setHistoryFilter(event.target.value)}>
+                <option value="">All statuses</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+              </select>
+              <FaChevronDown className='history-dropdown-arrow' aria-hidden='true' />
+              
+            </label>
+            <label className="queue-filter history-filter">Sort
+              <select value={historySort} onChange={(event) => setHistorySort(event.target.value)}>
+                <option value="newest">Newest first</option>
+                <option value="oldest">Oldest first</option>
+              </select>
+                <FaChevronDown className='history-dropdown-arrow2' aria-hidden='true' />
+              
+            </label>
+          </div>
+          
           <button type="button" className="history-clear-btn" onClick={() => { setShowClearConfirm(true); setClearError(''); }}>
             <FiTrash2 aria-hidden="true" /> Delete all approved &amp; rejected
           </button>
@@ -371,8 +379,8 @@ const AdminApproval = ({ setUser, user }) => {
               {clearError && <p className="approval-error" role="alert">{clearError}</p>}
             </div>
             <div className="history-detail-actions">
-              <button type="button" className="history-delete-confirm-btn" onClick={clearReviewed}>Delete all</button>
               <button type="button" className="history-detail-close-btn" onClick={() => setShowClearConfirm(false)}>Cancel</button>
+              <button type="button" className="history-delete-confirm-btn" onClick={clearReviewed}>Delete all</button>
             </div>
           </div>
         </div>
