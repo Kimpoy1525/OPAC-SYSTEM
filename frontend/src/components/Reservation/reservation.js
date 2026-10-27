@@ -25,6 +25,7 @@ const Reservation = ({ setUser, user }) => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [dateSort, setDateSort] = useState('newest');
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewDetail, setViewDetail] = useState(null);
   const [duplicateInfo, setDuplicateInfo] = useState(null);
 
@@ -34,9 +35,17 @@ const Reservation = ({ setUser, user }) => {
   const attemptsLeft = Math.max(0, MAX_ATTEMPTS - usedAttempts);
   const canSubmit = attemptsLeft > 0;
 
-  // Review Progress list: status filter + newest/oldest sorting.
+  // Review Progress list: status filter + title/overview/keywords search + newest/oldest sorting.
   const visibleReservations = reservations
     .filter((reservation) => statusFilter === 'ALL' || reservation.status === statusFilter)
+    .filter((reservation) => {
+      const query = searchQuery.toLowerCase().trim();
+      if (!query) return true;
+      const title = (reservation.title || '').toLowerCase();
+      const overview = (reservation.overview || '').toLowerCase();
+      const keywords = (reservation.keywords || '').toLowerCase();
+      return title.includes(query) || overview.includes(query) || keywords.includes(query);
+    })
     .slice()
     .sort((a, b) => {
       const diff = new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime();
@@ -222,6 +231,17 @@ const Reservation = ({ setUser, user }) => {
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
             </select>
+          </div>
+          <div className="review-search-wrap">
+            <label className="review-search-label" htmlFor="review-search">Search titles</label>
+            <input
+              id="review-search"
+              name="searchQuery"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search by title, keywords, or overview..."
+              aria-label="Search review progress titles"
+            />
           </div>
           {loading ? <div className="review-empty"><p>Loading reservations...</p></div> : visibleReservations.length ? visibleReservations.map((reservation, index) => (
             <article

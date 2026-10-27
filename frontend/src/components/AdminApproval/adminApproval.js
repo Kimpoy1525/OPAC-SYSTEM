@@ -12,6 +12,7 @@ const AdminApproval = ({ setUser, user }) => {
   const [history, setHistory] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [historyFilter, setHistoryFilter] = useState('');
+  const [historySearchQuery, setHistorySearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [reviewing, setReviewing] = useState(false);
   const [reviewComment, setReviewComment] = useState('');
@@ -61,7 +62,14 @@ const AdminApproval = ({ setUser, user }) => {
     REJECTED: history.filter((r) => r.status === 'REJECTED').length,
   };
 
-  const filteredHistory = sortReservations(historyFilter ? history.filter((reservation) => reservation.status === historyFilter) : history, historySort);
+  const filteredHistory = sortReservations(history.filter((reservation) => {
+    if (historyFilter && reservation.status !== historyFilter) return false;
+    const query = historySearchQuery.toLowerCase().trim();
+    if (!query) return true;
+    const title = (reservation.title || '').toLowerCase();
+    const studentName = (reservation.student_name || '').toLowerCase();
+    return title.includes(query) || studentName.includes(query);
+  }), historySort);
 
   const changeCourseFilter = (course) => {
     setCourseFilter(course);
@@ -252,10 +260,20 @@ const AdminApproval = ({ setUser, user }) => {
                 <option value="oldest">Oldest first</option>
               </select>
                 <FaChevronDown className='history-dropdown-arrow2' aria-hidden='true' />
-              
+
             </label>
+            <div className="history-search-wrap">
+              <label className="review-search-label" htmlFor="history-search">Search titles</label>
+              <input
+                id="history-search"
+                name="historySearchQuery"
+                value={historySearchQuery}
+                onChange={(event) => setHistorySearchQuery(event.target.value)}
+                placeholder="Search by title or student name..."
+                aria-label="Search submission history titles"
+              />
+            </div>
           </div>
-          
           <button type="button" className="history-clear-btn" onClick={() => { setShowClearConfirm(true); setClearError(''); }}>
             <FiTrash2 aria-hidden="true" /> Delete all approved &amp; rejected
           </button>
