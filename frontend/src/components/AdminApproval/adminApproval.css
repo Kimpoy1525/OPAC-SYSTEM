@@ -789,3 +789,57 @@
   color: #fff;
   border-color: #a61b1b;
 }
+
+/* Review comment textarea (queue) */
+.review-comment-wrap {
+  margin: 14px 0;
+}
+.review-comment-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.review-comment-textarea {
+  width: 100%;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid #cfd6d3;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  resize: vertical;
+  box-sizing: border-box;
+}
+.review-comment-textarea:disabled {
+  background: #f3f5f4;
+  cursor: not-allowed;
+}
+.review-comment-textarea:focus {
+  outline: none;
+  border-color: #058b32;
+}
+
+/* Review comment display (history detail modal) */
+.history-detail-comment {
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: #f3f5f4;
+  border-radius: 8px;
+  border-left: 4px solid #058b32;
+}
+.history-detail-comment span {
+  color: #667069;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.history-detail-comment strong {
+  font-size: 12px;
+  color: #18201b;
+  white-space: pre-line;
+}

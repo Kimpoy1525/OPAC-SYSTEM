@@ -14,6 +14,7 @@ const AdminApproval = ({ setUser, user }) => {
   const [historyFilter, setHistoryFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [reviewing, setReviewing] = useState(false);
+  const [reviewComment, setReviewComment] = useState('');
   const [error, setError] = useState('');
   const [courseFilter, setCourseFilter] = useState('');
   const [queueSort, setQueueSort] = useState('newest');
@@ -105,9 +106,10 @@ const AdminApproval = ({ setUser, user }) => {
     try {
       await axios.patch(
         `${process.env.REACT_APP_API_URL}/api/accounts/reservations/${selected.id}/review/`,
-        { status },
+        { status, comment: reviewComment },
         { withCredentials: true }
       );
+      setReviewComment('');
       const remaining = proposals.filter((proposal) => proposal.id !== selected.id);
       setProposals(remaining);
       const remainingFiltered = courseFilter ? remaining.filter((proposal) => proposal.course === courseFilter) : remaining;
@@ -170,6 +172,16 @@ const AdminApproval = ({ setUser, user }) => {
                   ))}
                 </div>
                 {error && <p className="approval-error" role="alert">{error}</p>}
+                <div className="review-comment-wrap">
+                  <label className="review-comment-label">Review comment / reason</label>
+                  <textarea
+                    className="review-comment-textarea"
+                    value={reviewComment}
+                    onChange={(event) => setReviewComment(event.target.value)}
+                    placeholder="e.g. Title needs more specific scope..."
+                    disabled={reviewing}
+                  />
+                </div>
                 <div className="approval-actions">
                   <button className="approve-button" disabled={reviewing} onClick={() => review('APPROVED')}>Approve</button>
                   <button className="reject-button" disabled={reviewing} onClick={() => review('REJECTED')}>Reject</button>
@@ -340,6 +352,11 @@ const AdminApproval = ({ setUser, user }) => {
                 <div><span>Submitted</span><strong>{historyDetail.created_at ? new Date(historyDetail.created_at).toLocaleString() : '—'}</strong></div>
                 <div><span>Reviewed By</span><strong>{historyDetail.reviewed_by_name || '—'}</strong></div>
                 <div><span>Reviewed At</span><strong>{historyDetail.reviewed_at ? new Date(historyDetail.reviewed_at).toLocaleString() : '—'}</strong></div>
+                {historyDetail.review_comment && (
+                  <div className="history-detail-comment">
+                    <span>Comment</span><strong>{historyDetail.review_comment}</strong>
+                  </div>
+                )}
               </div>
             </div>
 

@@ -306,7 +306,12 @@ const Reservation = ({ setUser, user }) => {
               <p><strong>Course:</strong> {viewDetail.course} - <strong>Section:</strong> {viewDetail.section}</p>
               <p><strong>Submitted:</strong> {viewDetail.created_at ? new Date(viewDetail.created_at).toLocaleString() : '-'}</p>
               {viewDetail.reviewed_at && (
-                <p><strong>Reviewed:</strong> {new Date(viewDetail.reviewed_at).toLocaleString()}{viewDetail.reviewed_by_name ? ` by ${viewDetail.reviewed_by_name}` : ''}</p>
+                <>
+                  <p><strong>Reviewed:</strong> {new Date(viewDetail.reviewed_at).toLocaleString()}{viewDetail.reviewed_by_name ? ` by ${viewDetail.reviewed_by_name}` : ''}</p>
+                  {viewDetail.review_comment && (
+                    <p><strong>Comment:</strong> {viewDetail.review_comment}</p>
+                  )}
+                </>
               )}
             </div>
             <div className="modal-actions">

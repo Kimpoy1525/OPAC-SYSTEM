@@ -265,6 +265,7 @@ def _reservation_json(reservation):
         "created_at": reservation.created_at.isoformat(),
         "reviewed_at": reservation.reviewed_at.isoformat() if reservation.reviewed_at else None,
         "reviewed_by_name": reviewer_name,
+        "review_comment": reservation.review_comment or "",
     }
 
 
@@ -422,6 +423,7 @@ def review_reservation(request, reservation_id):
     try:
         data = json.loads(request.body)
         status = str(data.get("status", "")).upper()
+        comment = str(data.get("comment", "")).strip()
     except json.JSONDecodeError:
         return JsonResponse({"error": "Invalid JSON"}, status=400)
 
@@ -436,7 +438,8 @@ def review_reservation(request, reservation_id):
     reservation.status = status
     reservation.reviewed_by = request.user
     reservation.reviewed_at = timezone.now()
-    reservation.save(update_fields=["status", "reviewed_by", "reviewed_at"])
+    reservation.review_comment = comment
+    reservation.save(update_fields=["status", "reviewed_by", "reviewed_at", "review_comment"])
     return JsonResponse({"reservation": _reservation_json(reservation)})
 
 

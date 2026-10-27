@@ -67,6 +67,7 @@ class TitleReservation(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     reviewed_at = models.DateTimeField(null=True, blank=True)
+    review_comment = models.TextField(blank=True, default="")
 
     class Meta:
         ordering = ["-created_at"]
